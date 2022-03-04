@@ -1,0 +1,711 @@
+
+============================================================================================================================
+================================================ DESCRIPTION OF CODE =======================================================
+============================================================================================================================
+
+
+
+
+The source code is written in JAVA.
+
+The source code for Task 1 is comprised of 6 files:
+    - App.java : Contains 'main' method that runs Task 1 program.
+    - Task1.java : Evaluates the provided datasets, outputs the results to the console, and logs them to the text file.
+    - Evaluator.java : Handles the calculation of the evaluation metrics for the datasets.
+    - Dataset.java : Represents a CSV dataset.
+    - Row.java : Represents a row within a CSV dataset.
+    - Column.java : Represents a column within a CSV dataset.
+
+The source code is documented as follows:
+    - At class definition:
+        - Description of class purpose.
+    - At variable definitions:
+        - Description of variable purpose.
+    - At function definition:
+        - Description of function purpose
+        - Description of function algorithm (if applicable).
+        - Description of function input parameters (if applicable)
+        - Description of function output (if applicable).
+        - Description of function Exceptions (if applicable).
+    - Within function:
+        - Description of main code-blocks/key processes.
+    - Other:
+        - Comments are used to format the files, and seperate their different
+        components/logic areas.
+
+
+
+
+============================================================================================================================
+==================================================== SOURCE CODE ===========================================================
+============================================================================================================================
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------- FILE 1 : App.Java --------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+/**
+ * @module  COMP3208: Social Computing Techniques
+ * @project Coursework
+ * @author  Charles Powell
+ * 
+ * -- DESCRIPTION -- 
+ * 
+ * Main class for application - used to run the individual tasks.
+ */
+public class App 
+{
+    /**
+     * Main method - runs the individual tasks.
+     * 
+     * @param args The system arguments.
+     */
+    public static void main( String[] args ){
+        
+        ////////////
+        // TASK 1 //
+        ////////////
+
+        Task1.run();
+    }
+}
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------ FILE 2 : Task1.Java -------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+import java.io.File;
+import java.util.ArrayList;
+
+/**
+ * @module  COMP3208: Social Computing Techniques
+ * @project Coursework
+ * @author  Charles Powell
+ * 
+ * -- DESCRIPTION -- 
+ * 
+ * Main Class for Task 1 - finds the MSE, RMSE and MAE for a set of predictions
+ * and truth ratings.
+ */
+public class Task1 {
+    
+    // constants
+    private static final String RESULTS_FILE = "task1_results.csv"; // The name of the file the task 1 results will be written to
+    private static final String DATASET_DELIMITER = ","; // The delimiter for the dataset in it's file
+    private static final String PREDICTIONS_FILE = "Task1" + File.separator + "predictions.csv"; // Name of file containing rating predictions
+    private static final int PREDICTIONS_RATING_INDEX = 2; // the column index of the predicted rating within the predictions dataset
+    private static final String TRUTHS_FILE = "Task1" + File.separator + "truths.csv"; // Name of file containing rating truths
+    private static final int TRUTHS_RATING_INDEX = 2; // The column index of the true rating within the truths dataset
+
+    //////////////////
+    // RUNNING TASK //
+    //////////////////
+
+    /**
+     * Runner funtion for Task 1.
+     * 
+     * Algorithm:
+     * - Loads the datasets from the resoures.
+     * - Gathers the evaluation metrics.
+     * - Outputs results to terminal.
+     * - Logs results to file.
+     */
+    public static void run(){
+        try{
+            // formatting
+            System.out.println("\n===== TASK 1 =====\n");
+
+            // PREPERATION //
+
+            // loading datasets
+            Dataset predicationsDataset = Dataset.readFromFile(Task1.PREDICTIONS_FILE, Task1.DATASET_DELIMITER);
+            Dataset truthsDataset = Dataset.readFromFile(Task1.TRUTHS_FILE, Task1.DATASET_DELIMITER);
+
+            // gathering needed columns
+            Column predictedRatings = predicationsDataset.getColumn(Task1.PREDICTIONS_RATING_INDEX);
+            Column truthRatings = truthsDataset.getColumn(Task1.TRUTHS_RATING_INDEX);
+
+            // CALCULATING RESULTS //
+
+            // getting evaluation metrics
+            float mse = Evaluator.getMSE(predictedRatings, truthRatings);
+            float rmse = Evaluator.getRMSE(predictedRatings, truthRatings);
+            float mae = Evaluator.getMAE(predictedRatings, truthRatings);
+
+            // adding results to list
+            ArrayList<String> resultsList = new ArrayList<String>();
+            resultsList.add(Float.toString(mse));
+            resultsList.add(Float.toString(rmse));
+            resultsList.add(Float.toString(mae));
+
+            // creating output row
+            Row resultsRow = new Row(resultsList);
+
+            // creating output dataset
+            Dataset resultsDataset = new Dataset(Task1.DATASET_DELIMITER);
+            resultsDataset.add(resultsRow);
+
+            // OUTPUTTING RESULTS //
+            
+            // printing to screen
+            System.out.println("Task 1 Output:");
+            System.out.println(resultsDataset.toString());
+            
+            // writing to file
+            System.out.println("Writing Task 1 Results to file : '" + Task1.RESULTS_FILE + "'");
+            resultsDataset.writeToFile(new File(Task1.RESULTS_FILE));
+            System.out.println("Task 1 results successfully written to file : '" + Task1.RESULTS_FILE + "'");
+
+            // formatting
+            System.out.println();
+        }
+        catch(Exception e){
+            System.out.println("Unable to run Task 1!" + "\t\n" + "Cause : " + e.toString());
+        }
+    }
+}
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------ FILE 3 : Evaluator.Java ------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+/**
+ * @module  COMP3208: Social Computing Techniques
+ * @project Coursework
+ * @author  Charles Powell
+ * 
+ * -- DESCRIPTION -- 
+ * 
+ * Performs evaluation of a recommender system's predicted ratings using the 
+ * actual ratings (truths) and standard evaluation metrics.
+ */
+public class Evaluator {
+
+    //////////////////////////////
+    // MEAN SQUARED ERROR (MSE) //
+    //////////////////////////////
+
+    /**
+     * Computes the MEAN SQUARED ERROR for a set of predicted ratings.
+     * 
+     * Algorithm:
+     *  - error = Obersved - predicted
+     *  - squared error = difference ^ 2
+     *  - Sum of squared error = sum of squared error for all items
+     *  - MSE = Sum of squared error / number of entries in dataset
+     * 
+     * @param predictions The predicted ratings.
+     * @param truths The actual ratings.
+     * @return The mean squared error for the predictions.
+     */
+    public static float getMSE(Column predictions, Column truths){
+        // mae variable
+        float mse = 0;
+
+        // summing squared errors
+        float sumOfSquaredErrors = 0;
+        for(int i = 0; i < predictions.size(); i++){
+            float observed = Float.parseFloat(truths.get(i));
+            float predicted = Float.parseFloat(predictions.get(i));
+
+            float error = observed - predicted;
+
+            float squaredError = error * error;
+
+            sumOfSquaredErrors += squaredError;
+        }
+
+        // finding average error
+        mse = sumOfSquaredErrors / predictions.size();
+
+        // returning result
+        return mse;
+    }
+
+    ////////////////////////////////////
+    // ROOT MEAN SQUARED ERROR (RMSE) //
+    ////////////////////////////////////
+
+    /**
+     * Computes the ROOT MEAN SQUARED ERROR for a set of predicted ratings.
+     * 
+     * Algorithm:
+     *  - error = Obersved - predicted
+     *  - squared error = difference ^ 2
+     *  - Sum of squared error = squared error for all items
+     *  - MSE = Sum of squared error / number of entries in dataset
+     *  - RMSE = Square root of MSE
+     *
+     * @param predictions The predicted ratings.
+     * @param truths The actual ratings.
+     * @return The root smean squared error for the predictions.
+     */
+    public static float getRMSE(Column predictions, Column truths){
+        // rmse variable
+        float rmse = 0;
+
+        // gathering mse value
+        float mse = Evaluator.getMSE(predictions, truths);
+
+        // calculating rmse value
+        rmse = (float) Math.sqrt(mse);
+
+        // returning result
+        return rmse;
+    }
+
+    ///////////////////////////////
+    // MEAN ABSOLUTE ERROR (MAE) //
+    ///////////////////////////////
+
+    /**
+     * Computes the MEAN ABSOLUTE ERROR for a set of predicted ratings.
+     * 
+     * Algorithm:
+     *  - error = Obersved - predicted
+     *  - abs error = absolute of error
+     *  - Sum of absolute error = sum of absolute error for all entries.
+     *  - MAE = sum of absolute error / number of entries in dataset
+     * 
+     * @param predictions The predicted ratings.
+     * @param truths The actual ratings.
+     * @return The mean absolute error for the predictions.
+     */
+    public static float getMAE(Column predictions, Column truths) throws Exception{
+        // mae variable
+        float mae = 0;
+
+        // summing errors
+        float sumOfErrors = 0;
+        for(int i = 0; i < predictions.size(); i++){
+            float observed = Float.parseFloat(truths.get(i));
+            float predicted = Float.parseFloat(predictions.get(i));
+
+            float error = observed - predicted;
+
+            float absError = Math.abs(error);
+
+            sumOfErrors += absError;
+        }
+
+        // finding average error
+        mae = sumOfErrors / predictions.size();
+
+        // returning result
+        return mae;
+    }
+}
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- FILE 4 : Dataset.Java ------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+/**
+ * @module  COMP3208: Social Computing Techniques
+ * @project Coursework
+ * @author  Charles Powell
+ * 
+ * -- DESCRIPTION -- 
+ * 
+ * Dataset of String items.
+ */
+public class Dataset extends ArrayList<Row>{
+
+    // member variables
+    private String delimiter; // The delimiter for the dataset when being read from/written to a file.
+
+    //////////////////
+    // INITIALIZING //
+    //////////////////
+
+    /**
+     * Default constructor.
+     * 
+     * @param delimiter The string delimiter for the dataset at load/write time.
+     */
+    public Dataset(String delimiter){
+        this.delimiter = delimiter;
+    }
+
+    /**
+     * Class constructor - takes in a dataset to instatiate with.
+     * 
+     * @param delimiter The string delimiter for the dataset at load/write time.
+     * @param initial The initial dataset to instatiate with.
+     */
+    public Dataset(String delimiter, Dataset initial){
+        super(initial);
+        this.delimiter = delimiter;
+    }
+
+    /////////////////////
+    // READING DATASET //
+    /////////////////////
+
+    /**
+     * Reads a dataset from a file.
+     * 
+     * Algorithm:
+     *  - Creates new Dataset object.
+     *  - Sets up a buffered reader object to read the given file.
+     *  - Iterates through the file, and creates a new Row object for each line
+     *    by splitting the line with the provided delimiter.
+     *  - Adds the new Row object to the Dataset object.
+     *  - Returns the new Dataset object.
+     * 
+     * @param filename The name of the file the dataset is being read from.
+     * @param delimeter The string delimiter of the dataset within the file.
+     * @return The loaded dataset as a Dataset object.
+     * @throws Exception Thrown if the dataset could not be loaded from the file.
+     */
+    public static Dataset readFromFile(String filename, String delimiter) throws Exception{
+        try{
+            // creating object to store dataset
+            Dataset dataset = new Dataset(delimiter);
+
+            // creating file object
+            File file = new File(Dataset.class.getClassLoader().getResource(filename).getFile());
+
+            // setting up file reader 
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+
+            // iterating through the file and adding each row to the dataset
+            while(reader.ready()){
+                // getting next line
+                String line = reader.readLine();
+
+                // forming the row
+                Row row = new Row(Arrays.asList(line.split(delimiter)));
+
+                // adding row to dataset
+                dataset.add(row);
+            }
+
+            // closing the reader
+            reader.close();
+
+            // returning completed dataset
+            return dataset;
+        }
+        catch(Exception e){
+            throw new Exception("Unable to read dataset from file '" + filename + "'.\n" + 
+            "Cause : \n\t" + e.toString());
+        }
+    }
+
+    /////////////////////
+    // WRITING DATASET //
+    /////////////////////
+
+    /**
+     * Writes the dataset to the given file.
+     * 
+     * Algorithm:
+     *  - Sets up a FileOutputStream to write the Dataset to the provided file.
+     *  - Gathers the Dataset 'content' by converting it to a String.
+     *  - Writes the Dataset content to the File using the FileOutputStream.
+     * 
+     * @param file The File object the dataset will be written to.
+     * @throws Exception If the dataset could not be written to the given file.
+     */
+    public void writeToFile(File file) throws Exception{
+        try{
+            // setting up output stream
+            OutputStream out = new FileOutputStream(file);
+
+            // gathering dataset content
+            String content = this.toString();
+
+            // writing content to file
+            out.write(content.getBytes());
+
+            // closing the file
+            out.close();
+        }
+        catch(Exception e){
+            throw new Exception("Unable to write dataset to file '" + file.getName() + "'.\n" + 
+                                "Cause : \n\t" + e.toString());
+        }
+    }
+
+    //////////////////////
+    // QUERYING DATASET //
+    //////////////////////
+
+    /**
+     * Gathers a number of columns from the dataset.
+     * 
+     * Algorithm:
+     *  - Creates a new Dataset object.
+     *  - For each Row in the old Dataset, createas a new Row that contains only the required
+     *    columns.
+     *  - Adds each new Row to the new Dataset.
+     *  - Returns the new Dataset, which contains only the required columns.
+     * 
+     * @param colIndex A list of column indexes to be gathered from the dataset.
+     * @return A new Dataset containing only the required columns.
+     */
+    public Dataset getColumns(int... colIndex){
+        // creating new dataset object
+        Dataset newDataset = new Dataset(this.delimiter);
+
+        // iterating through this dataset and adding needed columns of each row
+        for(Row row : this){
+            // creating new row built from needed columnns of dataset
+            Row newRow = new Row();
+            int curIndex = 0;
+            for(String cell: row){
+                if(Dataset.arrayHasValue(colIndex, curIndex)){
+                    newRow.add(cell);
+                }
+
+                curIndex += 1;
+            }
+
+            // adding new row to new dataset
+            newDataset.add(newRow);
+        }
+
+        // returning completed dataset object
+        return newDataset;
+    }
+
+    /**
+     * Gathers a specific column from within the dataset.
+     * 
+     * Algorithm:
+     *  - Creates a Column object.
+     *  - Iterates through each row, and adds the element from the required column
+     *    to the new Column object.
+     *  - Returns the new Column object.
+     * 
+     * @param colIndex The index of the column being gathered.
+     * @return The column at the specified index.
+     */
+    public Column getColumn(int colIndex){
+        // creating new column object
+        Column column = new Column();
+
+        // interating through rows and adding needed elements to column
+        for(Row row : this){
+            int curIndex = 0;
+            for(String cell: row){
+                if(colIndex == curIndex){
+                    column.add(cell);
+                }
+
+                curIndex += 1;
+            }
+        }
+
+        // returning completed dataset object
+        return column;
+    }
+
+    /**
+     * Gathers a number of rows from the dataset.
+     * 
+     * Algorithm:
+     *  - Creates a new Dataset object.
+     *  - Iterates through the old Dataset, and adds only the required Rows to 
+     *    the new Dataset.
+     *  - Returns the new Dataset.
+     * 
+     * @param rowIndex A list of row indexes to be gathered from the dataset.
+     * @return A new Dataset containing only the requested list of rows.
+     */
+    public Dataset getRows(int... rowIndex){
+        // creating new dataset object
+        Dataset newDataset = new Dataset(this.delimiter);
+
+        // iterating through the dataset and adding the needed rows
+        int curIndex = 0;
+        for(Row row : this){
+            if(Dataset.arrayHasValue(rowIndex, curIndex)){
+                newDataset.add(row);
+            }
+            curIndex += 1;
+        }
+
+        // returning completed dataset
+        return newDataset;
+    }
+
+    ////////////////////
+    // HELPER METHODS //
+    ////////////////////
+
+    /**
+     * Converts the dataset to a String.
+     * 
+     * Algorithm:
+     *  - Creates a base String to store the String representation of the Dataset.
+     *  - Converts each row into a delimiter-seperated String.
+     *  - Adds the String conversion of each Row to the Dataset String
+     *  - Returns the Dataset String.
+     * 
+     * @return The Dataset in String form.
+     */
+    @Override
+    public String toString(){
+        // creating string to hold the dataset
+        String string = "";
+
+        // iterating through the dataset and adding each row to the string
+        for(Row row : this){
+            int colIndex = 0;
+            for(String cell : row){
+                string += cell;
+
+                // only adding comma if not last cell
+                if(colIndex != (row.size() - 1)){
+                    string += this.delimiter;
+                }
+                colIndex+=1;
+            }
+            string += "\n";
+        }
+
+        // returning completed String
+        return string;
+    }
+
+    /**
+     * Checks if the given integer array contains the given value.
+     * 
+     * Algorithm:
+     *  - Iterates over the items in the array and checks each one against
+     *    the target value.
+     * 
+     * @param array The array being checked.
+     * @param value The element being looked for.
+     * @return True if the array contains the element, false if not.
+     */
+    public static boolean arrayHasValue(int[] array, int value){
+        for(int item : array){
+            if(item == value){
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------- FILE 5 : Row.Java -------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @module  COMP3208: Social Computing Techniques
+ * @project Coursework
+ * @author  Charles Powell
+ * 
+ * -- DESCRIPTION -- 
+ * 
+ * A row within the dataset.
+ */
+public class Row extends ArrayList<String>{
+
+    ///////////////////
+    // INITIALIZING //
+    //////////////////
+
+    /**
+     * Default constructor.
+     */
+    public Row(){}
+
+    /**
+     * Class constructor - takes in an initial set of items to be added
+     * to the row.
+     * 
+     * @param initial Initial set of items to be added to row.
+     */
+    public Row(List<String> initial){
+        super(initial);
+    }
+}
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------ FILE 6 : Column.Java ------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @module  COMP3208: Social Computing Techniques
+ * @project Coursework
+ * @author  Charles Powell
+ * 
+ * -- DESCRIPTION -- 
+ * 
+ * A column within the dataset.
+ */
+public class Column extends ArrayList<String>{
+
+    ///////////////////
+    // INITIALIZING //
+    //////////////////
+
+    /**
+     * Default constructor.
+     */
+    public Column(){}
+
+    /**
+     * Class constructor - takes in an initial set of items.
+     * 
+     * @param initial The initial set of items to be addedd to the column.
+     */
+    public Column(List<String> initial){
+        super(initial);
+    }
+}
