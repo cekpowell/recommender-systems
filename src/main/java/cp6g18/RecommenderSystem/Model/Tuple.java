@@ -20,6 +20,11 @@ public class Tuple<T,S>{
     //////////////////
 
     /**
+     * Default constructor.
+     */
+    public Tuple(){}
+
+    /**
      * Class constructor.
      * 
      * @param first

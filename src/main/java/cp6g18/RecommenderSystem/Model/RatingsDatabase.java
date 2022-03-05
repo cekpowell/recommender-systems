@@ -15,17 +15,13 @@ import com.almworks.sqlite4java.SQLiteException;
  * 
  * // TODO
  */
-public class Database {
+public class RatingsDatabase {
     // constants
     public static final float UNRATED_ITEM_RATING = -1.0f;
 
     // member variables
     private String databaseFilename; // TODO
-    private String trainingDatasetTableName; // TODO
-    private String testingDatasetTableName; // TODO
     private SQLiteConnection connection; // TODO
-    private TrainingDataset trainingDataset; // TODO
-    private TrainingDataset testingDataset; // TODO
 
     //////////////////
     // INITIALIZING //
@@ -40,17 +36,13 @@ public class Database {
      * @param testingDatasetTableName The name of the testing table within the database.
      * @param datasetMappingType The type of mapping of data to be stored in the database's corresponding datasets.
      */
-    public Database(String databaseFilename, String trainingDatasetTableName, String testingDatasetTableName, DatasetMappingType datasetMappingType) throws Exception{
+    public RatingsDatabase(String databaseFilename) throws Exception{
         // configuring SQLite4Java - necesarry because of this: https://github.com/aws-samples/aws-dynamodb-examples/issues/22
         System.setProperty("sqlite4java.library.path", "src/main/resources/libs/");
 
         // initializing
         this.databaseFilename = databaseFilename;
-        this.trainingDatasetTableName = trainingDatasetTableName;
-        this.testingDatasetTableName = testingDatasetTableName; 
-        this.connection = new SQLiteConnection(new File(TrainingDataset.class.getClassLoader().getResource(this.databaseFilename).getFile()));
-        this.trainingDataset = new TrainingDataset(datasetMappingType);
-        this.testingDataset = new TrainingDataset(datasetMappingType);
+        this.connection = new SQLiteConnection(new File(RatingsTrainingDataset.class.getClassLoader().getResource(this.databaseFilename).getFile()));
 
         // connecting to database
         this.open(false); /** False so that database only loaded, not created. */
@@ -92,10 +84,6 @@ public class Database {
 	 * Closes the database by disposing of the connection.
 	 */
 	public void close() {
-        // CLEARING DATASETS //
-
-        this.clearDatasets();
-
 		// DISCONNECTING FROM DATABASE //
 
         // informing
@@ -122,9 +110,12 @@ public class Database {
     /**
      * Loads the training dataset from the table into the Database's Dataset object.
      * 
+     * @param trainingDatasetTableName // TODO
+     * @param trainingDatasetMappingType // TODO
+     * @returns TrainingDataset object containing the data from the training table.
      * @throws SQLiteException If the call to the database fails.
      */
-    public void loadTrainingDataset() throws SQLiteException{
+    public RatingsTrainingDataset loadTrainingDataset(String trainingDatasetTableName, RatingsTrainingDatasetMappingType trainingDatasetMappingType) throws SQLiteException{
 
         /////////////////
         // PREPERATION //
@@ -132,14 +123,17 @@ public class Database {
 
         // informing
         System.out.println("\n");
-        System.out.print("Loading training ratings from table : '" + this.trainingDatasetTableName + "' ...");
+        System.out.print("Loading training ratings from table : '" + trainingDatasetTableName + "' ...");
         System.out.println("\n");
+
+        // creating new training dataset object
+        RatingsTrainingDataset trainingDataset = new RatingsTrainingDataset(trainingDatasetMappingType);
 
         // tracking number of loaded ratings
         int count = 0;
 
         // SQLiteStatement object to hold the database information
-        SQLiteStatement statement = this.connection.prepare("SELECT * FROM " + this.trainingDatasetTableName);
+        SQLiteStatement statement = this.connection.prepare("SELECT * FROM " + trainingDatasetTableName);
 
         /////////////
         // LOADING //
@@ -154,7 +148,7 @@ public class Database {
             Integer timestamp = statement.columnInt(3);
 
             // adding the rating to the dataset
-            this.trainingDataset.addRating(userID, itemID, itemRating, timestamp);
+            trainingDataset.addRating(userID, itemID, itemRating, timestamp);
 
             // incrementing count
             count++;
@@ -173,18 +167,27 @@ public class Database {
 
         // informing
         System.out.println("\n");
-        System.out.println("Successfully loaded training ratings from table : '" + this.trainingDatasetTableName + "' !");
+        System.out.println("Successfully loaded training ratings from table : '" + trainingDatasetTableName + "' !");
         System.out.println("Number of Ratings : " + count);
-        System.out.println("Number of entries in training dataset : " + this.trainingDataset.getNumberOfEntries());
+        System.out.println("Number of entries in training dataset : " + trainingDataset.getNumberOfEntries());
         System.out.println("\n");
+
+        ///////////////
+        // RETURNING //
+        ///////////////
+
+        // returning training dataset
+        return trainingDataset;
     }
 
     /**
      * Loads the testing dataset from the table into the Database's Dataset object.
      * 
+     * @param testingDatasetTableName
+     * @return // TODO
      * @throws SQLiteException If the call to the database fails.
      */
-    public void loadTestingDataset() throws Exception{
+    public RatingsDataset loadTestingDataset(String testingDatasetTableName) throws SQLiteException{
 
         /////////////////
         // PREPERATION //
@@ -192,14 +195,17 @@ public class Database {
 
         // informing
         System.out.println("\n");
-        System.out.print("Loading testing ratings from table : '" + this.testingDatasetTableName + "' ...");
+        System.out.print("Loading testing ratings from table : '" + testingDatasetTableName + "' ...");
         System.out.println("\n");
+
+        // creating new testing dataset object
+        RatingsDataset testingDataset = new RatingsDataset();
 
         // tracking number of loaded ratings
         int count = 0;
 
         // SQLiteStatement object to hold the database information
-        SQLiteStatement statement = this.connection.prepare("SELECT * FROM " + this.testingDatasetTableName);
+        SQLiteStatement statement = this.connection.prepare("SELECT * FROM " + testingDatasetTableName);
 
         /////////////
         // LOADING //
@@ -213,7 +219,7 @@ public class Database {
             Integer timestamp = statement.columnInt(2);
 
             // adding the rating to the dataset
-            this.testingDataset.addRating(userID, itemID, Database.UNRATED_ITEM_RATING, timestamp);
+            testingDataset.addRating(userID, itemID, RatingsDatabase.UNRATED_ITEM_RATING, timestamp);
 
             // incrementing count
             count++;
@@ -232,10 +238,16 @@ public class Database {
 
         // informing
         System.out.println("\n");
-        System.out.println("Successfully loaded testing ratings from table : '" + this.testingDatasetTableName + "' !");
+        System.out.println("Successfully loaded testing ratings from table : '" + testingDatasetTableName + "' !");
         System.out.println("Number of Ratings : " + count);
-        System.out.println("Number of entries in testing dataset : " + this.testingDataset.getNumberOfEntries());
         System.out.println("\n");
+
+        ///////////////
+        // RETURNING //
+        ///////////////
+
+        // returning loaded testing dataset object
+        return testingDataset;
     }
 
     /////////////////////////////////////////
@@ -244,38 +256,9 @@ public class Database {
 
     // TODO
 
-    ////////////////////
-    // HELPER METHODS //
-    ////////////////////
+    ///////////////////////
+    // QUERYING DATABASE //
+    ///////////////////////
 
-    /**
-     * Clears the datasets populated with data from this database. Used
-     * to free up memory for very large datasets.
-     */
-    public void clearDatasets(){
-        this.trainingDataset.clear();
-        this.testingDataset.clear();
-    }
-
-    /////////////////////////
-    // GETTERS AND SETTERS //
-    /////////////////////////
-
-    /**
-     * Getter method for the training dataset.
-     * 
-     * @return The training dataset associates with this database.
-     */
-    public TrainingDataset getTrainingDataset(){
-        return this.trainingDataset;
-    }
-
-    /**
-     * Getter method for the testing dataset.
-     * 
-     * @return The testing dataset associated with this database.
-     */
-    public TrainingDataset getTestingDataset(){
-        return this.testingDataset;
-    }
+    // TODO
 }

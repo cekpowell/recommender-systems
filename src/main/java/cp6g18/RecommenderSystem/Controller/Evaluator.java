@@ -24,7 +24,6 @@ public class Evaluator {
     // EVALUATION //
     ////////////////
 
-
     /**
      * Evaluates a set of predictions and true ratings according to standard
      * evaluation metrics.

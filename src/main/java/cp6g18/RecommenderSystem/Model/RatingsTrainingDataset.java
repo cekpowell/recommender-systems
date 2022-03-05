@@ -2,10 +2,10 @@ package cp6g18.RecommenderSystem.Model;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -16,17 +16,20 @@ import java.util.HashMap;
  * 
  * // TODO
  */
-public class TrainingDataset{
+public class RatingsTrainingDataset{
     // constants
-    private static final String DATASET_DELIMITER = ",";
-    private static final int DATESET_USER_ID_INDEX = 0;
-    private static final int DATESET_ITEM_ID_INDEX = 1;
-    private static final int DATESET_RATING_INDEX = 2;
-    private static final int DATESET_TIMESTAMP_INDEX = 3;
+    private static final String DATASET_DELIMITER = ","; // TODO
+    private static final int DATESET_USER_ID_INDEX = 0; // TODO
+    private static final int DATESET_ITEM_ID_INDEX = 1; // TODO
+    private static final int DATESET_ITEM_RATING_INDEX = 2; // TODO
+    private static final int DATESET_TIMESTAMP_INDEX = 3; // TODO
 
     // member variables
-    private DatasetMappingType datasetMappingType; // The type of mapping of data stored in this dataset.
+    private RatingsTrainingDatasetMappingType datasetMappingType; // The type of mapping of data stored in this dataset.
     private HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>> data; // {user ID -> {item ID -> (rating,timestamp)}} OR {item ID -> {user ID -> (rating,timestamp)}}.
+    private int numOfEntries; // count for the number of entries in the dataset
+    private HashMap<Integer, Tuple<Integer, Float>> userTotalRatings; // {userID -> (numberOfRatings given by user, total rating given by user)}
+    private HashMap<Integer, Tuple<Integer, Float>> itemTotalRatings; // {itemID -> (number of ratings given to item, total rating given to item)}
 
     //////////////////
     // INITIALIZING //
@@ -37,23 +40,12 @@ public class TrainingDataset{
      * 
      * @param datasetMappingType The type of mapping of data stored in this dataset.
      */
-    public TrainingDataset(DatasetMappingType datasetMappingType){
+    public RatingsTrainingDataset(RatingsTrainingDatasetMappingType datasetMappingType){
         // initializing
         this.datasetMappingType = datasetMappingType;
         this.data = new HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>>();
-    }
-
-    /**
-     * // TODO
-     * 
-     * @param datasetMappingType
-     * @param trainingDatasetFile
-     * @return
-     */
-    public static TrainingDataset loadFromCSVFile(DatasetMappingType datasetMappingType, File trainingDatasetFile){
-
-
-        return null;
+        this.userTotalRatings = new HashMap<Integer, Tuple<Integer, Float>>();
+        this.itemTotalRatings = new HashMap<Integer, Tuple<Integer, Float>>();
     }
 
     /////////////////////
@@ -76,7 +68,7 @@ public class TrainingDataset{
      * @return The loaded dataset as a Dataset object.
      * @throws Exception Thrown if the dataset could not be loaded from the file.
      */
-    public static TrainingDataset readFromCSVFile(String filename, DatasetMappingType datasetMappingType) throws Exception{
+    public static RatingsTrainingDataset readFromCSVFile(String filename, RatingsTrainingDatasetMappingType trainingDatasetMappingType) throws Exception{
         try{
             // informing
             System.out.println("\n");
@@ -84,10 +76,10 @@ public class TrainingDataset{
             System.out.println("\n");
 
             // creating object to store dataset
-            TrainingDataset trainingDataset = new TrainingDataset(datasetMappingType);
+            RatingsTrainingDataset trainingDataset = new RatingsTrainingDataset(trainingDatasetMappingType);
 
             // creating file object
-            File file = new File(TrainingDataset.class.getClassLoader().getResource(filename).getFile());
+            File file = new File(RatingsTrainingDataset.class.getClassLoader().getResource(filename).getFile());
 
             // setting up file reader 
             BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -101,13 +93,13 @@ public class TrainingDataset{
                 String line = reader.readLine();
 
                 // gathering entry data from line
-                int userID = Integer.parseInt(line.split(TrainingDataset.DATASET_DELIMITER)[TrainingDataset.DATESET_USER_ID_INDEX]);
-                int itemID = Integer.parseInt(line.split(TrainingDataset.DATASET_DELIMITER)[TrainingDataset.DATESET_ITEM_ID_INDEX]);
-                float rating = Float.parseFloat(line.split(TrainingDataset.DATASET_DELIMITER)[TrainingDataset.DATESET_RATING_INDEX]);
-                int timestamp = Integer.parseInt(line.split(TrainingDataset.DATASET_DELIMITER)[TrainingDataset.DATESET_TIMESTAMP_INDEX]);
+                int userID = Integer.parseInt(line.split(RatingsTrainingDataset.DATASET_DELIMITER)[RatingsTrainingDataset.DATESET_USER_ID_INDEX]);
+                int itemID = Integer.parseInt(line.split(RatingsTrainingDataset.DATASET_DELIMITER)[RatingsTrainingDataset.DATESET_ITEM_ID_INDEX]);
+                float itemRating = Float.parseFloat(line.split(RatingsTrainingDataset.DATASET_DELIMITER)[RatingsTrainingDataset.DATESET_ITEM_RATING_INDEX]);
+                int timestamp = Integer.parseInt(line.split(RatingsTrainingDataset.DATASET_DELIMITER)[RatingsTrainingDataset.DATESET_TIMESTAMP_INDEX]);
 
                 // adding row to dataset
-                trainingDataset.addRating(userID, itemID, rating, timestamp);
+                trainingDataset.addRating(userID, itemID, itemRating, timestamp);
 
                 // incrementing count
                 count++;
@@ -132,51 +124,6 @@ public class TrainingDataset{
         }
     }
 
-    /////////////////////
-    // WRITING DATASET //
-    /////////////////////
-
-    /**
-     * Writes the dataset to the given file.
-     * 
-     * Algorithm:
-     *  - Sets up a FileOutputStream to write the Dataset to the provided file.
-     *  - Gathers the Dataset 'content' by converting it to a String.
-     *  - Writes the Dataset content to the File using the FileOutputStream.
-     * 
-     * @param filename The name of the file the dataset will be written to.
-     * @throws Exception If the dataset could not be written to the given file.
-     */
-    public void writeToFile(String filename) throws Exception{
-        try{
-            // informing
-            System.out.println("\n");
-            System.out.print("Writing training dataset to file : '" + filename + "' ...");
-            System.out.println("\n");
-
-            // setting up output stream
-            OutputStream out = new FileOutputStream(filename);
-
-            // gathering dataset content
-            String content = this.toString();
-
-            // writing content to file
-            out.write(content.getBytes());
-
-            // closing the file
-            out.close();
-
-            // informing
-            System.out.println("\n");
-            System.out.println("Successfully written training dataset to file : '" + filename+ "' !");
-            System.out.println("\n");
-        }
-        catch(Exception e){
-            throw new Exception("Unable to write dataset to file '" + filename + "'.\n" + 
-                                "Cause : \n\t" + e.toString());
-        }
-    }
-
     ////////////////////////////////
     // ADDING DATA TO THE DATASET //
     ////////////////////////////////
@@ -186,13 +133,13 @@ public class TrainingDataset{
      * 
      * @param userID
      * @param itemID
-     * @param rating
+     * @param itemRating
      * @param timestamp
      */
     public void addRating(int userID, int itemID, float itemRating, int timestamp){
         // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.datasetMappingType == DatasetMappingType.USERS_TO_ITEMS){
+        if(this.datasetMappingType == RatingsTrainingDatasetMappingType.USERS_TO_ITEMS){
             // loading the hashmap for this ite,
             HashMap<Integer, Tuple<Float, Integer>> userRatings = this.data.get(userID);
 
@@ -221,13 +168,110 @@ public class TrainingDataset{
             // adding this rating to the user's ratings
             itemRatings.put(userID, new Tuple<Float, Integer>(itemRating, timestamp));
         }
+
+        // INCREMENTING RECORDS //
+
+        // incrementing number of entries
+        this.numOfEntries++;
+
+        // adding rating to total ratings for user
+        Tuple<Integer, Float> userTotal = this.userTotalRatings.get(userID);
+        if(userTotal == null){
+            userTotal = new Tuple<Integer, Float>(0, 0f);
+            this.userTotalRatings.put(userID, userTotal);
+        }
+        userTotal.first++;
+        userTotal.second += itemRating;
+
+        // adding rating to total ratings for item
+        Tuple<Integer, Float> itemTotal = this.itemTotalRatings.get(itemID);
+        if(itemTotal == null){
+            itemTotal = new Tuple<Integer, Float>(0, 0f);
+            this.itemTotalRatings.put(itemID, itemTotal);
+        }
+        itemTotal.first++;
+        itemTotal.second += itemRating;
     }
 
     ///////////////////////////////////
     // GETTING DATA FROM THE DATASET //
     ///////////////////////////////////
 
-    // TODO
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public ArrayList<Integer> getItems(){
+        return (new ArrayList<Integer>(this.data.keySet()));
+    }
+
+    /**
+     * // TODO
+     * 
+     * @param itemID
+     * @return
+     */
+    public HashMap<Integer, Tuple<Float, Integer>> getUsersWhoRatedItem(int itemID){
+        return this.data.get(itemID);
+    }
+
+    /**
+     * // TODO
+     * 
+     * @param userID
+     * @param itemID
+     * @return
+     */
+    public float getUserRatingOfItem(int userID, int itemID){
+        // HANDLING USERS TO ITEMS MAPPING CASE //
+
+        if(this.datasetMappingType == RatingsTrainingDatasetMappingType.USERS_TO_ITEMS){
+            return (this.data.get(userID).get(itemID).first);
+        }
+
+        // HANDLING ITEMS TO USERS MAPPING CASE //
+
+        else{
+            return (this.data.get(itemID).get(userID).first);
+        }
+    }
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public HashMap<Integer, Float> getUserAverageRatings(){
+        // creating new hashmap
+        HashMap<Integer, Float> userAverageRatings = new HashMap<Integer, Float>();
+
+        // adding average ratings to the hashmap
+        for(Entry<Integer, Tuple<Integer, Float>> userTotalRating : this.userTotalRatings.entrySet()){
+            userAverageRatings.put(userTotalRating.getKey(), (userTotalRating.getValue().second / userTotalRating.getValue().first));
+        }
+
+        // returning the hashamp
+        return userAverageRatings;
+    }
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public HashMap<Integer, Float> getItemAverageRatings(){
+        // creating new hashmap
+        HashMap<Integer, Float> itemAverageRatings = new HashMap<Integer, Float>();
+
+        // adding average ratings to the hashmap
+        for(Entry<Integer, Tuple<Integer, Float>> itemTotalRating : this.itemTotalRatings.entrySet()){
+            itemAverageRatings.put(itemTotalRating.getKey(), (itemTotalRating.getValue().second / itemTotalRating.getValue().first));
+        }
+
+        // returning the hashamp
+        return itemAverageRatings;
+    }
 
     ////////////////////
     // HELPER METHODS //
