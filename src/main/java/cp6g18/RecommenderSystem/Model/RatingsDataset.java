@@ -1,7 +1,6 @@
 package cp6g18.RecommenderSystem.Model;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,9 +14,6 @@ import java.util.Set;
  * // TODO
  */
 public abstract class RatingsDataset{
-
-    // CONSTANTS //
-    public static final int UNRATED_ITEM_RATING = -1; // TODO
 
     //////////////////////////////
     // ADDING RATING TO DATASET //
@@ -33,84 +29,14 @@ public abstract class RatingsDataset{
      */
     public abstract void addRating(int userID, int itemID, float itemRating, int timestamp);
 
-    ///////////////////////////////////
-    // GETTING DATA FROM THE DATASET //
-    ///////////////////////////////////
-
-    /**
-     * // TODO
-     * 
-     * @return
-     */
-    public abstract Set<Integer> getUsers();
-
-    /**
-     * // TODO
-     * 
-     * @return
-     */
-    public abstract Set<Integer> getItems();
-
-    /**
-     * // TODO
-     * 
-     * @param itemID
-     * @return
-     */
-    public abstract Set<Integer> getUsersWhoRatedItem(int itemID);
-
-    /**
-     * // TODO
-     * 
-     * @param item1ID
-     * @param item2ID
-     * @return
-     */
-    public abstract Set<Integer> getUsersWhoRatedItems(int item1ID, int item2ID);
-
-    /**
-     * // TODO
-     * 
-     * @param userID
-     * @return
-     */
-    public abstract Set<Integer> getItemsRatedByUser(int userID);
-
-    /**
-     * // TODO
-     * 
-     * @param user1ID
-     * @param user2ID
-     * @return
-     */
-    public abstract Set<Integer> getItemsRatedByUsers(int user1ID, int user2ID);
-
-    /**
-     * // TODO
-     * 
-     * @param userID
-     * @param itemID
-     * @return
-     */
-    public abstract Float getUserRatingOfItem(int userID, int itemID);
-
-    /**
-     * Gathers the average rating of each user within the dataset.
-     * 
-     * @return A mapping of user IDs to their average rating.
-     */
-    public abstract HashMap<Integer, Float> getAverageUserRatings();
-
-    /**
-     * Gathers the average rating of each item within the dataset.
-     * 
-     * @return A mapping of item IDs to their average rating.
-     */
-    public abstract HashMap<Integer, Float> getAverageItemRatings();
-
     ////////////////////
     // HELPER METHODS //
     ////////////////////
+
+    /**
+     * // TODO
+     */
+    public abstract void clear();
 
     /**
      * // TODO

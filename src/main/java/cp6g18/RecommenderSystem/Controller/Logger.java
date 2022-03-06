@@ -92,7 +92,7 @@ public class Logger {
         Logger.processStartTime = System.currentTimeMillis();
 
         // logging
-        System.out.println("\n" + message);
+        System.out.println("\n" + message + " ...");
     }
 
     /**
@@ -105,7 +105,7 @@ public class Logger {
         Logger.processEndTime = System.currentTimeMillis();
 
         // logging
-        System.out.println(message + " " + Logger.getProcessCompletionTime());
+        System.out.println(message + " ! " + Logger.getProcessCompletionTime());
     }
 
     ////////////////////////////////

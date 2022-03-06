@@ -3,9 +3,9 @@ package cp6g18.RecommenderSystem.Controller;
 import java.util.HashMap;
 import java.util.Set;
 
-import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
-import cp6g18.RecommenderSystem.Model.HashMapRatingsDataset;
-import cp6g18.RecommenderSystem.Model.HashMapRatingsDatasetMappingType;
+import cp6g18.RecommenderSystem.Model.TestingRatingsDataset;
+import cp6g18.RecommenderSystem.Model.TrainingRatingsDataset;
+import cp6g18.RecommenderSystem.Model.TrainingRatingsDatasetMappingType;
 import cp6g18.RecommenderSystem.Model.SimilarityMatrix;
 
 /**
@@ -40,10 +40,10 @@ public class CosineSimilarityRecommender extends Recommender{
      * 
      * @param trainingDataset
      */
-    protected void trainAux(HashMapRatingsDataset trainingDataset){
+    protected void trainAux(TrainingRatingsDataset trainingDataset){
         // USERS TO ITEMS MAPPING TYPE //
         
-        if(trainingDataset.getMappingType() == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
+        if(trainingDataset.getMappingType() == TrainingRatingsDatasetMappingType.USERS_TO_ITEMS){
             // TODO handle user-based filtering
         }
 
@@ -62,7 +62,7 @@ public class CosineSimilarityRecommender extends Recommender{
     // MAKING PREDICTIONS //
     ////////////////////////
 
-    protected ArrayListRatingsDataset makePredictionsAux(ArrayListRatingsDataset dataset){
+    protected TestingRatingsDataset makePredictionsAux(TestingRatingsDataset dataset){
         // TODO
 
         return null;
@@ -84,7 +84,7 @@ public class CosineSimilarityRecommender extends Recommender{
      * @param trainingDataset
      * @return
      */
-    private static SimilarityMatrix getItemBasedAdjustedCosineSimilarityMatrix(HashMapRatingsDataset trainingDataset){
+    private static SimilarityMatrix getItemBasedAdjustedCosineSimilarityMatrix(TrainingRatingsDataset trainingDataset){
         ///////////////
         // PREPARING //
         ///////////////
@@ -129,7 +129,7 @@ public class CosineSimilarityRecommender extends Recommender{
      * @param item2ID
      * @return 
      */
-    private static float getItemBasedAdjustedCosineSimilarity(HashMapRatingsDataset trainingDataset, HashMap<Integer, Float> userAverageRatings, int item1ID, int item2ID){
+    private static float getItemBasedAdjustedCosineSimilarity(TrainingRatingsDataset trainingDataset, HashMap<Integer, Float> userAverageRatings, int item1ID, int item2ID){
         /**
          * - Find set of users that rated both item 1 and item 2
          * - Calculate numerator of equation

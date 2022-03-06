@@ -6,9 +6,9 @@ import cp6g18.RecommenderSystem.Controller.CosineSimilarityRecommender;
 import cp6g18.RecommenderSystem.Controller.FileWriter;
 import cp6g18.RecommenderSystem.Controller.Logger;
 import cp6g18.RecommenderSystem.Model.RatingsDatabase;
-import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
-import cp6g18.RecommenderSystem.Model.HashMapRatingsDataset;
-import cp6g18.RecommenderSystem.Model.HashMapRatingsDatasetMappingType;
+import cp6g18.RecommenderSystem.Model.TestingRatingsDataset;
+import cp6g18.RecommenderSystem.Model.TrainingRatingsDataset;
+import cp6g18.RecommenderSystem.Model.TrainingRatingsDatasetMappingType;
 
 // package cp6g18.Tasks;
 
@@ -62,7 +62,7 @@ public class Task2 {
             RatingsDatabase database = new RatingsDatabase(Task2.DATBASE_FILENAME);
 
             // gathering training data
-            HashMapRatingsDataset trainingDataset = new HashMapRatingsDataset(HashMapRatingsDatasetMappingType.ITEMS_TO_USERS);
+            TrainingRatingsDataset trainingDataset = new TrainingRatingsDataset(TrainingRatingsDatasetMappingType.ITEMS_TO_USERS);
             database.loadRatingsDataset(trainingDataset, Task2.TRAINING_TABLE_NAME);
 
             // creating recommender system
@@ -95,7 +95,7 @@ public class Task2 {
             Logger.logSubTaskStart("LOADING TESTING DATA");
 
             // gathering testing datas
-            ArrayListRatingsDataset testingDataset = new ArrayListRatingsDataset();
+            TestingRatingsDataset testingDataset = new TestingRatingsDataset();
             database.loadRatingsDataset(testingDataset, Task2.TESTING_TABLE_NAME);
 
             // logging
@@ -108,7 +108,7 @@ public class Task2 {
             // logging
             Logger.logSubTaskStart("PREDICTING");
 
-            ArrayListRatingsDataset predictions = recommender.makePredictions(testingDataset);
+            TestingRatingsDataset predictions = recommender.makePredictions(testingDataset);
             
             // writing to file
             FileWriter.writeObjectToFile(predictions, new File(Task2.RESULTS_FILE));

@@ -29,7 +29,7 @@ public class FileWriter {
     public static void writeObjectToFile(Object object, File file) throws Exception{
         try{
             // logging
-            Logger.logProcessStart("Writing object to file : '" + file.getName() + "'' ...");
+            Logger.logProcessStart("Writing object to file : '" + file.getName() + "''");
 
             // setting up output stream
             OutputStream out = new FileOutputStream(file);
@@ -44,7 +44,7 @@ public class FileWriter {
             out.close();
 
             // logging
-            Logger.logProcessEnd("Successfully written object to file : '" + file.getName()+ "' !");
+            Logger.logProcessEnd("Successfully written object to file : '" + file.getName()+ "'");
         }
         catch(Exception e){
             throw new Exception("Unable to write object to file '" + file.getName() + "'.\n" + 

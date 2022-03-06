@@ -2,7 +2,6 @@ package cp6g18.RecommenderSystem.Model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -13,7 +12,7 @@ import java.util.Set;
  * 
  * // TODO
  */
-public class ArrayListRatingsDataset extends RatingsDataset{
+public class TestingRatingsDataset extends RatingsDataset{
 
     // member variables
     private ArrayList<Rating> data; // TODO
@@ -29,7 +28,7 @@ public class ArrayListRatingsDataset extends RatingsDataset{
      * 
      * @param datasetMappingType The type of mapping of data stored in this dataset.
      */
-    public ArrayListRatingsDataset(){
+    public TestingRatingsDataset(){
         // initializing
         this.data = new ArrayList<Rating>();
         this.totalUserRatings = new HashMap<Integer, Tuple<Integer, Float>>();
@@ -85,109 +84,9 @@ public class ArrayListRatingsDataset extends RatingsDataset{
      * 
      * @return
      */
-    public Set<Integer> getUsers(){
-
-        return null;
-    }
-
-    /**
-     * // TODO
-     * 
-     * @return
-     */
-    public Set<Integer> getItems(){
-
-        return null;
-    }
-
-    /**
-     * // TODO
-     * 
-     * @return
-     */
-    public ArrayList<Float> getRatings(){
-        // creating empty array list
-        ArrayList<Float> itemRatings = new ArrayList<Float>();
-
-        // iterating through ratings and adding each item rating to the list
-        for(Rating rating : this.data){
-            itemRatings.add(rating.getRating());
-        }
-
-        // returning list of item ratings
-        return itemRatings;
-    }
-
-    /**
-     * // TODO
-     * 
-     * @param itemID
-     * @return
-     */
-    public Set<Integer> getUsersWhoRatedItem(int itemID){
-
-        return null;
-    }
-
-    /**
-     * // TODO
-     * 
-     * @param item1ID
-     * @param item2ID
-     * @return
-     */
-    public Set<Integer> getUsersWhoRatedItems(int item1ID, int item2ID){
-        return null;
-    }
-
-    /**
-     * // TODO
-     * 
-     * @param userID
-     * @return
-     */
-    public Set<Integer> getItemsRatedByUser(int userID){
-        return null;
-    }
-
-    /**
-     * // TODO
-     * 
-     * @param user1ID
-     * @param user2ID
-     * @return
-     */
-    public Set<Integer> getItemsRatedByUsers(int user1ID, int user2ID){
-        return null;
-    }
-
-    /**
-     * // TODO
-     * 
-     * @param userID
-     * @param itemID
-     * @return
-     */
-    public Float getUserRatingOfItem(int userID, int itemID){
-        return null;
-    }
-
-    /**
-     * Gathers the average rating of each user within the dataset.
-     * 
-     * @return A mapping of user IDs to their average rating.
-     */
-    public HashMap<Integer, Float> getAverageUserRatings(){
-        return null;
-    }
-
-    /**
-     * Gathers the average rating of each item within the dataset.
-     * 
-     * @return A mapping of item IDs to their average rating.
-     */
-    public HashMap<Integer, Float> getAverageItemRatings(){
-        return null;
+    public ArrayList<Rating> getRatings(){
+        // returning ratings
+        return this.data;
     }
 
     ////////////////////

@@ -1,8 +1,7 @@
 package cp6g18.RecommenderSystem.Controller;
 
-import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
-import cp6g18.RecommenderSystem.Model.HashMapRatingsDataset;
-import cp6g18.RecommenderSystem.Model.HashMapRatingsDatasetMappingType;
+import cp6g18.RecommenderSystem.Model.TestingRatingsDataset;
+import cp6g18.RecommenderSystem.Model.TrainingRatingsDataset;
 import cp6g18.RecommenderSystem.Model.SimilarityMatrix;
 
 /**
@@ -42,9 +41,9 @@ public abstract class Recommender{
      * 
      * @param trainingDataset
      */
-    public void train(HashMapRatingsDataset trainingDataset){
+    public void train(TrainingRatingsDataset trainingDataset){
         // informing
-        Logger.logProcessStart("Training recommender system...");
+        Logger.logProcessStart("Training recommender system");
 
         // training the system using the dataset
         this.trainAux(trainingDataset);
@@ -53,7 +52,7 @@ public abstract class Recommender{
         this.isTrained = true;
 
         // informing
-        Logger.logProcessEnd("Recommender system successfully trained !");
+        Logger.logProcessEnd("Recommender system successfully trained");
     }
 
     /**
@@ -61,7 +60,7 @@ public abstract class Recommender{
      * 
      * @param trainingDataset
      */
-    protected abstract void trainAux(HashMapRatingsDataset trainingDataset);
+    protected abstract void trainAux(TrainingRatingsDataset trainingDataset);
 
     ////////////////////////
     // MAKING PREDICTIONS //
@@ -74,7 +73,7 @@ public abstract class Recommender{
      * @return
      * @throws
      */
-    public ArrayListRatingsDataset makePredictions(ArrayListRatingsDataset dataset) throws Exception{
+    public TestingRatingsDataset makePredictions(TestingRatingsDataset dataset) throws Exception{
         // checking system has been trained               
         if(this.isTrained){
             return this.makePredictionsAux(dataset);
@@ -90,7 +89,7 @@ public abstract class Recommender{
      * @param dataset
      * @return
      */
-    protected abstract ArrayListRatingsDataset makePredictionsAux(ArrayListRatingsDataset dataset);
+    protected abstract TestingRatingsDataset makePredictionsAux(TestingRatingsDataset dataset);
 
     /////////////////////////
     // GETTERS AND SETTERS //

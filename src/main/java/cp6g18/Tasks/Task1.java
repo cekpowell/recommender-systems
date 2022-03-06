@@ -7,7 +7,7 @@ import cp6g18.RecommenderSystem.Controller.FileWriter;
 import cp6g18.RecommenderSystem.Controller.Logger;
 import cp6g18.RecommenderSystem.Model.Evaluation;
 import cp6g18.RecommenderSystem.Model.RatingsDatabase;
-import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
+import cp6g18.RecommenderSystem.Model.TestingRatingsDataset;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -60,11 +60,11 @@ public class Task1 {
             RatingsDatabase database = new RatingsDatabase(Task1.DATBASE_FILENAME);
 
             // gathering predictions
-            ArrayListRatingsDataset predictions = new ArrayListRatingsDataset();
+            TestingRatingsDataset predictions = new TestingRatingsDataset();
             database.loadRatingsDataset(predictions, Task1.PREDICTIONS_TABLE_NAME);
 
             // gathering truths
-            ArrayListRatingsDataset truths = new ArrayListRatingsDataset();
+            TestingRatingsDataset truths = new TestingRatingsDataset();
             database.loadRatingsDataset(truths, Task1.TRUTHS_TABLE_NAME);
 
             // logging

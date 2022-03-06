@@ -3,6 +3,7 @@ package cp6g18.RecommenderSystem.Controller;
 import java.util.ArrayList;
 
 import cp6g18.RecommenderSystem.Model.Evaluation;
+import cp6g18.RecommenderSystem.Model.Rating;
 import cp6g18.RecommenderSystem.Model.RatingsDatabase;
 
 /**
@@ -42,9 +43,9 @@ public class Evaluator {
      * @param truths The true ratings.
      * @return An Evaluation object containing the evaluation metrics.
      */
-    public static Evaluation evaluatePredictions(ArrayList<Float> predictions, ArrayList<Float> truths){
+    public static Evaluation evaluatePredictions(ArrayList<Rating> predictions, ArrayList<Rating> truths){
         // logging
-        Logger.logProcessStart("Evaluating predictions against truths...");
+        Logger.logProcessStart("Evaluating predictions against truths");
 
         // gathering evaluation metrics
         float mse = Evaluator.getMSE(predictions, truths);
@@ -55,7 +56,7 @@ public class Evaluator {
         Evaluation evaluation = new Evaluation(mse, rmse, mae);
 
         // logging
-        Logger.logProcessEnd("Evaluation successfully completed !");
+        Logger.logProcessEnd("Evaluation successfully completed");
 
         // returning evaluation
         return evaluation;
@@ -78,15 +79,15 @@ public class Evaluator {
      * @param truths The actual ratings.
      * @return The mean squared error for the predictions.
      */
-    private static float getMSE(ArrayList<Float> predictions, ArrayList<Float> truths){
+    private static float getMSE(ArrayList<Rating> predictions, ArrayList<Rating> truths){
         // mae variable
         float mse = 0;
 
         // summing squared errors
         float sumOfSquaredErrors = 0;
         for(int i = 0; i < predictions.size(); i++){
-            float truth = truths.get(i);
-            float predicted = predictions.get(i);
+            float truth = truths.get(i).getRating();
+            float predicted = predictions.get(i).getRating();
 
             float error = truth - predicted;
 
@@ -120,7 +121,7 @@ public class Evaluator {
      * @param truths The actual ratings.
      * @return The root smean squared error for the predictions.
      */
-    private static float getRMSE(ArrayList<Float> predictions, ArrayList<Float> truths){
+    private static float getRMSE(ArrayList<Rating> predictions, ArrayList<Rating> truths){
         // rmse variable
         float rmse = 0;
 
@@ -151,15 +152,15 @@ public class Evaluator {
      * @param truths The actual ratings.
      * @return The mean absolute error for the predictions.
      */
-    private static float getMAE(ArrayList<Float> predictions, ArrayList<Float> truths){
+    private static float getMAE(ArrayList<Rating> predictions, ArrayList<Rating> truths){
         // mae variable
         float mae = 0;
 
         // summing errors
         float sumOfErrors = 0;
         for(int i = 0; i < predictions.size(); i++){
-            float truth = truths.get(i);
-            float predicted = predictions.get(i);
+            float truth = truths.get(i).getRating();
+            float predicted = predictions.get(i).getRating();
 
             float error = truth - predicted;
 

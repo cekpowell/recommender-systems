@@ -11,6 +11,9 @@ package cp6g18.RecommenderSystem.Model;
  */
 public class Rating{
 
+    // CONSTANTS //
+    public static final int UNRATED_ITEM_RATING = -1; // TODO
+
     // member variables
     private int userID;
     private int itemID;
@@ -49,7 +52,7 @@ public class Rating{
      * @return
      */
     public boolean isUnrated(){
-        return (this.rating == RatingsDataset.UNRATED_ITEM_RATING);
+        return (this.rating == Rating.UNRATED_ITEM_RATING);
     }
 
     /**

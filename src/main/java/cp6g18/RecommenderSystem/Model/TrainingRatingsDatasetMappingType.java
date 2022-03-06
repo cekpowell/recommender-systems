@@ -9,7 +9,7 @@
  * 
  * // TODO
  */
-public enum HashMapRatingsDatasetMappingType {
+public enum TrainingRatingsDatasetMappingType {
     // Types
     USERS_TO_ITEMS,
     ITEMS_TO_USERS;

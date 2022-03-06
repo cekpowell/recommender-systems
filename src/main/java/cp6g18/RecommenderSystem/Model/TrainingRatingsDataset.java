@@ -14,10 +14,10 @@ import java.util.Map.Entry;
  * 
  * // TODO
  */
-public class HashMapRatingsDataset extends RatingsDataset{
+public class TrainingRatingsDataset extends RatingsDataset{
 
     // member variables
-    private HashMapRatingsDatasetMappingType mappingType; // The type of mapping to store in the hashmap
+    private TrainingRatingsDatasetMappingType mappingType; // The type of mapping to store in the hashmap
     private HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>> data; // {user ID -> {item ID -> (rating,timestamp)}} OR {item ID -> {user ID -> (rating,timestamp)}}.
     private HashMap<Integer, Tuple<Integer, Float>> totalUserRatings; // {userID -> (numberOfRatings given by user, total rating given by user)}
     private HashMap<Integer, Tuple<Integer, Float>> totalItemRatings; // {itemID -> (number of ratings given to item, total rating given to item)}
@@ -31,7 +31,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
      * 
      * @param recommenderType The type of recommender system being trained by this dataset.
      */
-    public HashMapRatingsDataset(HashMapRatingsDatasetMappingType mappingType){
+    public TrainingRatingsDataset(TrainingRatingsDatasetMappingType mappingType){
         // initializing
         this.mappingType = mappingType;
         this.data = new HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>>();
@@ -54,7 +54,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
     public void addRating(int userID, int itemID, float itemRating, int timestamp){
         // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
+        if(this.mappingType == TrainingRatingsDatasetMappingType.USERS_TO_ITEMS){
             // loading the hashmap for this ite,
             HashMap<Integer, Tuple<Float, Integer>> userRatings = this.data.get(userID);
 
@@ -117,7 +117,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
     public Set<Integer> getUsers(){
         // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
+        if(this.mappingType == TrainingRatingsDatasetMappingType.USERS_TO_ITEMS){
             return this.data.keySet();
         }
 
@@ -147,7 +147,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
     public Set<Integer> getItems(){
         // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
+        if(this.mappingType == TrainingRatingsDatasetMappingType.USERS_TO_ITEMS){
             // creating new set
             Set<Integer> items = new HashSet<Integer>();
 
@@ -178,7 +178,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
     public Set<Integer> getUsersWhoRatedItem(int itemID){
         // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
+        if(this.mappingType == TrainingRatingsDatasetMappingType.USERS_TO_ITEMS){
             // creating new set
             Set<Integer> users = new HashSet<Integer>();
             
@@ -222,7 +222,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
     public Set<Integer> getItemsRatedByUser(int userID){
         // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
+        if(this.mappingType == TrainingRatingsDatasetMappingType.USERS_TO_ITEMS){
             return this.data.get(userID).keySet();
         }
 
@@ -267,7 +267,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
     public Float getUserRatingOfItem(int userID, int itemID){
         // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
+        if(this.mappingType == TrainingRatingsDatasetMappingType.USERS_TO_ITEMS){
             return (this.data.get(userID).get(itemID).first);
         }
 
@@ -343,7 +343,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
      * 
      * @return The mapping type for the dataset.
      */
-    public HashMapRatingsDatasetMappingType getMappingType(){
+    public TrainingRatingsDatasetMappingType getMappingType(){
         return this.mappingType;
     }
 }
