@@ -1,12 +1,10 @@
 package cp6g18.RecommenderSystem.Model;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.OutputStream;
-
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -17,151 +15,26 @@ import java.util.ArrayList;
  * 
  * // TODO
  */
-public class RatingsDataset{
-    // constants
-    private static final String DATASET_DELIMITER = ","; // TODO
-    private static final int DATESET_USER_ID_INDEX = 0; // TODO
-    private static final int DATESET_ITEM_ID_INDEX = 1; // TODO
-    private static final int DATESET_TIMESTAMP_INDEX = 2; // TODO
+public abstract class RatingsDataset<L, // Typing of lists
+                                     R, // Typing of raw item rating
+                                     A> { // Typing of data average
 
-    // member variables
-    private ArrayList<Rating> data; // TODO
+    // CONSTANTS //
+    public static final String DELIMITER = ","; // TODO
+    public static final int USER_ID_INDEX = 0; // TODO
+    public static final int ITEM_ID_INDEX = 1; // TODO
+    public static final int ITEM_RATING_INDEX = 2; // TODO
+    public static final int TIMESTAMP_INDEX = 3; // TODO
+    public static final int UNRATED_ITEM_RATING = -1;
 
-    //////////////////
-    // INITIALIZING //
-    //////////////////
+    public static final String USER_ID_NAME = "UserID"; // TODO
+    public static final String ITEM_ID_NAME = "ItemID"; // TODO
+    public static final String RATING_NAME = "Rating"; // TODO
+    public static final String TIMESTAMP_NAME = "Timestamp"; // TODO
 
-    /**
-     * Class constructor.
-     * 
-     * @param datasetMappingType The type of mapping of data stored in this dataset.
-     */
-    public RatingsDataset(){
-        // initializing
-        this.data = new ArrayList<Rating>();
-    }
-
-    /////////////////////
-    // READING DATASET //
-    /////////////////////
-
-    /**
-     * Reads a dataset from a file.
-     * 
-     * Algorithm:
-     *  - Creates new Dataset object.
-     *  - Sets up a buffered reader object to read the given file.
-     *  - Iterates through the file, and creates a new Row object for each line
-     *    by splitting the line with the provided delimiter.
-     *  - Adds the new Row object to the Dataset object.
-     *  - Returns the new Dataset object.
-     * 
-     * @param filename The name of the file the dataset is being read from.
-     * @return The loaded dataset as a Dataset object.
-     * @throws Exception Thrown if the dataset could not be loaded from the file.
-     */
-    public static RatingsDataset readFromCSVFile(String filename) throws Exception{
-        try{
-            // informing
-            System.out.println("\n");
-            System.out.print("Loading dataset from file : '" + filename + "' ...");
-            System.out.println("\n");
-
-            // creating object to store dataset
-            RatingsDataset dataset = new RatingsDataset();
-
-            // creating file object
-            File file = new File(RatingsDataset.class.getClassLoader().getResource(filename).getFile());
-
-            // setting up file reader 
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-
-            // count to record number of ratings
-            int count = 0;
-
-            // iterating through the file and adding each row to the dataset
-            while(reader.ready()){
-                // getting next line
-                String line = reader.readLine();
-
-                // gathering entry data from line
-                int userID = Integer.parseInt(line.split(RatingsDataset.DATASET_DELIMITER)[RatingsDataset.DATESET_USER_ID_INDEX]);
-                int itemID = Integer.parseInt(line.split(RatingsDataset.DATASET_DELIMITER)[RatingsDataset.DATESET_ITEM_ID_INDEX]);
-                int timestamp = Integer.parseInt(line.split(RatingsDataset.DATASET_DELIMITER)[RatingsDataset.DATESET_TIMESTAMP_INDEX]);
-
-                // adding row to dataset
-                dataset.addRating(userID, itemID, timestamp);
-
-                // incrementing count
-                count++;
-            }
-
-            // closing the reader
-            reader.close();
-
-            // informing
-            System.out.println("\n");
-            System.out.println("Successfully loaded dataset from file : '" + filename+ "' !");
-            System.out.println("Number of Ratings : " + count);
-            System.out.println("\n");
-
-            // returning completed dataset
-            return dataset;
-        }
-        catch(Exception e){
-            throw new Exception("Unable to read dataset from file '" + filename + "'.\n" + 
-            "Cause : \n\t" + e.toString());
-        }
-    }
-
-    /////////////////////
-    // WRITING DATASET //
-    /////////////////////
-
-    /**
-     * Writes the dataset to the given file.
-     * 
-     * Algorithm:
-     *  - Sets up a FileOutputStream to write the Dataset to the provided file.
-     *  - Gathers the Dataset 'content' by converting it to a String.
-     *  - Writes the Dataset content to the File using the FileOutputStream.
-     * 
-     * @param file The File object the dataset will be written to.
-     * @throws Exception If the dataset could not be written to the given file.
-     */
-    public void writeToFile(File file) throws Exception{
-        try{
-            // informing
-            System.out.println("\n");
-            System.out.print("Writing dataset to file : '" + file.getName() + "' ...");
-            System.out.println("\n");
-
-            // setting up output stream
-            OutputStream out = new FileOutputStream(file);
-
-            // gathering dataset content
-            String content = this.toString();
-
-            // writing content to file
-            out.write(content.getBytes());
-
-            // closing the file
-            out.close();
-
-            // informing
-            System.out.println("\n");
-            System.out.println("Successfully written dataset to file : '" + file.getName()+ "' !");
-            System.out.println("\n");
-        }
-        catch(Exception e){
-            throw new Exception("Unable to write dataset to file '" + file.getName() + "'.\n" + 
-                                "Cause : \n\t" + e.toString());
-        }
-    }
-
-    ////////////////////////////////
-    // ADDING DATA TO THE DATASET //
-    ////////////////////////////////
+    //////////////////////////////
+    // ADDING RATING TO DATASET //
+    //////////////////////////////
 
     /**
      * // TODO
@@ -171,34 +44,82 @@ public class RatingsDataset{
      * @param itemRating
      * @param timestamp
      */
-    public void addRating(int userID, int itemID, float itemRating, int timestamp){
-        // creating rating object
-        Rating rating = new Rating(userID, itemID, itemRating, timestamp);
+    public abstract void addRating(int userID, int itemID, float itemRating, int timestamp);
 
-        // adding rating object to dataset
-        this.data.add(rating);
-    }
+    ///////////////////////////////////
+    // GETTING DATA FROM THE DATASET //
+    ///////////////////////////////////
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public abstract L getUsers();
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public abstract L getItems();
+
+    /**
+     * // TODO
+     * 
+     * @param itemID
+     * @return
+     */
+    public abstract L getUsersWhoRatedItem(int itemID);
+
+    /**
+     * // TODO
+     * 
+     * @param item1ID
+     * @param item2ID
+     * @return
+     */
+    public abstract L getUsersWhoRatedItems(int item1ID, int item2ID);
+
+    /**
+     * // TODO
+     * 
+     * @param userID
+     * @return
+     */
+    public abstract L getItemsRatedByUser(int userID);
+
+    /**
+     * // TODO
+     * 
+     * @param user1ID
+     * @param user2ID
+     * @return
+     */
+    public abstract L getItemsRatedByUsers(int user1ID, int user2ID);
 
     /**
      * // TODO
      * 
      * @param userID
      * @param itemID
-     * @param timestamp
+     * @return
      */
-    public void addRating(int userID, int itemID, int timestamp){
-        // creating rating object
-        Rating rating = new Rating(userID, itemID, timestamp);
+    public abstract R getUserRatingOfItem(int userID, int itemID);
 
-        // adding rating object to dataset
-        this.data.add(rating);
-    }
+    /**
+     * Gathers the average rating of each user within the dataset.
+     * 
+     * @return A mapping of user IDs to their average rating.
+     */
+    public abstract A getAverageUserRatings();
 
-    ///////////////////////////////////
-    // GETTING DATA FROM THE DATASET //
-    ///////////////////////////////////
-
-    // TODO
+    /**
+     * Gathers the average rating of each item within the dataset.
+     * 
+     * @return A mapping of item IDs to their average rating.
+     */
+    public abstract A getAverageItemRatings();
 
     ////////////////////
     // HELPER METHODS //
@@ -207,43 +128,30 @@ public class RatingsDataset{
     /**
      * // TODO
      * 
-     * @return
+     * @return 
      */
-    public ArrayList<Float> getListOfItemRatings(){
-        // creating empty array list
-        ArrayList<Float> itemRatings = new ArrayList<Float>();
-
-        // iterating through ratings and adding each item rating to the list
-        for(Rating rating : this.data){
-            itemRatings.add(rating.getItemRating());
-        }
-
-        // returning list of item ratings
-        return itemRatings;
-    }
-
-    /**
-     * Clears the dataset.
-     */
-    public void clear(){
-        this.data.clear();
-    }
+    public abstract String toString();
 
     /**
      * // TODO
      * 
-     * @return 
+     * @param <T>
+     * @param list1
+     * @param list2
+     * @return
      */
-    public String toString(){
-        // creating empty string object
-        String string = "";
+    public static <T> Set<T> getCommonElements(Collection<T> list1, Collection<T> list2){
+        // creating new array list
+        Set<T> commonElements = new HashSet<T>();
 
-        // adding each rating to the string
-        for(Rating rating : this.data){
-            string += rating.toString() + "\n";
+        // finding common elements
+        for(T element : list1){
+            if(list2.contains(element)){
+                commonElements.add(element);
+            }
         }
 
-        // returning completed string
-        return string;
+        // returning common elements
+        return commonElements;
     }
 }

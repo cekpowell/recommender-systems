@@ -1,5 +1,9 @@
 package cp6g18.RecommenderSystem.Model;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
 /**
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
@@ -43,18 +47,6 @@ public class Evaluation {
      * @return The evaluation results as a string.
      */
     public String toString(){
-        return "Evaluatioin Results" + "\n"
-             + "\t MSE:" + this.mse + "\n"
-             + "\t RMSE:" + this.rmse + "\n"
-             + "\t MAE:" + this.mae + "\n";
-    }
-
-    /**
-     * Converts the evaluation to a simple (i.e., shortened) string.
-     * 
-     * @return The evaluation results as a simple string.
-     */
-    public String toSimpleString(){
         return this.mse + "," + this.rmse + "," + this.mae;
     }
 }

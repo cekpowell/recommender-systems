@@ -9,8 +9,8 @@
  * 
  * // TODO
  */
-public enum RatingsTrainingDatasetMappingType {
+public enum RecommenderType {
     // Types
-    USERS_TO_ITEMS, // {user ID -> {item ID -> (rating,timestamp)}}
-    ITEMS_TO_USERS; // {item ID -> {user ID -> (rating,timestamp)}}
+    ITEM_BASED,
+    USER_BASED;
 }

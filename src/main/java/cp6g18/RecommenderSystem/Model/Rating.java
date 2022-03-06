@@ -10,8 +10,6 @@ package cp6g18.RecommenderSystem.Model;
  * // TODO
  */
 class Rating{
-    // constants
-    private static final int UNRATED_ITEM_RATING = -1;
 
     // member variables
     private int userID;
@@ -41,24 +39,6 @@ class Rating{
         this.timestamp = timestamp;
     }
 
-    /**
-     * Class constructor.
-     * 
-     * // TODO
-     * 
-     * @param userID
-     * @param itemID
-     * @param itemRating
-     * @param timestamp
-     */
-    public Rating(int userID, int itemID, int timestamp){
-        // initializing
-        this.userID = userID;
-        this.itemID = itemID;
-        this.itemRating = Rating.UNRATED_ITEM_RATING;
-        this.timestamp = timestamp;
-    }
-
     ////////////////////
     // HELPER METHODS //
     ////////////////////
@@ -69,7 +49,7 @@ class Rating{
      * @return
      */
     public boolean isUnrated(){
-        return (this.itemRating == Rating.UNRATED_ITEM_RATING);
+        return (this.itemRating == RatingsDataset.UNRATED_ITEM_RATING);
     }
 
     /**

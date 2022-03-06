@@ -1,67 +1,106 @@
+package cp6g18.Tasks;
+
+import java.io.File;
+
+import cp6g18.RecommenderSystem.Controller.CosineSimilarityRecommender;
+import cp6g18.RecommenderSystem.Controller.FileWriter;
+import cp6g18.RecommenderSystem.Model.RatingsDatabase;
+import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
+import cp6g18.RecommenderSystem.Model.HashMapRatingsDataset;
+import cp6g18.RecommenderSystem.Model.RecommenderType;
+
 // package cp6g18.Tasks;
 
 // import java.io.File;
 
 // import cp6g18.RecommenderSystem.Model.Dataset.Dataset;
 
-// /**
-//  * @module  COMP3208: Social Computing Techniques
-//  * @project Coursework
-//  * @author  Charles Powell
-//  * 
-//  * -- DESCRIPTION -- 
-//  * 
-//  * Main Class for Task 2 - // TODO
-//  */
-// public class Task2 {
+/**
+ * @module  COMP3208: Social Computing Techniques
+ * @project Coursework
+ * @author  Charles Powell
+ * 
+ * -- DESCRIPTION -- 
+ * 
+ * Main Class for Task 2 - \\ TODO
+ */
+public class Task2 {
     
-//     // constants
-//     private static final String RESULTS_FILE = "task2_results.csv"; // The name of the file the task 1 results will be written to
+    // constants
+    private static final String DATBASE_FILENAME = "Task2" + File.separator + "database.db"; // the name of the database file storing the data
+    private static final String TRAINING_TABLE_NAME = "training"; // the name of the table containing the training datas
+    private static final String TESTING_TABLE_NAME = "testing"; // the name of the table containing the testing datas
 
-//     private static final String TRAINING_FILE = "Task2" + File.separator + "train.csv"; // Name of file containing training data
-//     private static final String TESTING_FILE = "Task2" + File.separator + "test.csv"; // Name of file containing testing data
+    private static final String TRAINING_FILE = "Task2" + File.separator + "training.csv"; // Name of file containing training ratings
+    private static final String TESTING_FILE = "Task2" + File.separator + "testing.csv"; // Name of file containing testing ratings
 
-//     //////////////////
-//     // RUNNING TASK //
-//     //////////////////
+    private static final String RESULTS_FILE = "task2_results.csv"; // The name of the file the task 1 results will be written to
 
-//     /**
-//      * Runner funtion for Task 2.
-//      * 
-//      * Algorithm:
-//      * // TODO
-//      */
-//     public static void run(){
-//         try{
-//             // formatting
-//             System.out.println("\n===== TASK 2 =====\n");
+    //////////////////
+    // RUNNING TASK //
+    //////////////////
 
-//             // PREPERATION //
+    /**
+     * Runner funtion for Task 2.
+     * 
+     * // TODO
+     */
+    public static void run(){
+        try{
+            // logging
+            System.out.println("\n=====================================");
+            System.out.println(  "========== START OF TASK 2 ==========");
+            System.out.println(  "=====================================");
 
-//             // loading datasets
-//             Dataset trainingDataset = Dataset.readFromFile(Task2.TRAINING_FILE);
-//             Dataset testingDataset = Dataset.readFromFile(Task2.TESTING_FILE);
+            /////////////////
+            // PREPERATION //
+            /////////////////
 
-//             // CALCULATING RESULTS //
+            // logging
+            System.out.println("\n============= PREPARING =============");
 
-//             // TODO
+            // connecting to task 1 database
+            RatingsDatabase database = new RatingsDatabase(Task2.DATBASE_FILENAME);
 
-//             // OUTPUTTING RESULTS //
+            // gathering training data
+            HashMapRatingsDataset trainingDataset = database.loadHashMapRatingsDataset(Task2.TRAINING_TABLE_NAME, RecommenderType.ITEM_BASED);
+
+            // gathering testing datas
+            ArrayListRatingsDataset testingDataset = database.loadArrayListRatingsDataset(Task2.TESTING_TABLE_NAME);
+
+            // creating recommender system
+            CosineSimilarityRecommender recommender = new CosineSimilarityRecommender();
+
+            //////////////
+            // TRAINING //
+            //////////////
+
+            // logging
+            System.out.println("\n============= TRAINING ==============");
+
+            // training recommender
+            recommender.train(trainingDataset);
+
+            ////////////////////////
+            // MAKING PREDICTIONS //
+            ////////////////////////
+
+            // logging
+            System.out.println("\n============ PREDICTING =============");
+
+            ArrayListRatingsDataset predictions = recommender.makePredictions(testingDataset);
             
-//             // printing to screen
-//             System.out.println("Task 2 Output:");
-//             //System.out.println(resultsDataset.toString());
-            
-//             // writing to file
-//             System.out.println("Writing Task 2 Results to file : '" + Task2.RESULTS_FILE + "'");
-//             //esultsDataset.writeToFile(new File(Task2.RESULTS_FILE));
-//             System.out.println("Task 2 results successfully written to file : '" + Task2.RESULTS_FILE + "'");
+            // writing to file
+            FileWriter.writeObjectToFile(predictions, new File(Task2.RESULTS_FILE));
 
-//             // formatting
-//             System.out.println();
-//         }
-//         catch(Exception e){
-//             System.out.println("Unable to run Task 2!" + "\t\n" + "Cause : " + e.toString());
-//         }
-//     }
-// }
+            // logging
+            System.out.println("\n=====================================");
+            System.out.println(  "=========== END OF TASK 2 ===========");
+            System.out.println(  "=====================================\n");
+        }
+        catch(Exception e){
+            System.out.println("Unable to run Task 2!\n" + 
+                               "Cause : " + e.toString());
+        }
+    }
+}

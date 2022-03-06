@@ -5,7 +5,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 
+import com.almworks.sqlite4java.SQLiteStatement;
+
 import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
+import cp6g18.RecommenderSystem.Model.DatabaseTableRatingsDataset;
 import cp6g18.RecommenderSystem.Model.HashMapRatingsDataset;
 import cp6g18.RecommenderSystem.Model.RecommenderType;
 import cp6g18.RecommenderSystem.Model.SimilarityMatrix;
@@ -19,7 +22,7 @@ import cp6g18.RecommenderSystem.Model.SimilarityMatrix;
  * 
  * // TODO
  */
-public class CosineSimilarityRecommender extends Recommender{
+public class CosineSimilarityRecommender2 extends Recommender{
 
     //////////////////
     // INITIALISING //
@@ -28,7 +31,7 @@ public class CosineSimilarityRecommender extends Recommender{
     /**
      * Class constructor.
      */
-    public CosineSimilarityRecommender(){
+    public CosineSimilarityRecommender2(){
         // initializing
         super();
     }
@@ -46,10 +49,10 @@ public class CosineSimilarityRecommender extends Recommender{
         // ITEM BASED //
         if(trainingDataset.getRecommenderType() == RecommenderType.ITEM_BASED){
             // gathering the similarity matrix
-            SimilarityMatrix model = CosineSimilarityRecommender.getItemBasedAdjustedCosineSimilarityMatrix(trainingDataset);
+            //SimilarityMatrix model = CosineSimilarityRecommender2.getItemBasedAdjustedCosineSimilarityMatrix(trainingDataset);
 
             // setting model into system
-            this.setModel(model);
+            //this.setModel(model);
         }
 
         // TODO Handle other types of filtering
@@ -77,7 +80,7 @@ public class CosineSimilarityRecommender extends Recommender{
      * @param trainingDataset
      * @return
      */
-    private static SimilarityMatrix getItemBasedAdjustedCosineSimilarityMatrix(HashMapRatingsDataset trainingDataset){
+    public static SimilarityMatrix getItemBasedAdjustedCosineSimilarityMatrix(DatabaseTableRatingsDataset trainingDataset) throws Exception{
         ///////////////
         // PREPARING //
         ///////////////
@@ -85,24 +88,25 @@ public class CosineSimilarityRecommender extends Recommender{
         // creating new similarity matrix instance
         SimilarityMatrix similarityMatrix = new SimilarityMatrix();
 
-        // gathering average user ratings
-        HashMap<Integer, Float> userAverageRatings = trainingDataset.getAverageUserRatings();
-
         /////////////////
         // CALCULATING //
         /////////////////
 
         // finding similarity between every item
-        for(int item1 : trainingDataset.getItems()){
-            for(int item2 : trainingDataset.getItems()){
-                // calculating if not yet calculated
-                if(!similarityMatrix.hasSimilarity(item1, item2)){
-                    // calculating similarity
-                    float similarity = CosineSimilarityRecommender.getItemBasedAdjustedCosineSimilarity(trainingDataset, userAverageRatings, item1, item2);
+        SQLiteStatement items1 = trainingDataset.getItems();
+        while(items1.step()){
+            SQLiteStatement items2 = trainingDataset.getItems();
+            while(items2.step()){
+                int item1 = items1.columnInt(0);
+                int item2 = items2.columnInt(0);
 
-                    // adding similarity to the matrix
-                    similarityMatrix.setSimilarity(item1, item2, similarity);
-                }
+                // calculating similarity
+                float similarity = CosineSimilarityRecommender2.getItemBasedAdjustedCosineSimilarity(trainingDataset, item1, item2);
+
+                System.out.println("Similarity between item " + item1 + " and " + item2 + " : " + similarity);
+
+                // adding similarity to the matrix
+                similarityMatrix.setSimilarity(item1, item2, similarity);
             }
         }
 
@@ -125,7 +129,7 @@ public class CosineSimilarityRecommender extends Recommender{
      * @param item2ID
      * @return 
      */
-    private static float getItemBasedAdjustedCosineSimilarity(HashMapRatingsDataset trainingDataset, HashMap<Integer, Float> userAverageRatings, int item1ID, int item2ID){
+    private static float getItemBasedAdjustedCosineSimilarity(DatabaseTableRatingsDataset trainingDataset, int item1ID, int item2ID) throws Exception{
         /**
          * - Find set of users that rated both item 1 and item 2
          * - Calculate numerator of equation
@@ -141,12 +145,7 @@ public class CosineSimilarityRecommender extends Recommender{
         float similarity = 0f;
 
         // list of user's who have rated both items
-        Set<Integer> commonUsers = trainingDataset.getUsersWhoRatedItems(item1ID, item2ID);
-
-        // if no common users, similarity is 0, so can return similarity at this point
-        if(commonUsers.size() == 0){
-            return similarity;
-        }
+        SQLiteStatement commonUsers = trainingDataset.getUsersWhoRatedItems(item1ID, item2ID);
 
         /////////////////
         // CALCULATION //
@@ -157,16 +156,19 @@ public class CosineSimilarityRecommender extends Recommender{
         // variable to store numerator
         float numerator = 0f;
 
-        // iterating over all users
-        for(int user : commonUsers){
-            // average user rating
-            float userAverageRating = userAverageRatings.get(user);
+        // iterating over common users
+        while(commonUsers.step()){
+            // getting userID
+            int userID = commonUsers.columnInt(0);
+
+            // getting user's average rating
+            float userAverageRating = trainingDataset.getAverageUserRating(userID);
 
             // user rating of item 1
-            float userRatingOfItem1 = trainingDataset.getUserRatingOfItem(user, item1ID);
+            float userRatingOfItem1 = trainingDataset.getUserRatingOfItem(userID, item1ID);
 
             // user rating of item 2
-            float userRatingOfItem2 = trainingDataset.getUserRatingOfItem(user, item2ID);
+            float userRatingOfItem2 = trainingDataset.getUserRatingOfItem(userID, item2ID);
 
             // combining
             numerator += (userRatingOfItem1 - userAverageRating) * (userRatingOfItem2 - userAverageRating);
@@ -179,13 +181,19 @@ public class CosineSimilarityRecommender extends Recommender{
 
         // lhs
 
+        // list of user's who have rated both items
+        commonUsers = trainingDataset.getUsersWhoRatedItems(item1ID, item2ID);
+
         float lhs = 0f;
-        for(int user : commonUsers){
+        while(commonUsers.step()){
+            // getting user ID
+            int userID = commonUsers.columnInt(0);
+
             // average user rating
-            float userAverageRating = userAverageRatings.get(user);
+            float userAverageRating = trainingDataset.getAverageUserRating(userID);
 
             // user rating of item 1
-            float userRatingOfItem1 = trainingDataset.getUserRatingOfItem(user, item1ID);
+            float userRatingOfItem1 = trainingDataset.getUserRatingOfItem(userID, item1ID);
 
             // calculation
             float calculation = (userRatingOfItem1 - userAverageRating) * (userRatingOfItem1 - userAverageRating);
@@ -197,13 +205,19 @@ public class CosineSimilarityRecommender extends Recommender{
 
         // rhs
 
+        // list of user's who have rated both items
+        commonUsers = trainingDataset.getUsersWhoRatedItems(item1ID, item2ID);
+
         float rhs = 0f;
-        for(int user : commonUsers){
+        while(commonUsers.step()){
+            // getting user ID
+            int userID = commonUsers.columnInt(0);
+
             // average user rating
-            float userAverageRating = userAverageRatings.get(user);
+            float userAverageRating = trainingDataset.getAverageUserRating(userID);
 
             // user rating of item 2
-            float userRatingOfItem2 = trainingDataset.getUserRatingOfItem(user, item2ID);
+            float userRatingOfItem2 = trainingDataset.getUserRatingOfItem(userID, item2ID);
 
             // calculation
             float calculation = (userRatingOfItem2 - userAverageRating) * (userRatingOfItem2 - userAverageRating);

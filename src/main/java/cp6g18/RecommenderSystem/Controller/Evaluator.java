@@ -3,10 +3,7 @@ package cp6g18.RecommenderSystem.Controller;
 import java.util.ArrayList;
 
 import cp6g18.RecommenderSystem.Model.Evaluation;
-
-// package cp6g18.RecommenderSystem.Controller;
-
-// import cp6g18.RecommenderSystem.Model.Dataset.Column;
+import cp6g18.RecommenderSystem.Model.RatingsDatabase;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -25,6 +22,19 @@ public class Evaluator {
     ////////////////
 
     /**
+     * // TODO
+     * 
+     * @param recommender
+     * @param ratingsDatabase
+     * @return
+     */
+    public static Evaluation evaluateRecommender(Recommender recommender, RatingsDatabase ratingsDatabase){
+        // TODO
+
+        return null;
+    }
+
+    /**
      * Evaluates a set of predictions and true ratings according to standard
      * evaluation metrics.
      * 
@@ -32,7 +42,10 @@ public class Evaluator {
      * @param truths The true ratings.
      * @return An Evaluation object containing the evaluation metrics.
      */
-    public static Evaluation evaluate(ArrayList<Float> predictions, ArrayList<Float> truths){
+    public static Evaluation evaluatePredictions(ArrayList<Float> predictions, ArrayList<Float> truths){
+        // logging
+        System.out.println("\nEvaluating predictions against truths...");
+
         // gathering evaluation metrics
         float mse = Evaluator.getMSE(predictions, truths);
         float rmse = Evaluator.getRMSE(predictions, truths);
@@ -41,6 +54,8 @@ public class Evaluator {
         // creating evaluation object
         Evaluation evaluation = new Evaluation(mse, rmse, mae);
 
+        // logging
+        System.out.println("Evaluating complete!");
 
         // returning evaluation
         return evaluation;
