@@ -4,6 +4,9 @@ import java.io.File;
 
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteStatement;
+
+import cp6g18.RecommenderSystem.Controller.Logger;
+
 import com.almworks.sqlite4java.SQLiteException;
 
 /**
@@ -63,16 +66,16 @@ public class RatingsDatabase{
     private void open(boolean allowCreateTable) throws SQLiteException{
         // CONNECTING TO DATABASE //
 
-        // informing
-        System.out.print("\nConnecting to database : '" + this.databaseFilename + "' ...\n\n");
+        // logging
+        Logger.logProcessStart("Connecting to database : '" + this.databaseFilename + "' ...\n\n");
 
         // opening the connection to the database
         this.connection.open(allowCreateTable);
 
         // CONNNECTION SUCCESSFULL //
 
-        // informing
-        System.out.println("\nSuccessfully connected to database : '" + this.databaseFilename + "' !");
+        // logging
+        Logger.logProcessEnd("\nSuccessfully connected to database : '" + this.databaseFilename + "' !");
     }
 
     /**
@@ -81,35 +84,22 @@ public class RatingsDatabase{
 	public void close() {
 		// DISCONNECTING FROM DATABASE //
 
-        // informing
-        System.out.print("\nDisconnecting from database : '" + this.databaseFilename + "' ...\n\n");
-        System.out.println();
+        // logging
+        Logger.logProcessStart("Disconnecting from database : '" + this.databaseFilename + "' ...\n\n");
 
         // opening the connection to the database
         this.connection.dispose();
 
         // DISCONNNECTION SUCCESSFULL //
 
-        // informing
-        System.out.println();
-        System.out.println("\nSuccessfully disconnected from database : '" + this.databaseFilename + "' !s");
+        // logging
+        Logger.logProcessEnd("\nSuccessfully disconnected from database : '" + this.databaseFilename + "' !");
 	}
 
 
     ///////////////////////////////////////////
     // LOADING DATASET OBJECTS FROM DATABASE //
     ///////////////////////////////////////////
-
-    /**
-     * // TODO
-     * 
-     * @param tableName
-     * @return
-     * @throws SQLiteException
-     */
-    public DatabaseTableRatingsDataset loaDatabaseTableRatingsDataset(String tableName) throws SQLiteException{
-        return new DatabaseTableRatingsDataset(this.connection, tableName);
-    }
 
     /**
      * Loads thes dataset from the table into a RatingsDataset object.
@@ -124,8 +114,8 @@ public class RatingsDatabase{
         // PREPERATION //
         /////////////////
 
-        // informing
-        System.out.println("\nLoading ratings from table : '" + tableName + "' as ArrayListRatingsDataset ...");
+        // logging
+        Logger.logProcessStart("Loading ratings from table : '" + tableName + "' as ArrayListRatingsDataset ...");
 
         // creating new dataset object
         ArrayListRatingsDataset dataset = new ArrayListRatingsDataset();
@@ -166,9 +156,8 @@ public class RatingsDatabase{
         // INFORMING //
         ///////////////
 
-        // informing
-        System.out.println("Successfully loaded ratings from table : '" + tableName + "' as ArrayListRatingsDataset !");
-        System.out.println("\tNumber of Ratings : " + count);
+        // logging
+        Logger.logProcessEnd("Successfully loaded ratings from table : '" + tableName + "' as ArrayListRatingsDataset (" + count + " ratings) !");
 
         ///////////////
         // RETURNING //
@@ -179,21 +168,21 @@ public class RatingsDatabase{
     }
 
     /**
-     * Loads the training dataset from the table into the Database's Dataset object.
+     * Loads the dataset from the table into a HashMapRatingsDataset object.
      * 
-     * @param trainingDatasetTableName // TODO
+     * @param tableName // TODO
      * @param trainingDatasetMappingType // TODO
-     * @returns TrainingDataset object containing the data from the training table.
+     * @returns HashMapRatings dataset object containing the dataset.
      * @throws SQLiteException If the call to the database fails.
      */
-    public HashMapRatingsDataset loadHashMapRatingsDataset(String trainingDatasetTableName, RecommenderType trainingDatasetMappingType) throws SQLiteException{
+    public HashMapRatingsDataset loadHashMapRatingsDataset(String tableName, RecommenderType trainingDatasetMappingType) throws SQLiteException{
 
         /////////////////
         // PREPERATION //
         /////////////////
 
-        // informing
-        System.out.println("\nLoading training ratings from table : '" + trainingDatasetTableName + "' as HashMapRatingsDatset ...");
+        // logging
+        Logger.logProcessStart("Loading ratings from table : '" + tableName + "' as HashMapRatingsDataset ...");
 
         // creating new training dataset object
         HashMapRatingsDataset trainingDataset = new HashMapRatingsDataset(trainingDatasetMappingType);
@@ -202,7 +191,7 @@ public class RatingsDatabase{
         int count = 0;
 
         // SQLiteStatement object to hold the database information
-        SQLiteStatement statement = this.connection.prepare("SELECT * FROM " + trainingDatasetTableName);
+        SQLiteStatement statement = this.connection.prepare("SELECT * FROM " + tableName);
 
         /////////////
         // LOADING //
@@ -234,9 +223,8 @@ public class RatingsDatabase{
         // INFORMING //
         ///////////////
 
-        // informing
-        System.out.println("Successfully loaded training ratings from table : '" + trainingDatasetTableName + "' as HashMapRatingsDatset !");
-        System.out.println("\tNumber of Ratings : " + count);
+        // logging
+        Logger.logProcessEnd("Successfully loaded ratings from table : '" + tableName + "' as HashMapRatingsDataset (" + count + " ratings) !");
 
         ///////////////
         // RETURNING //

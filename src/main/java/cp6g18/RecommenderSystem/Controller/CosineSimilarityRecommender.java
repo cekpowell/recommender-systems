@@ -1,7 +1,5 @@
 package cp6g18.RecommenderSystem.Controller;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 

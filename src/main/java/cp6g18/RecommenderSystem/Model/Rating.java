@@ -9,12 +9,12 @@ package cp6g18.RecommenderSystem.Model;
  * 
  * // TODO
  */
-class Rating{
+public class Rating{
 
     // member variables
     private int userID;
     private int itemID;
-    private float itemRating;
+    private float rating;
     private int timestamp;
 
     //////////////////
@@ -28,14 +28,14 @@ class Rating{
      * 
      * @param userID
      * @param itemID
-     * @param itemRating
+     * @param rating
      * @param timestamp
      */
-    public Rating(int userID, int itemID, float itemRating, int timestamp){
+    public Rating(int userID, int itemID, float rating, int timestamp){
         // initializing
         this.userID = userID;
         this.itemID = itemID;
-        this.itemRating = itemRating;
+        this.rating = rating;
         this.timestamp = timestamp;
     }
 
@@ -49,7 +49,7 @@ class Rating{
      * @return
      */
     public boolean isUnrated(){
-        return (this.itemRating == RatingsDataset.UNRATED_ITEM_RATING);
+        return (this.rating == RatingsDataset.UNRATED_ITEM_RATING);
     }
 
     /**
@@ -58,25 +58,54 @@ class Rating{
      * @return The rating as a String.
      */
     public String toString(){
-        return ("" + this.userID + "," + this.itemID + "," + this.itemRating + "," + this.timestamp); 
+        return ("" + this.userID + "," + this.itemID + "," + this.rating + "," + this.timestamp); 
     }
 
     /////////////////////////
     // GETTERS AND SETTERS //
     /////////////////////////
 
+    /**
+     * // TODO
+     * 
+     * @return
+     */
     public int getUserID(){
         return this.userID;
     }
 
+    /**
+     * // TODO
+     * 
+     * @return
+     */
     public int getItemID(){
         return this.itemID;
     }
 
-    public float getItemRating(){
-        return this.itemRating;
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public float getRating(){
+        return this.rating;
     }
 
+    /**
+     * // TODO
+     * 
+     * @param rating
+     */
+    public void setRating(float rating){
+        this.rating = rating;
+    }
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
     public int getTimestamp(){
         return this.timestamp;
     }

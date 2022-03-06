@@ -1,8 +1,5 @@
 package cp6g18.RecommenderSystem.Model;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,9 +14,7 @@ import java.util.Map.Entry;
  * 
  * // TODO
  */
-public class HashMapRatingsDataset extends RatingsDataset<Set<Integer>,             // Typing of lists
-                                                          Float,                    // Typing of Raw item rating
-                                                          HashMap<Integer, Float>>{ // Typing of data average
+public class HashMapRatingsDataset extends RatingsDataset{
 
     // member variables
     private RecommenderType recommenderType; // The type of recommender being trained by this dataset (item based or user based)

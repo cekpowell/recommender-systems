@@ -44,7 +44,7 @@ public class Evaluator {
      */
     public static Evaluation evaluatePredictions(ArrayList<Float> predictions, ArrayList<Float> truths){
         // logging
-        System.out.println("\nEvaluating predictions against truths...");
+        Logger.logProcessStart("Evaluating predictions against truths...");
 
         // gathering evaluation metrics
         float mse = Evaluator.getMSE(predictions, truths);
@@ -55,7 +55,7 @@ public class Evaluator {
         Evaluation evaluation = new Evaluation(mse, rmse, mae);
 
         // logging
-        System.out.println("Evaluating complete!");
+        Logger.logProcessEnd("Evaluation successfully completed !");
 
         // returning evaluation
         return evaluation;

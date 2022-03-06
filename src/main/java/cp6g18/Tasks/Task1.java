@@ -4,6 +4,7 @@ import java.io.File;
 
 import cp6g18.RecommenderSystem.Controller.Evaluator;
 import cp6g18.RecommenderSystem.Controller.FileWriter;
+import cp6g18.RecommenderSystem.Controller.Logger;
 import cp6g18.RecommenderSystem.Model.Evaluation;
 import cp6g18.RecommenderSystem.Model.RatingsDatabase;
 import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
@@ -46,16 +47,14 @@ public class Task1 {
     public static void run(){
         try{
             // logging
-            System.out.println("\n=====================================");
-            System.out.println(  "========== START OF TASK 1 ==========");
-            System.out.println(  "=====================================");
+            Logger.logTaskStart(1);
 
             /////////////////
             // PREPERATION //
             /////////////////
 
             // logging
-            System.out.println("\n============= PREPARING =============");
+            Logger.logSubTaskStart("PREPARING");
 
             // connecting to task 1 database
             RatingsDatabase database = new RatingsDatabase(Task1.DATBASE_FILENAME);
@@ -66,21 +65,27 @@ public class Task1 {
             // gathering truths
             ArrayListRatingsDataset truths = database.loadArrayListRatingsDataset(Task1.TRUTHS_TABLE_NAME);
 
+            // logging
+            Logger.logSubTaskEnd("PREPARING");
+
             ////////////////
             // EVALUATING //
             ////////////////
 
             // logging
-            System.out.println("\n============ EVALUATING ============");
+            Logger.logSubTaskStart("EVALUATING");
 
             Evaluation evaluation = Evaluator.evaluatePredictions(predictions.getRatings(), truths.getRatings());
+
+            // logging
+            Logger.logSubTaskEnd("EVALUATING");
 
             ////////////////////////
             // RECORDING RESULTS //
             ////////////////////////
 
             // logging
-            System.out.println("\n============= RECORDING =============");
+            Logger.logSubTaskStart("RECORDING");
             
             // printing to screen
             System.out.println("\nTask 1 Result : " + evaluation.toString());
@@ -89,9 +94,10 @@ public class Task1 {
             FileWriter.writeObjectToFile(evaluation, new File(Task1.RESULTS_FILE));
 
             // logging
-            System.out.println("\n=====================================");
-            System.out.println(  "=========== END OF TASK 1 ===========");
-            System.out.println(  "=====================================\n");
+            Logger.logSubTaskEnd("EVALUATING");
+
+            // logging
+            Logger.logTaskEnd(1);
         }
         catch(Exception e){
             System.out.println("Unable to run Task 1!\n" + 

@@ -15,9 +15,7 @@ import java.util.Set;
  * 
  * // TODO
  */
-public abstract class RatingsDataset<L, // Typing of lists
-                                     R, // Typing of raw item rating
-                                     A> { // Typing of data average
+public abstract class RatingsDataset{
 
     // CONSTANTS //
     public static final String DELIMITER = ","; // TODO
@@ -55,14 +53,14 @@ public abstract class RatingsDataset<L, // Typing of lists
      * 
      * @return
      */
-    public abstract L getUsers();
+    public abstract Set<Integer> getUsers();
 
     /**
      * // TODO
      * 
      * @return
      */
-    public abstract L getItems();
+    public abstract Set<Integer> getItems();
 
     /**
      * // TODO
@@ -70,7 +68,7 @@ public abstract class RatingsDataset<L, // Typing of lists
      * @param itemID
      * @return
      */
-    public abstract L getUsersWhoRatedItem(int itemID);
+    public abstract Set<Integer> getUsersWhoRatedItem(int itemID);
 
     /**
      * // TODO
@@ -79,7 +77,7 @@ public abstract class RatingsDataset<L, // Typing of lists
      * @param item2ID
      * @return
      */
-    public abstract L getUsersWhoRatedItems(int item1ID, int item2ID);
+    public abstract Set<Integer> getUsersWhoRatedItems(int item1ID, int item2ID);
 
     /**
      * // TODO
@@ -87,7 +85,7 @@ public abstract class RatingsDataset<L, // Typing of lists
      * @param userID
      * @return
      */
-    public abstract L getItemsRatedByUser(int userID);
+    public abstract Set<Integer> getItemsRatedByUser(int userID);
 
     /**
      * // TODO
@@ -96,7 +94,7 @@ public abstract class RatingsDataset<L, // Typing of lists
      * @param user2ID
      * @return
      */
-    public abstract L getItemsRatedByUsers(int user1ID, int user2ID);
+    public abstract Set<Integer> getItemsRatedByUsers(int user1ID, int user2ID);
 
     /**
      * // TODO
@@ -105,21 +103,21 @@ public abstract class RatingsDataset<L, // Typing of lists
      * @param itemID
      * @return
      */
-    public abstract R getUserRatingOfItem(int userID, int itemID);
+    public abstract Float getUserRatingOfItem(int userID, int itemID);
 
     /**
      * Gathers the average rating of each user within the dataset.
      * 
      * @return A mapping of user IDs to their average rating.
      */
-    public abstract A getAverageUserRatings();
+    public abstract HashMap<Integer, Float> getAverageUserRatings();
 
     /**
      * Gathers the average rating of each item within the dataset.
      * 
      * @return A mapping of item IDs to their average rating.
      */
-    public abstract A getAverageItemRatings();
+    public abstract HashMap<Integer, Float> getAverageItemRatings();
 
     ////////////////////
     // HELPER METHODS //

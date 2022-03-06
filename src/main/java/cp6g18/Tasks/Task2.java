@@ -4,6 +4,7 @@ import java.io.File;
 
 import cp6g18.RecommenderSystem.Controller.CosineSimilarityRecommender;
 import cp6g18.RecommenderSystem.Controller.FileWriter;
+import cp6g18.RecommenderSystem.Controller.Logger;
 import cp6g18.RecommenderSystem.Model.RatingsDatabase;
 import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
 import cp6g18.RecommenderSystem.Model.HashMapRatingsDataset;
@@ -48,16 +49,14 @@ public class Task2 {
     public static void run(){
         try{
             // logging
-            System.out.println("\n=====================================");
-            System.out.println(  "========== START OF TASK 2 ==========");
-            System.out.println(  "=====================================");
+            Logger.logTaskStart(2);
 
             /////////////////
             // PREPERATION //
             /////////////////
 
             // logging
-            System.out.println("\n============= PREPARING =============");
+            Logger.logSubTaskStart("PREPARING");
 
             // connecting to task 1 database
             RatingsDatabase database = new RatingsDatabase(Task2.DATBASE_FILENAME);
@@ -71,22 +70,28 @@ public class Task2 {
             // creating recommender system
             CosineSimilarityRecommender recommender = new CosineSimilarityRecommender();
 
+            // logging
+            Logger.logSubTaskEnd("PREPARING");
+
             //////////////
             // TRAINING //
             //////////////
 
             // logging
-            System.out.println("\n============= TRAINING ==============");
+            Logger.logSubTaskStart("TRAINING");
 
             // training recommender
             recommender.train(trainingDataset);
+
+            // logging
+            Logger.logSubTaskEnd("TRAINING");
 
             ////////////////////////
             // MAKING PREDICTIONS //
             ////////////////////////
 
             // logging
-            System.out.println("\n============ PREDICTING =============");
+            Logger.logSubTaskStart("PREDICTING");
 
             ArrayListRatingsDataset predictions = recommender.makePredictions(testingDataset);
             
@@ -94,9 +99,10 @@ public class Task2 {
             FileWriter.writeObjectToFile(predictions, new File(Task2.RESULTS_FILE));
 
             // logging
-            System.out.println("\n=====================================");
-            System.out.println(  "=========== END OF TASK 2 ===========");
-            System.out.println(  "=====================================\n");
+            Logger.logSubTaskEnd("PREDICTING");
+
+            // logging
+            Logger.logTaskEnd(2);
         }
         catch(Exception e){
             System.out.println("Unable to run Task 2!\n" + 

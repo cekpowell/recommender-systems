@@ -1,9 +1,5 @@
 package cp6g18.RecommenderSystem.Model;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-
 /**
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework

@@ -33,9 +33,6 @@ public abstract class Recommender{
         this.recommenderType = null;
         this.model = null;
         this.isTrained = false;
-
-        // logging
-        System.out.println("\nNew recommender system instantiated!");
     }
 
     /////////////////////
@@ -49,18 +46,16 @@ public abstract class Recommender{
      */
     public void train(HashMapRatingsDataset trainingDataset){
         // informing
-        System.out.println("\nTraining recommender system...");
+        Logger.logProcessStart("Training recommender system...");
 
         // training the system using the dataset
-        long startTime = System.currentTimeMillis();
         this.trainAux(trainingDataset);
-        long endTime = System.currentTimeMillis();
 
         // setting the status of the training variable
         this.isTrained = true;
 
         // informing
-        System.out.println("Recommender system successfully trained in " + ((float ) ((endTime - startTime) / 1000f)) + " seconds!");
+        Logger.logProcessEnd("Recommender system successfully trained !");
     }
 
     /**
