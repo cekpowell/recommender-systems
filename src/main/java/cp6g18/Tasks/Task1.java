@@ -60,10 +60,12 @@ public class Task1 {
             RatingsDatabase database = new RatingsDatabase(Task1.DATBASE_FILENAME);
 
             // gathering predictions
-            ArrayListRatingsDataset predictions = database.loadArrayListRatingsDataset(Task1.PREDICTIONS_TABLE_NAME);
+            ArrayListRatingsDataset predictions = new ArrayListRatingsDataset();
+            database.loadRatingsDataset(predictions, Task1.PREDICTIONS_TABLE_NAME);
 
             // gathering truths
-            ArrayListRatingsDataset truths = database.loadArrayListRatingsDataset(Task1.TRUTHS_TABLE_NAME);
+            ArrayListRatingsDataset truths = new ArrayListRatingsDataset();
+            database.loadRatingsDataset(truths, Task1.TRUTHS_TABLE_NAME);
 
             // logging
             Logger.logSubTaskEnd("PREPARING");
@@ -96,12 +98,19 @@ public class Task1 {
             // logging
             Logger.logSubTaskEnd("EVALUATING");
 
+            ////////////////
+            // FINISHING //
+            ///////////////
+
+            // closing the database
+            database.close();
+
             // logging
             Logger.logTaskEnd(1);
         }
         catch(Exception e){
-            System.out.println("Unable to run Task 1!\n" + 
-                               "Cause : " + e.toString());
+            System.out.println("\nUnable to run Task 1!\n" + 
+                               "Cause : " + e.toString() + "\n");
         }
     }
 }

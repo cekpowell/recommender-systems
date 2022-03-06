@@ -8,7 +8,7 @@ import cp6g18.RecommenderSystem.Controller.Logger;
 import cp6g18.RecommenderSystem.Model.RatingsDatabase;
 import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
 import cp6g18.RecommenderSystem.Model.HashMapRatingsDataset;
-import cp6g18.RecommenderSystem.Model.RecommenderType;
+import cp6g18.RecommenderSystem.Model.HashMapRatingsDatasetMappingType;
 
 // package cp6g18.Tasks;
 
@@ -51,27 +51,25 @@ public class Task2 {
             // logging
             Logger.logTaskStart(2);
 
-            /////////////////
-            // PREPERATION //
-            /////////////////
+            ///////////////////////////
+            // LOADING TRAINING DATA //
+            ///////////////////////////
 
             // logging
-            Logger.logSubTaskStart("PREPARING");
+            Logger.logSubTaskStart("LOADING TRAINING DATA");
 
             // connecting to task 1 database
             RatingsDatabase database = new RatingsDatabase(Task2.DATBASE_FILENAME);
 
             // gathering training data
-            HashMapRatingsDataset trainingDataset = database.loadHashMapRatingsDataset(Task2.TRAINING_TABLE_NAME, RecommenderType.ITEM_BASED);
-
-            // gathering testing datas
-            ArrayListRatingsDataset testingDataset = database.loadArrayListRatingsDataset(Task2.TESTING_TABLE_NAME);
+            HashMapRatingsDataset trainingDataset = new HashMapRatingsDataset(HashMapRatingsDatasetMappingType.ITEMS_TO_USERS);
+            database.loadRatingsDataset(trainingDataset, Task2.TRAINING_TABLE_NAME);
 
             // creating recommender system
             CosineSimilarityRecommender recommender = new CosineSimilarityRecommender();
 
             // logging
-            Logger.logSubTaskEnd("PREPARING");
+            Logger.logSubTaskEnd("LOADING TRAINING DATA");
 
             //////////////
             // TRAINING //
@@ -83,8 +81,25 @@ public class Task2 {
             // training recommender
             recommender.train(trainingDataset);
 
+            // clearing training dataset (free up memory)
+            trainingDataset.clear();
+
             // logging
             Logger.logSubTaskEnd("TRAINING");
+
+            //////////////////////////
+            // LOADING TESTING DATA //
+            //////////////////////////
+
+            // logging
+            Logger.logSubTaskStart("LOADING TESTING DATA");
+
+            // gathering testing datas
+            ArrayListRatingsDataset testingDataset = new ArrayListRatingsDataset();
+            database.loadRatingsDataset(testingDataset, Task2.TESTING_TABLE_NAME);
+
+            // logging
+            Logger.logSubTaskEnd("LOADING TESTING DATA");
 
             ////////////////////////
             // MAKING PREDICTIONS //
@@ -101,12 +116,19 @@ public class Task2 {
             // logging
             Logger.logSubTaskEnd("PREDICTING");
 
+            ////////////////
+            // FINISHING //
+            ///////////////
+
+            // closing the database
+            database.close();
+
             // logging
             Logger.logTaskEnd(2);
         }
         catch(Exception e){
-            System.out.println("Unable to run Task 2!\n" + 
-                               "Cause : " + e.toString());
+            System.out.println("\nUnable to run Task 2!\n" + 
+                               "Cause : " + e.toString() + "\n");
         }
     }
 }

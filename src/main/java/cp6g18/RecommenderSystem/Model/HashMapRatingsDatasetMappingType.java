@@ -9,8 +9,8 @@
  * 
  * // TODO
  */
-public enum RecommenderType {
+public enum HashMapRatingsDatasetMappingType {
     // Types
-    ITEM_BASED,
-    USER_BASED;
+    USERS_TO_ITEMS,
+    ITEMS_TO_USERS;
 }

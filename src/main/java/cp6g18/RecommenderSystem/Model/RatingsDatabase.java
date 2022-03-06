@@ -36,8 +36,9 @@ public class RatingsDatabase{
      * @param trainingDatasetTableName The name of the training table within the database.
      * @param testingDatasetTableName The name of the testing table within the database.
      * @param datasetMappingType The type of mapping of data to be stored in the database's corresponding datasets.
+     * @throws SQLiteException // TODO
      */
-    public RatingsDatabase(String databaseFilename) throws Exception{
+    public RatingsDatabase(String databaseFilename) throws SQLiteException{
         // configuring SQLite4Java - necesarry because of this: https://github.com/aws-samples/aws-dynamodb-examples/issues/22
         System.out.println();
         System.setProperty("sqlite4java.library.path", "src/main/resources/libs/");
@@ -67,7 +68,7 @@ public class RatingsDatabase{
         // CONNECTING TO DATABASE //
 
         // logging
-        Logger.logProcessStart("Connecting to database : '" + this.databaseFilename + "' ...\n\n");
+        Logger.logProcessStart("Connecting to database : '" + this.databaseFilename + "' ...\n");
 
         // opening the connection to the database
         this.connection.open(allowCreateTable);
@@ -85,7 +86,7 @@ public class RatingsDatabase{
 		// DISCONNECTING FROM DATABASE //
 
         // logging
-        Logger.logProcessStart("Disconnecting from database : '" + this.databaseFilename + "' ...\n\n");
+        Logger.logProcessStart("Disconnecting from database : '" + this.databaseFilename + "' ...\n");
 
         // opening the connection to the database
         this.connection.dispose();
@@ -102,23 +103,18 @@ public class RatingsDatabase{
     ///////////////////////////////////////////
 
     /**
-     * Loads thes dataset from the table into a RatingsDataset object.
+     * // TODO
      * 
-     * @param tableName // TODO
-     * @return // TODO
-     * @throws SQLiteException If the call to the database fails.
+     * @param dataset
+     * @param tableName
      */
-    public ArrayListRatingsDataset loadArrayListRatingsDataset(String tableName) throws SQLiteException{
-
+    public void loadRatingsDataset(RatingsDataset dataset, String tableName) throws SQLiteException{
         /////////////////
         // PREPERATION //
         /////////////////
 
         // logging
-        Logger.logProcessStart("Loading ratings from table : '" + tableName + "' as ArrayListRatingsDataset ...");
-
-        // creating new dataset object
-        ArrayListRatingsDataset dataset = new ArrayListRatingsDataset();
+        Logger.logProcessStart("Loading ratings from table : '" + tableName + "' ...");
 
         // tracking number of loaded ratings
         int count = 0;
@@ -133,10 +129,10 @@ public class RatingsDatabase{
         // evaluating the SQL statement and iterating through the loaded rows
         while(statement.step()){
             // extracting information for this rating
-            Integer userID = statement.columnInt(0);
-            Integer itemID = statement.columnInt(1);
-            Float itemRating = (float) statement.columnDouble(2);
-            Integer timestamp = statement.columnInt(3);
+            Integer userID = statement.columnInt(RatingsDatabaseSchema.USER_ID.getColIndex());
+            Integer itemID = statement.columnInt(RatingsDatabaseSchema.ITEM_ID.getColIndex());
+            Float itemRating = (float) statement.columnDouble(RatingsDatabaseSchema.RATING.getColIndex());
+            Integer timestamp = statement.columnInt(RatingsDatabaseSchema.TIMESTAMP.getColIndex());
 
             // adding the rating to the dataset
             dataset.addRating(userID, itemID, itemRating, timestamp);
@@ -157,86 +153,84 @@ public class RatingsDatabase{
         ///////////////
 
         // logging
-        Logger.logProcessEnd("Successfully loaded ratings from table : '" + tableName + "' as ArrayListRatingsDataset (" + count + " ratings) !");
-
-        ///////////////
-        // RETURNING //
-        ///////////////
-
-        // returning loaded dataset object
-        return dataset;
-    }
-
-    /**
-     * Loads the dataset from the table into a HashMapRatingsDataset object.
-     * 
-     * @param tableName // TODO
-     * @param trainingDatasetMappingType // TODO
-     * @returns HashMapRatings dataset object containing the dataset.
-     * @throws SQLiteException If the call to the database fails.
-     */
-    public HashMapRatingsDataset loadHashMapRatingsDataset(String tableName, RecommenderType trainingDatasetMappingType) throws SQLiteException{
-
-        /////////////////
-        // PREPERATION //
-        /////////////////
-
-        // logging
-        Logger.logProcessStart("Loading ratings from table : '" + tableName + "' as HashMapRatingsDataset ...");
-
-        // creating new training dataset object
-        HashMapRatingsDataset trainingDataset = new HashMapRatingsDataset(trainingDatasetMappingType);
-
-        // tracking number of loaded ratings
-        int count = 0;
-
-        // SQLiteStatement object to hold the database information
-        SQLiteStatement statement = this.connection.prepare("SELECT * FROM " + tableName);
-
-        /////////////
-        // LOADING //
-        /////////////
-
-        // evaluating the SQL statement and iterating through the loaded rows
-        while(statement.step()){
-            // extracting information for this rating
-            Integer userID = statement.columnInt(0);
-            Integer itemID = statement.columnInt(1);
-            Float itemRating = (float) statement.columnDouble(2);
-            Integer timestamp = statement.columnInt(3);
-
-            // adding the rating to the dataset
-            trainingDataset.addRating(userID, itemID, itemRating, timestamp);
-
-            // incrementing count
-            count++;
-        }
-
-        //////////////
-        // CLEANING //
-        //////////////
-
-        // disposing statements
-        statement.dispose();
-
-        ///////////////
-        // INFORMING //
-        ///////////////
-
-        // logging
-        Logger.logProcessEnd("Successfully loaded ratings from table : '" + tableName + "' as HashMapRatingsDataset (" + count + " ratings) !");
-
-        ///////////////
-        // RETURNING //
-        ///////////////
-
-        // returning training dataset
-        return trainingDataset;
+        Logger.logProcessEnd("Successfully loaded ratings from table : '" + tableName + "' (" + count + " ratings) !");
     }
 
     /////////////////////////
     // CREATING NEW TABLES //
     /////////////////////////
 
-    // TODO
+    // TODO creating new named table
+
+    // TODO creating new training and testing tables
+}
+
+////////////////////
+// HELPER CLASSES //
+////////////////////
+
+/**
+ * // TODO
+ */
+enum RatingsDatabaseSchema{
+    // TYPES // (Each type is a database column)
+    USER_ID(
+        "UserID", // name of column
+        0         // index of column
+    ),
+    ITEM_ID(
+        "ItemID", // name of column
+        1         // index of column
+    ),
+    RATING(
+        "Rating", // name of column
+        2         // index of column
+    ),
+    
+    TIMESTAMP(
+        "Timestamp", // name of column
+        3            // index of column
+    );
+
+    // MEMBER VARIABLES // (information about the columns)
+    private String colName;
+    private int colIndex;
+
+    //////////////////
+    // INITIALIZING //
+    //////////////////
+
+    /**
+     * Class constructor.
+     * 
+     * @param colName Name of the column within the database.
+     * @param colIndex Index for the column within the database.
+     */
+    private RatingsDatabaseSchema(String colName, int colIndex){
+        // initializing
+        this.colName = colName;
+        this.colIndex = colIndex;
+    }
+
+    /////////////////////////
+    // GETTERS AND SETTERS //
+    /////////////////////////
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public String getColName(){
+        return this.colName;
+    }
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public int getColIndex(){
+        return this.colIndex;
+    }
 }

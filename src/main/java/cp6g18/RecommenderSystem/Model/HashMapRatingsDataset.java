@@ -17,7 +17,7 @@ import java.util.Map.Entry;
 public class HashMapRatingsDataset extends RatingsDataset{
 
     // member variables
-    private RecommenderType recommenderType; // The type of recommender being trained by this dataset (item based or user based)
+    private HashMapRatingsDatasetMappingType mappingType; // The type of mapping to store in the hashmap
     private HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>> data; // {user ID -> {item ID -> (rating,timestamp)}} OR {item ID -> {user ID -> (rating,timestamp)}}.
     private HashMap<Integer, Tuple<Integer, Float>> totalUserRatings; // {userID -> (numberOfRatings given by user, total rating given by user)}
     private HashMap<Integer, Tuple<Integer, Float>> totalItemRatings; // {itemID -> (number of ratings given to item, total rating given to item)}
@@ -31,9 +31,9 @@ public class HashMapRatingsDataset extends RatingsDataset{
      * 
      * @param recommenderType The type of recommender system being trained by this dataset.
      */
-    public HashMapRatingsDataset(RecommenderType recommenderType){
+    public HashMapRatingsDataset(HashMapRatingsDatasetMappingType mappingType){
         // initializing
-        this.recommenderType = recommenderType;
+        this.mappingType = mappingType;
         this.data = new HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>>();
         this.totalUserRatings = new HashMap<Integer, Tuple<Integer, Float>>();
         this.totalItemRatings = new HashMap<Integer, Tuple<Integer, Float>>();
@@ -54,7 +54,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
     public void addRating(int userID, int itemID, float itemRating, int timestamp){
         // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.recommenderType == RecommenderType.USER_BASED){
+        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
             // loading the hashmap for this ite,
             HashMap<Integer, Tuple<Float, Integer>> userRatings = this.data.get(userID);
 
@@ -115,13 +115,13 @@ public class HashMapRatingsDataset extends RatingsDataset{
      * @return
      */
     public Set<Integer> getUsers(){
-        // HANDLING USER BASED CASE //
+        // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.recommenderType == RecommenderType.USER_BASED){
+        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
             return this.data.keySet();
         }
 
-        // HANDLING ITEM BASED CASE //
+        // HANDLING ITEMS TO USERS MAPPING CASE //
 
         else{
             // creating new set
@@ -145,9 +145,9 @@ public class HashMapRatingsDataset extends RatingsDataset{
      * @return
      */
     public Set<Integer> getItems(){
-        // HANDLING USER BASED CASE //
+        // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.recommenderType == RecommenderType.USER_BASED){
+        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
             // creating new set
             Set<Integer> items = new HashSet<Integer>();
 
@@ -162,7 +162,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
             return items;
         }
 
-        // HANDLING ITEM BASED CASE //
+        // HANDLING ITEMS TO USERS MAPPING CASE //
 
         else{
             return this.data.keySet();
@@ -176,9 +176,9 @@ public class HashMapRatingsDataset extends RatingsDataset{
      * @return
      */
     public Set<Integer> getUsersWhoRatedItem(int itemID){
-        // HANDLING USER BASED CASE //
+        // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.recommenderType == RecommenderType.USER_BASED){
+        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
             // creating new set
             Set<Integer> users = new HashSet<Integer>();
             
@@ -195,7 +195,7 @@ public class HashMapRatingsDataset extends RatingsDataset{
             return users;
         }
 
-        // HANDLING ITEM BASED CASE //
+        // HANDLING ITEMS TO USERS MAPPING CASE //
 
         else{
             return this.data.get(itemID).keySet();
@@ -220,13 +220,13 @@ public class HashMapRatingsDataset extends RatingsDataset{
      * @return
      */
     public Set<Integer> getItemsRatedByUser(int userID){
-        // HANDLING USER BASED CASE //
+        // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.recommenderType == RecommenderType.USER_BASED){
+        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
             return this.data.get(userID).keySet();
         }
 
-        // HANDLING ITEM BASED CASE //
+        // HANDLING ITEMS TO USERS MAPPING CASE //
 
         else{
             // creating new set
@@ -265,13 +265,13 @@ public class HashMapRatingsDataset extends RatingsDataset{
      * @return
      */
     public Float getUserRatingOfItem(int userID, int itemID){
-        // HANDLING USERS BASED CASE //
+        // HANDLING USERS TO ITEMS MAPPING CASE //
 
-        if(this.recommenderType == RecommenderType.USER_BASED){
+        if(this.mappingType == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
             return (this.data.get(userID).get(itemID).first);
         }
 
-        // HANDLING ITEMS BASED CASE //
+        // HANDLING ITEMS TO USERS MAPPING CASE //
 
         else{
             return (this.data.get(itemID).get(userID).first);
@@ -339,11 +339,11 @@ public class HashMapRatingsDataset extends RatingsDataset{
     /////////////////////////
 
     /**
-     * Returns the recommender type for the dataset.
+     * Returns the mapping type for the dataset.
      * 
-     * @return The recommender type for the dataset.
+     * @return The mapping type for the dataset.
      */
-    public RecommenderType getRecommenderType(){
-        return this.recommenderType;
+    public HashMapRatingsDatasetMappingType getMappingType(){
+        return this.mappingType;
     }
 }

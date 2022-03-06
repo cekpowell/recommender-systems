@@ -4,10 +4,6 @@ package cp6g18.RecommenderSystem.Controller;
  * // TODO
  */
 public class Logger {
-    
-    // CONSTANTS //
-
-    private static final int TIME_PRECISION = 4;
 
     // STATICS //
 
@@ -122,7 +118,7 @@ public class Logger {
      * @return
      */
     private static String getTaskCompletionTime(){
-        return ("(" + ("" + ((float ) ((Logger.taskEndTime - taskStartTime) / 1000f))).substring(0, Logger.TIME_PRECISION) + "s)");
+        return ("(" + ((float ) ((Logger.taskEndTime - taskStartTime) / 1000f))+ "s)");
     }
 
     /**
@@ -131,7 +127,7 @@ public class Logger {
      * @return
      */
     private static String getSubTaskCompletionTime(){
-        return ("(" + ("" + ((float ) ((Logger.subTaskEndTime - subTaskStartTime) / 1000f))).substring(0, Logger.TIME_PRECISION) + "s)");
+        return ("(" + ((float ) ((Logger.subTaskEndTime - subTaskStartTime) / 1000f))+ "s)");
     }
 
     /**
@@ -140,6 +136,6 @@ public class Logger {
      * @return
      */
     private static String getProcessCompletionTime(){
-        return ("(" + ("" + ((float ) ((Logger.processEndTime - processStartTime) / 1000f))).substring(0, Logger.TIME_PRECISION) + "s)");
+        return ("(" + ((float ) ((Logger.processEndTime - processStartTime) / 1000f)) + "s)");
     }
 }

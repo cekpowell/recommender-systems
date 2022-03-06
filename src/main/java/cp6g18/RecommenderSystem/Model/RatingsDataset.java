@@ -1,6 +1,5 @@
 package cp6g18.RecommenderSystem.Model;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,17 +17,7 @@ import java.util.Set;
 public abstract class RatingsDataset{
 
     // CONSTANTS //
-    public static final String DELIMITER = ","; // TODO
-    public static final int USER_ID_INDEX = 0; // TODO
-    public static final int ITEM_ID_INDEX = 1; // TODO
-    public static final int ITEM_RATING_INDEX = 2; // TODO
-    public static final int TIMESTAMP_INDEX = 3; // TODO
-    public static final int UNRATED_ITEM_RATING = -1;
-
-    public static final String USER_ID_NAME = "UserID"; // TODO
-    public static final String ITEM_ID_NAME = "ItemID"; // TODO
-    public static final String RATING_NAME = "Rating"; // TODO
-    public static final String TIMESTAMP_NAME = "Timestamp"; // TODO
+    public static final int UNRATED_ITEM_RATING = -1; // TODO
 
     //////////////////////////////
     // ADDING RATING TO DATASET //

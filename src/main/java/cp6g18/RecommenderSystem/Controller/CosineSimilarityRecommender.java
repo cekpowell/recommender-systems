@@ -5,7 +5,7 @@ import java.util.Set;
 
 import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
 import cp6g18.RecommenderSystem.Model.HashMapRatingsDataset;
-import cp6g18.RecommenderSystem.Model.RecommenderType;
+import cp6g18.RecommenderSystem.Model.HashMapRatingsDatasetMappingType;
 import cp6g18.RecommenderSystem.Model.SimilarityMatrix;
 
 /**
@@ -41,16 +41,21 @@ public class CosineSimilarityRecommender extends Recommender{
      * @param trainingDataset
      */
     protected void trainAux(HashMapRatingsDataset trainingDataset){
-        // ITEM BASED //
-        if(trainingDataset.getRecommenderType() == RecommenderType.ITEM_BASED){
+        // USERS TO ITEMS MAPPING TYPE //
+        
+        if(trainingDataset.getMappingType() == HashMapRatingsDatasetMappingType.USERS_TO_ITEMS){
+            // TODO handle user-based filtering
+        }
+
+        // ITEMS TO USERS MAPPING TYPE //
+        
+        else{
             // gathering the similarity matrix
             SimilarityMatrix model = CosineSimilarityRecommender.getItemBasedAdjustedCosineSimilarityMatrix(trainingDataset);
 
             // setting model into system
             this.setModel(model);
         }
-
-        // TODO Handle other types of filtering
     }
 
     ////////////////////////
@@ -63,11 +68,15 @@ public class CosineSimilarityRecommender extends Recommender{
         return null;
     }
 
-    /////////////////////////////////////////
-    // ITEM-BASED COLLABORATIVE FILTERING  //
-    /////////////////////////////////////////
+    ////////////////////////////
+    // SIMILARITY CALCULATORS //
+    ////////////////////////////
 
-    // SIMILARITY MATRIX //
+    // USER-BASED COLLABORATIVE FILTERING  //
+
+    // TODO
+
+    // ITEM-BASED COLLABORATIVE FILTERING  //
 
     /**
      * // TODO
@@ -112,9 +121,6 @@ public class CosineSimilarityRecommender extends Recommender{
         return similarityMatrix;
     }
 
-
-    // COSINE SIMILARITY //
-
     /**
      * // TODO
      * 
@@ -150,68 +156,35 @@ public class CosineSimilarityRecommender extends Recommender{
         // CALCULATION //
         /////////////////
 
-        // NUMERATOR //
-
-        // variable to store numerator
+        // variables to store calculation segments
         float numerator = 0f;
-
-        // iterating over all users
-        for(int user : commonUsers){
-            // average user rating
-            float userAverageRating = userAverageRatings.get(user);
-
-            // user rating of item 1
-            float userRatingOfItem1 = trainingDataset.getUserRatingOfItem(user, item1ID);
-
-            // user rating of item 2
-            float userRatingOfItem2 = trainingDataset.getUserRatingOfItem(user, item2ID);
-
-            // combining
-            numerator += (userRatingOfItem1 - userAverageRating) * (userRatingOfItem2 - userAverageRating);
-        }
-
-        // DENOMINATOR //
-
-        // variable to store denominator
         float denominator = 0f;
+        float denominatorLhs = 0f;
+        float denominatorRhs = 0f;
 
-        // lhs
-
-        float lhs = 0f;
+        // iterating over all users and summing the segments
         for(int user : commonUsers){
-            // average user rating
+            // getting user's average rating
             float userAverageRating = userAverageRatings.get(user);
 
-            // user rating of item 1
-            float userRatingOfItem1 = trainingDataset.getUserRatingOfItem(user, item1ID);
+            // NUMERATOR //
 
-            // calculation
-            float calculation = (userRatingOfItem1 - userAverageRating) * (userRatingOfItem1 - userAverageRating);
+            // numerator
+            numerator += (trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating) * (trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating);
 
-            // adding calculation to sum
-            lhs += calculation;
+            // DENOMINATOR //
+
+            // lhs
+            denominatorLhs += (trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating) * (trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating);
+
+            // rhs
+            denominatorRhs += (trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating) * (trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating);
         }
-        lhs = (float) Math.sqrt((double) lhs);
 
-        // rhs
-
-        float rhs = 0f;
-        for(int user : commonUsers){
-            // average user rating
-            float userAverageRating = userAverageRatings.get(user);
-
-            // user rating of item 2
-            float userRatingOfItem2 = trainingDataset.getUserRatingOfItem(user, item2ID);
-
-            // calculation
-            float calculation = (userRatingOfItem2 - userAverageRating) * (userRatingOfItem2 - userAverageRating);
-
-            // adding calculation to sum
-            rhs += calculation;
-        }
-        rhs = (float) Math.sqrt((double) rhs);
-
-        denominator = lhs * rhs;
+        // finalising calculations
+        denominatorLhs = (float) Math.sqrt((double) denominatorLhs);
+        denominatorRhs = (float) Math.sqrt((double) denominatorRhs);
+        denominator = denominatorLhs * denominatorRhs;
 
         // COMBINING NUMERATOR AND DEMONINATOR //
 

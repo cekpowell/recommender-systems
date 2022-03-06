@@ -2,7 +2,7 @@ package cp6g18.RecommenderSystem.Controller;
 
 import cp6g18.RecommenderSystem.Model.ArrayListRatingsDataset;
 import cp6g18.RecommenderSystem.Model.HashMapRatingsDataset;
-import cp6g18.RecommenderSystem.Model.RecommenderType;
+import cp6g18.RecommenderSystem.Model.HashMapRatingsDatasetMappingType;
 import cp6g18.RecommenderSystem.Model.SimilarityMatrix;
 
 /**
@@ -17,7 +17,6 @@ import cp6g18.RecommenderSystem.Model.SimilarityMatrix;
 public abstract class Recommender{
 
     // member variables
-    private RecommenderType recommenderType;
     private boolean isTrained;
     private SimilarityMatrix model;
     
@@ -30,7 +29,6 @@ public abstract class Recommender{
      */
     public Recommender(){
         // initializing
-        this.recommenderType = null;
         this.model = null;
         this.isTrained = false;
     }
