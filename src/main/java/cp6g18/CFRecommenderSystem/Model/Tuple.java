@@ -1,4 +1,6 @@
-package cp6g18.RecommenderSystem.Model;
+package cp6g18.CFRecommenderSystem.Model;
+
+import java.io.Serializable;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -9,7 +11,7 @@ package cp6g18.RecommenderSystem.Model;
  * 
  * // TODO
  */
-public class Tuple<T,S>{
+public class Tuple<T,S> implements Serializable{
 
     // member variables
     public T first; // TODO

@@ -1,4 +1,6 @@
-package cp6g18.RecommenderSystem.Model;
+package cp6g18.CFRecommenderSystem.Model;
+
+import java.io.Serializable;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -9,7 +11,7 @@ package cp6g18.RecommenderSystem.Model;
  * 
  * // TODO
  */
-public class Rating{
+public class Rating implements Serializable{
 
     // CONSTANTS //
     public static final int UNRATED_ITEM_RATING = -1; // TODO

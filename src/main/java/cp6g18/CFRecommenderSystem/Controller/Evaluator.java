@@ -1,10 +1,11 @@
-package cp6g18.RecommenderSystem.Controller;
+package cp6g18.CFRecommenderSystem.Controller;
 
 import java.util.ArrayList;
 
-import cp6g18.RecommenderSystem.Model.Evaluation;
-import cp6g18.RecommenderSystem.Model.Rating;
-import cp6g18.RecommenderSystem.Model.RatingsDatabase;
+import cp6g18.CFRecommenderSystem.Model.Database;
+import cp6g18.CFRecommenderSystem.Model.Evaluation;
+import cp6g18.CFRecommenderSystem.Model.Rating;
+import cp6g18.Tools.Logger;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -29,7 +30,7 @@ public class Evaluator {
      * @param ratingsDatabase
      * @return
      */
-    public static Evaluation evaluateRecommender(Recommender recommender, RatingsDatabase ratingsDatabase){
+    public static Evaluation evaluateRecommender(Recommender recommender, Database ratingsDatabase){
         // TODO
 
         return null;

@@ -2,13 +2,12 @@ package cp6g18.Tasks;
 
 import java.io.File;
 
-import cp6g18.RecommenderSystem.Controller.CosineSimilarityRecommender;
-import cp6g18.RecommenderSystem.Controller.FileWriter;
-import cp6g18.RecommenderSystem.Controller.Logger;
-import cp6g18.RecommenderSystem.Model.RatingsDatabase;
-import cp6g18.RecommenderSystem.Model.TestingRatingsDataset;
-import cp6g18.RecommenderSystem.Model.TrainingRatingsDataset;
-import cp6g18.RecommenderSystem.Model.TrainingRatingsDatasetMappingType;
+import cp6g18.CFRecommenderSystem.Controller.IBRecommender;
+import cp6g18.CFRecommenderSystem.Model.Database;
+import cp6g18.CFRecommenderSystem.Model.IBTrainingDataset;
+import cp6g18.CFRecommenderSystem.Model.TestingDataset;
+import cp6g18.Tools.FileHandler;
+import cp6g18.Tools.Logger;
 
 // package cp6g18.Tasks;
 
@@ -59,14 +58,14 @@ public class Task2 {
             Logger.logSubTaskStart("LOADING TRAINING DATA");
 
             // connecting to task 1 database
-            RatingsDatabase database = new RatingsDatabase(Task2.DATBASE_FILENAME);
+            Database database = new Database(Task2.DATBASE_FILENAME);
 
             // gathering training data
-            TrainingRatingsDataset trainingDataset = new TrainingRatingsDataset(TrainingRatingsDatasetMappingType.ITEMS_TO_USERS);
+            IBTrainingDataset trainingDataset = new IBTrainingDataset();
             database.loadRatingsDataset(trainingDataset, Task2.TRAINING_TABLE_NAME);
 
             // creating recommender system
-            CosineSimilarityRecommender recommender = new CosineSimilarityRecommender();
+            IBRecommender recommender = new IBRecommender();
 
             // logging
             Logger.logSubTaskEnd("LOADING TRAINING DATA");
@@ -95,7 +94,7 @@ public class Task2 {
             Logger.logSubTaskStart("LOADING TESTING DATA");
 
             // gathering testing datas
-            TestingRatingsDataset testingDataset = new TestingRatingsDataset();
+            TestingDataset testingDataset = new TestingDataset();
             database.loadRatingsDataset(testingDataset, Task2.TESTING_TABLE_NAME);
 
             // logging
@@ -108,10 +107,10 @@ public class Task2 {
             // logging
             Logger.logSubTaskStart("PREDICTING");
 
-            TestingRatingsDataset predictions = recommender.makePredictions(testingDataset);
+            TestingDataset predictions = recommender.makePredictions(testingDataset);
             
             // writing to file
-            FileWriter.writeObjectToFile(predictions, new File(Task2.RESULTS_FILE));
+            FileHandler.writeObjectToFileAsString(predictions, new File(Task2.RESULTS_FILE));
 
             // logging
             Logger.logSubTaskEnd("PREDICTING");
@@ -129,6 +128,7 @@ public class Task2 {
         catch(Exception e){
             System.out.println("\nUnable to run Task 2!\n" + 
                                "Cause : " + e.toString() + "\n");
+            e.printStackTrace();
         }
     }
 }

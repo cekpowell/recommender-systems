@@ -1,4 +1,4 @@
-package cp6g18.RecommenderSystem.Model;
+package cp6g18.CFRecommenderSystem.Model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import java.util.HashMap;
  * 
  * // TODO
  */
-public class TestingRatingsDataset extends RatingsDataset{
+public class TestingDataset extends Dataset{
 
     // member variables
     private ArrayList<Rating> data; // TODO
@@ -28,7 +28,7 @@ public class TestingRatingsDataset extends RatingsDataset{
      * 
      * @param datasetMappingType The type of mapping of data stored in this dataset.
      */
-    public TestingRatingsDataset(){
+    public TestingDataset(){
         // initializing
         this.data = new ArrayList<Rating>();
         this.totalUserRatings = new HashMap<Integer, Tuple<Integer, Float>>();

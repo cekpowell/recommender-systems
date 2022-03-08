@@ -1,11 +1,12 @@
-package cp6g18.RecommenderSystem.Model;
+package cp6g18.CFRecommenderSystem.Model;
 
 import java.io.File;
+import java.util.Random;
 
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteStatement;
 
-import cp6g18.RecommenderSystem.Controller.Logger;
+import cp6g18.Tools.Logger;
 
 import com.almworks.sqlite4java.SQLiteException;
 
@@ -18,7 +19,7 @@ import com.almworks.sqlite4java.SQLiteException;
  * 
  * // TODO
  */
-public class RatingsDatabase{ 
+public class Database{ 
 
     // member variables
     private String databaseFilename; // TODO
@@ -33,19 +34,16 @@ public class RatingsDatabase{
      * thrown if no database with this filename exists.
      * 
      * @param databaseFilename The name of the database file. 
-     * @param trainingDatasetTableName The name of the training table within the database.
-     * @param testingDatasetTableName The name of the testing table within the database.
-     * @param datasetMappingType The type of mapping of data to be stored in the database's corresponding datasets.
      * @throws SQLiteException // TODO
      */
-    public RatingsDatabase(String databaseFilename) throws SQLiteException{
+    public Database(String databaseFilename) throws SQLiteException{
         // configuring SQLite4Java - necesarry because of this: https://github.com/aws-samples/aws-dynamodb-examples/issues/22
         System.out.println();
         System.setProperty("sqlite4java.library.path", "src/main/resources/libs/");
 
         // initializing
         this.databaseFilename = databaseFilename;
-        this.connection = new SQLiteConnection(new File(TrainingRatingsDataset.class.getClassLoader().getResource(this.databaseFilename).getFile()));
+        this.connection = new SQLiteConnection(new File(Database.class.getClassLoader().getResource(this.databaseFilename).getFile()));
 
         // connecting to database
         this.open(false);
@@ -108,7 +106,7 @@ public class RatingsDatabase{
      * @param dataset
      * @param tableName
      */
-    public void loadRatingsDataset(RatingsDataset dataset, String tableName) throws SQLiteException{
+    public void loadRatingsDataset(Dataset dataset, String tableName) throws SQLiteException{
         /////////////////
         // PREPERATION //
         /////////////////
@@ -190,10 +188,10 @@ public class RatingsDatabase{
      * @param ratio
      * @throws SQLiteException
      */
-	public void createTestTrainingSet(String originalTrainingTableName, String newTrainingTableName, String newTestingTableName, int ratio) throws SQLiteException{
+	public void createNewTrainingAndTestingTables(String originalTrainingTableName, String newTrainingTableName, String newTestingTableName, int ratio) throws SQLiteException{
 
         // logging
-        Logger.logProcessStart("Creating new training and testing sets in database '" + this.databaseFilename + "' from table '" + originalTrainingTableName + "'");
+        Logger.logProcessStart("Creating new training and testing tables in database '" + this.databaseFilename + "' from table '" + originalTrainingTableName + "'");
 
         // creating new tables with the given table names
         this.createTable(newTrainingTableName);
@@ -212,6 +210,9 @@ public class RatingsDatabase{
 
         // count to keep track of number of ratings that have been iterated
         int count = 0;
+
+        // incrementing count by random amount (to add randomness to generated sets)
+        count += new Random().nextInt(ratio);
 
         ///////////////////////////////
         // ADDING DATA TO NEW TABLES //
@@ -259,7 +260,7 @@ public class RatingsDatabase{
         newTestingTableStatement.dispose();
 
         // logging
-        Logger.logProcessEnd("Successfully created new training and testing sets in database '" + this.databaseFilename + "'");
+        Logger.logProcessEnd("Successfully created new training and testing tables in database '" + this.databaseFilename + "'");
     }
 }
 

@@ -2,12 +2,12 @@ package cp6g18.Tasks;
 
 import java.io.File;
 
-import cp6g18.RecommenderSystem.Controller.Evaluator;
-import cp6g18.RecommenderSystem.Controller.FileWriter;
-import cp6g18.RecommenderSystem.Controller.Logger;
-import cp6g18.RecommenderSystem.Model.Evaluation;
-import cp6g18.RecommenderSystem.Model.RatingsDatabase;
-import cp6g18.RecommenderSystem.Model.TestingRatingsDataset;
+import cp6g18.CFRecommenderSystem.Controller.Evaluator;
+import cp6g18.CFRecommenderSystem.Model.Database;
+import cp6g18.CFRecommenderSystem.Model.Evaluation;
+import cp6g18.CFRecommenderSystem.Model.TestingDataset;
+import cp6g18.Tools.FileHandler;
+import cp6g18.Tools.Logger;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -57,14 +57,14 @@ public class Task1 {
             Logger.logSubTaskStart("PREPARING");
 
             // connecting to task 1 database
-            RatingsDatabase database = new RatingsDatabase(Task1.DATBASE_FILENAME);
+            Database database = new Database(Task1.DATBASE_FILENAME);
 
             // gathering predictions
-            TestingRatingsDataset predictions = new TestingRatingsDataset();
+            TestingDataset predictions = new TestingDataset();
             database.loadRatingsDataset(predictions, Task1.PREDICTIONS_TABLE_NAME);
 
             // gathering truths
-            TestingRatingsDataset truths = new TestingRatingsDataset();
+            TestingDataset truths = new TestingDataset();
             database.loadRatingsDataset(truths, Task1.TRUTHS_TABLE_NAME);
 
             // logging
@@ -93,7 +93,7 @@ public class Task1 {
             System.out.println("\nTask 1 Result : " + evaluation.toString());
             
             // writing to file
-            FileWriter.writeObjectToFile(evaluation, new File(Task1.RESULTS_FILE));
+            FileHandler.writeObjectToFileAsString(evaluation, new File(Task1.RESULTS_FILE));
 
             // logging
             Logger.logSubTaskEnd("EVALUATING");

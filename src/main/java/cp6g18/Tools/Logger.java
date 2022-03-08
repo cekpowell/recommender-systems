@@ -1,4 +1,4 @@
-package cp6g18.RecommenderSystem.Controller;
+package cp6g18.Tools;
 
 /**
  * // TODO

@@ -1,4 +1,5 @@
-package cp6g18.RecommenderSystem.Model;
+package cp6g18.CFRecommenderSystem.Model;
+
 
 import java.util.HashMap;
 

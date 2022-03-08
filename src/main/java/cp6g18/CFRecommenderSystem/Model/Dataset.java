@@ -1,5 +1,7 @@
-package cp6g18.RecommenderSystem.Model;
+package cp6g18.CFRecommenderSystem.Model;
 
+
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +15,7 @@ import java.util.Set;
  * 
  * // TODO
  */
-public abstract class RatingsDataset{
+public abstract class Dataset implements Serializable{
 
     //////////////////////////////
     // ADDING RATING TO DATASET //
