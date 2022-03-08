@@ -6,6 +6,7 @@ import java.util.Set;
 import cp6g18.RecommenderSystem.Model.TestingRatingsDataset;
 import cp6g18.RecommenderSystem.Model.TrainingRatingsDataset;
 import cp6g18.RecommenderSystem.Model.TrainingRatingsDatasetMappingType;
+import cp6g18.RecommenderSystem.Model.Rating;
 import cp6g18.RecommenderSystem.Model.SimilarityMatrix;
 
 /**
@@ -62,15 +63,67 @@ public class CosineSimilarityRecommender extends Recommender{
     // MAKING PREDICTIONS //
     ////////////////////////
 
+    /**
+     * // TODO
+     */
     protected TestingRatingsDataset makePredictionsAux(TestingRatingsDataset dataset){
-        // TODO
-
-        return null;
+        /// returning the predictions
+        return CosineSimilarityRecommender.getItemBasedAdjustedCosineSimilarityPredictions(this.getModel(), dataset);
     }
 
-    ////////////////////////////
-    // SIMILARITY CALCULATORS //
-    ////////////////////////////
+    ////////////////////////////////////
+    // PREDICTED RATINGS CALCULATIONS //
+    ////////////////////////////////////
+
+    // USER-BASED COLLABORATIVE FILTERING //
+
+    // TODO
+
+    // ITEM-BASED COLLABORATIVE FILTERING
+
+    /**
+     * // TODO
+     * 
+     * @param model
+     * @return
+     */
+    private static TestingRatingsDataset getItemBasedAdjustedCosineSimilarityPredictions(SimilarityMatrix model, TestingRatingsDataset dataset){
+        // creating new testing dataset for the result (so that original one is kept)
+        TestingRatingsDataset predictions = new TestingRatingsDataset();
+
+        // iterating through unknown datasets
+        for(Rating rating : dataset.getRatings()){
+            // gathering needed information
+            int userID = rating.getUserID();
+            int itemID = rating.getItemID();
+
+            // gathering predicted rating for this entry
+            float predictedRating = CosineSimilarityRecommender.getItemBasedAdjustedCosineSimilarityPrediction(model, userID, itemID);
+
+            // adding new rating object to predictions
+            predictions.addRating(userID, itemID, predictedRating, rating.getTimestamp());
+        }
+
+        // returning predictions
+        return predictions;
+    }
+
+    /**
+     * // TODO
+     * 
+     * @param model
+     * @param userID
+     * @param itemID
+     * @return
+     */
+    private static float getItemBasedAdjustedCosineSimilarityPrediction(SimilarityMatrix model, int userID, int itemID){
+        // TODO
+        return 0f;
+    }
+
+    /////////////////////////////
+    // SIMILARITY CALCULATIONS //
+    /////////////////////////////
 
     // USER-BASED COLLABORATIVE FILTERING  //
 
