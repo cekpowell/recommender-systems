@@ -41,6 +41,7 @@ public class SimilarityMatrix {
      * @param similarity
      */
     public void setSimilarity(int object1ID, int object2ID, float similarity){
+
         // SIMILARITY FOR OBJECT 1 TO OBJECT 2 //
 
         HashMap<Integer, Float> object1Similarities = this.similarities.get(object1ID);
@@ -52,7 +53,7 @@ public class SimilarityMatrix {
 
         object1Similarities.put(object2ID, similarity);
 
-        // SIMILARITY FOR OBJET 2 TO OBJECT 1 //
+        // SIMILARITY FOR OBJECT 2 TO OBJECT 1 //
 
         HashMap<Integer, Float> object2Similarities = this.similarities.get(object2ID);
 
@@ -106,56 +107,6 @@ public class SimilarityMatrix {
      */
     public HashMap<Integer, Float> getSimilaritiesForObject(int objectID){
         return this.similarities.get(objectID);
-    }   
-
-    /**
-     * // TODO
-     * 
-     * @param objectID
-     * @return
-     */
-    public ArrayList<String> getNMostSimilarObjects(String object, int n){
-        return null;
-
-        // // new similarity matrix to store most similar items
-        // ArrayList<String> mostSimilarItems = new ArrayList<String>();
-
-        // // getting similarities for object
-        // SimilarityMatrix objectSimilarities = this.getSimilaritiesForObject(object);
-
-        // // SORTING THE SIMILARITIES //
-
-        // // defining a comparator to sort the similarities
-        // Comparator<Entry<Tuple<Integer, Integer>, Float>> valueComparator = new Comparator<Entry<Tuple<Integer, Integer>,Float>>() {
-            
-        //     @Override
-        //     public int compare(Entry<Tuple<Integer, Integer>, Float> e1, Entry<Tuple<Integer, Integer>, Float> e2) {
-        //         Float v1 = e1.getValue();
-        //         Float v2 = e2.getValue();
-        //         return v1.compareTo(v2);
-        //     }
-        // };
-        
-        // // Sort method needs a List
-        // ArrayList<Entry<Tuple<Integer, Integer>, Float>> listOfObjectSimilarities = new ArrayList<Entry<Tuple<Integer, Integer>, Float>>(objectSimilarities.getSimilarities().entrySet());
-        
-        // // sorting HashMap by values using comparator
-        // Collections.sort(listOfObjectSimilarities, Collections.reverseOrder(valueComparator));
-
-        // // GETTING MOST SIMILAR ITEMS //
-
-        // // selecting n most similar objects
-        // for(int i = 0; i < n; i++){
-        //     if(listOfObjectSimilarities.get(i).getKey().object1.equals(object)){
-        //         mostSimilarItems.add(listOfObjectSimilarities.get(i).getKey().object2);
-        //     }
-        //     else{
-        //         mostSimilarItems.add(listOfObjectSimilarities.get(i).getKey().object1);
-        //     }
-        // }
-
-        // // returning most similar items
-        // return mostSimilarItems;
     }
 
     ////////////////////

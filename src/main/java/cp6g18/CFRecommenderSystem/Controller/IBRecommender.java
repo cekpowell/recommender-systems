@@ -98,6 +98,11 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
         denominatorRhs = (float) Math.sqrt((double) denominatorRhs);
         denominator = denominatorLhs * denominatorRhs;
 
+        // CHECKING FOR INVALID DENOMINATOR // denominator can have value of 0, which causes NaN error // TODO look as to why this can happen and what it means
+        if(denominator == 0){
+            return similarity;
+        }
+
         // COMBINING NUMERATOR AND DEMONINATOR //
 
         similarity = numerator / denominator;
@@ -124,7 +129,19 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
      */
     protected float makePrediction(int userID, int itemID){
 
-        System.out.println("Making prediction for user " + userID + " for item " + itemID);
+        /**
+         * Things that could go wrong:
+         * - GENERAL:
+         *  - Item cold start - This item has not been seen before, so there are no similar itms.
+         *      - Return sensible prediction for the item (i.e., user average rating).
+         *  - User cold start - This user has not rated any items.
+         *      - Return sensible prediction for the item (i.e., item average rating).
+         * - Both user and item have not been seen before
+         *      - Return sensble prediction for the item (e.g., average rating of all items/all users)
+         * - WHEN LOOPING THROUGH SIMILAR ITEMS:
+         *  - The similar item has a negative similarity.
+         *  - The user hasnt rated the similar item.
+         */
 
         /////////////////
         // PREPERATION //
@@ -136,10 +153,11 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
         // getting simiilarity to other ites
         HashMap<Integer, Float> similarItems = this.getModel().getSimilaritiesForObject(itemID);
 
+        // CHECKING FOR ITEM COLD START //
         if(similarItems == null){
-            System.out.println("uh oh... no similar items for item " + itemID);
+            System.out.println("Cold start for ITEM " + itemID);
 
-            return prediction;
+            return 0f; // TODO return sensible prediction - e.g., user's average rating
         }
 
         // variables to store sums
@@ -153,9 +171,12 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
         // iterating through items
         for(Entry<Integer, Float> similarItem : similarItems.entrySet()){
             int similarItemID = similarItem.getKey();
-            float similarityOfSimilarItem = similarItem.getValue();
+            Float similarityOfSimilarItem = similarItem.getValue();
 
-            if(similarityOfSimilarItem < 0){
+            // CHECKING FOR DISSIMILARITY //
+            if(similarityOfSimilarItem <= 0){
+                // dont want to consider items that are not similar
+                // within the prediction
                 continue;
             }
 
@@ -164,13 +185,14 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
             // getting user rating of this item
             Float userRatingOfSimilarItem = this.getTrainingDataset().getUserRatingOfItem(userID, similarItemID);
 
-            // continuing if user didnt rate the item (cant consider similarity)
+            // CHECKING USER HAS RATED SIMILAR ITEM //
             if(userRatingOfSimilarItem == null){
+                // cant include this item if the user has not rated it // TODO use the item's average rating instead
                 continue;
             }
 
             // addding to numerator
-            numerator += (similarityOfSimilarItem * userRatingOfSimilarItem);
+            numerator += ((float) similarityOfSimilarItem * userRatingOfSimilarItem);
 
             // DENOMINATOR //
 
@@ -178,21 +200,17 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
             denominator += similarityOfSimilarItem;
         }
 
-        // getting final result
-        if(denominator == 0){
-            return prediction;
+        // CHECKING FOR USER COLD START // (if denominator and numerator are both zero, they were nevr incremented cus the user had no ratings, thus it is user cold start)
+        if(denominator == 0 && numerator == 0){
+            return 0f; // TODO return sensble prediction - i.e., average rating of item.
         }
+
+        // getting final results
         prediction = numerator / denominator;
 
         //////////////
         // RETURING //
         //////////////
-
-        System.out.println("\t Prediction : " + prediction);
-
-        if(prediction.isNaN()){
-            return 0f;
-        }
 
         // returning prediction
         return prediction;
