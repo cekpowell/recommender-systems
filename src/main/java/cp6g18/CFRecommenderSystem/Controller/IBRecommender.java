@@ -148,7 +148,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
         /////////////////
 
         // variable to store prediction
-        Float prediction = 0f;
+        Float prediction = 1f; // TODO what should the base recommendation be? 1 because 0 rating is not possible ?
 
         // getting simiilarity to other ites
         HashMap<Integer, Float> similarItems = this.getModel().getSimilaritiesForObject(itemID);
