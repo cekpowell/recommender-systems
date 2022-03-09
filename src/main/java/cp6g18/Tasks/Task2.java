@@ -81,7 +81,7 @@ public class Task2 {
             recommender.train(trainingDataset);
 
             // clearing training dataset (free up memory)
-            trainingDataset.clear();
+            //trainingDataset.clear();
 
             // logging
             Logger.logSubTaskEnd("TRAINING");
@@ -119,8 +119,14 @@ public class Task2 {
             // FINISHING //
             ///////////////
 
+            // logging
+            Logger.logSubTaskStart("FINISHING");
+
             // closing the database
             database.close();
+
+            // logging
+            Logger.logSubTaskEnd("FINISHING");
 
             // logging
             Logger.logTaskEnd(2);

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import cp6g18.CFRecommenderSystem.Model.Database;
 import cp6g18.CFRecommenderSystem.Model.Evaluation;
 import cp6g18.CFRecommenderSystem.Model.Rating;
+import cp6g18.CFRecommenderSystem.Model.TestingDataset;
+import cp6g18.CFRecommenderSystem.Model.TrainingDataset;
 import cp6g18.Tools.Logger;
 
 /**
@@ -30,10 +32,37 @@ public class Evaluator {
      * @param ratingsDatabase
      * @return
      */
-    public static Evaluation evaluateRecommender(Recommender recommender, Database ratingsDatabase){
-        // TODO
+    public static <T extends TrainingDataset> Evaluation evaluateRecommender(Recommender<T> recommender, T trainingDataset, Database database, String trainingTableName) throws Exception{
+        // names for new training and testing tables
+        String newTrainingTableName = "NEWtraining";
+        String newTestingTableName = "NEWtesting";
+        String newTestingTableTruthsName = "NEWtestingTRUTHS";
 
-        return null;
+        // creating new trainning and testing sets
+        database.createNewTrainingAndTestingTables(trainingTableName, newTrainingTableName, newTestingTableName, newTestingTableTruthsName, 10);
+
+        // loadinng new training set
+        database.loadRatingsDataset(trainingDataset, newTrainingTableName);
+
+        // loading new testing set
+        TestingDataset testingDataset = new TestingDataset();
+        database.loadRatingsDataset(testingDataset, newTestingTableName);
+
+        // loading truths
+        TestingDataset truths = new TestingDataset();
+        database.loadRatingsDataset(truths, newTestingTableTruthsName);
+
+        // training recommender
+        recommender.train(trainingDataset);
+
+        // making predictions
+        TestingDataset predictions = recommender.makePredictions(testingDataset);
+
+        // gathering evaluation
+        Evaluation evaluation = Evaluator.evaluatePredictions(predictions.getRatings(), truths.getRatings());
+        
+        // returning evaluation
+        return evaluation;
     }
 
     /**
@@ -82,10 +111,10 @@ public class Evaluator {
      */
     private static float getMSE(ArrayList<Rating> predictions, ArrayList<Rating> truths){
         // mae variable
-        float mse = 0;
+        float mse = 0f;
 
         // summing squared errors
-        float sumOfSquaredErrors = 0;
+        float sumOfSquaredErrors = 0f;
         for(int i = 0; i < predictions.size(); i++){
             float truth = truths.get(i).getRating();
             float predicted = predictions.get(i).getRating();
@@ -93,7 +122,7 @@ public class Evaluator {
             float error = truth - predicted;
 
             float squaredError = error * error;
-
+        
             sumOfSquaredErrors += squaredError;
         }
 

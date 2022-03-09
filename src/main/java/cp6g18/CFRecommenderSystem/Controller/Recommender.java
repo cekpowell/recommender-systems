@@ -21,6 +21,7 @@ public abstract class Recommender<T extends TrainingDataset>{
 
     // member variables
     private boolean isTrained;
+    private T trainingDataset;
     private SimilarityMatrix model;
     
     //////////////////
@@ -32,6 +33,7 @@ public abstract class Recommender<T extends TrainingDataset>{
      */
     public Recommender(){
         // initializing
+        this.trainingDataset = null;
         this.model = null;
         this.isTrained = false;
     }
@@ -52,6 +54,9 @@ public abstract class Recommender<T extends TrainingDataset>{
         ///////////////
         // PREPARING //
         ///////////////
+
+        // setting the training dataset
+        this.trainingDataset = trainingDataset;
 
         // creating new similarity matrix instance
         SimilarityMatrix model = new SimilarityMatrix();
@@ -152,6 +157,15 @@ public abstract class Recommender<T extends TrainingDataset>{
     /////////////////////////
     // GETTERS AND SETTERS //
     /////////////////////////
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public T getTrainingDataset(){
+        return this.trainingDataset;
+    }
 
     /**
      * // TODO

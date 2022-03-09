@@ -167,7 +167,13 @@ public class IBTrainingDataset extends TrainingDataset{
      * @return
      */
     public Float getUserRatingOfItem(int userID, int itemID){
-        // returning the rating
-        return (this.getData().get(itemID).get(userID).first);
+        try{
+            // returning the rating
+            return (this.getData().get(itemID).get(userID).first);
+        }
+        // case where rating does not exist
+        catch(NullPointerException e){
+            return null;
+        } 
     }
 }

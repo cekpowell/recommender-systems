@@ -114,6 +114,9 @@ public class Database{
         // logging
         Logger.logProcessStart("Loading ratings from table : '" + tableName + "'");
 
+        // clearing the dataset
+        dataset.clear();
+
         // tracking number of loaded ratings
         int count = 0;
 
@@ -188,7 +191,7 @@ public class Database{
      * @param ratio
      * @throws SQLiteException
      */
-	public void createNewTrainingAndTestingTables(String originalTrainingTableName, String newTrainingTableName, String newTestingTableName, int ratio) throws SQLiteException{
+	public void createNewTrainingAndTestingTables(String originalTrainingTableName, String newTrainingTableName, String newTestingTableName, String newTestingTableTruthsName, int ratio) throws SQLiteException{
 
         // logging
         Logger.logProcessStart("Creating new training and testing tables in database '" + this.databaseFilename + "' from table '" + originalTrainingTableName + "'");
@@ -196,6 +199,7 @@ public class Database{
         // creating new tables with the given table names
         this.createTable(newTrainingTableName);
         this.createTable(newTestingTableName);
+        this.createTable(newTestingTableTruthsName);
 
         ///////////////
         // PREPARING //
@@ -207,6 +211,7 @@ public class Database{
         // statements to add data to new tables
         SQLiteStatement newTrainingTableStatement = this.connection.prepare("INSERT INTO " + newTrainingTableName + "  VALUES (?,?,?,?)");
         SQLiteStatement newTestingTableStatement = this.connection.prepare("INSERT INTO " + newTestingTableName + " VALUES (?,?,?,?)");
+        SQLiteStatement newTestingTableTruthsStatement = this.connection.prepare("INSERT INTO " + newTestingTableTruthsName + " VALUES (?,?,?,?)");
 
         // count to keep track of number of ratings that have been iterated
         int count = 0;
@@ -218,20 +223,28 @@ public class Database{
         // ADDING DATA TO NEW TABLES //
         ///////////////////////////////
 
-        // starting begin clause
+        // starting begin clause (queing all these operations to be performed in one go)
         this.connection.exec("BEGIN");
 
         // iterating through entries in original table
         while(originalTrainingTableStatement.step()){
             // select whether to put it in the test or training set
             if (count % ratio == 0) {
-                // insert in test set
+                // insert in test set (unknowns)
                 newTestingTableStatement.bind(RatingsDatabaseSchema.USER_ID.getColID(), originalTrainingTableStatement.columnInt(RatingsDatabaseSchema.USER_ID.getColIndex()));
                 newTestingTableStatement.bind(RatingsDatabaseSchema.ITEM_ID.getColID(), originalTrainingTableStatement.columnInt(RatingsDatabaseSchema.ITEM_ID.getColIndex()));
                 newTestingTableStatement.bind(RatingsDatabaseSchema.RATING.getColID(), Rating.UNRATED_ITEM_RATING);
                 newTestingTableStatement.bind(RatingsDatabaseSchema.TIMESTAMP.getColID(), originalTrainingTableStatement.columnInt(RatingsDatabaseSchema.TIMESTAMP.getColIndex()));
                 newTestingTableStatement.stepThrough();
                 newTestingTableStatement.reset();
+
+                // insert into test set (truths)
+                newTestingTableTruthsStatement.bind(RatingsDatabaseSchema.USER_ID.getColID(), originalTrainingTableStatement.columnInt(RatingsDatabaseSchema.USER_ID.getColIndex()));
+                newTestingTableTruthsStatement.bind(RatingsDatabaseSchema.ITEM_ID.getColID(), originalTrainingTableStatement.columnInt(RatingsDatabaseSchema.ITEM_ID.getColIndex()));
+                newTestingTableTruthsStatement.bind(RatingsDatabaseSchema.RATING.getColID(), originalTrainingTableStatement.columnInt(RatingsDatabaseSchema.RATING.getColIndex()));
+                newTestingTableTruthsStatement.bind(RatingsDatabaseSchema.TIMESTAMP.getColID(), originalTrainingTableStatement.columnInt(RatingsDatabaseSchema.TIMESTAMP.getColIndex()));
+                newTestingTableTruthsStatement.stepThrough();
+                newTestingTableTruthsStatement.reset();
             } 
             else {
                 // insert in training set
@@ -247,7 +260,7 @@ public class Database{
             count++;
         }
 
-        // commiting changes
+        // commiting changes (commiting all changes made since the last begin statement).
         this.connection.exec("COMMIT");
 
         ///////////////

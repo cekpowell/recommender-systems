@@ -2,6 +2,7 @@ package cp6g18.CFRecommenderSystem.Controller;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import cp6g18.CFRecommenderSystem.Model.IBTrainingDataset;
 
@@ -122,7 +123,78 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
      * @return
      */
     protected float makePrediction(int userID, int itemID){
-        // TODO
-        return 0f;
+
+        System.out.println("Making prediction for user " + userID + " for item " + itemID);
+
+        /////////////////
+        // PREPERATION //
+        /////////////////
+
+        // variable to store prediction
+        Float prediction = 0f;
+
+        // getting simiilarity to other ites
+        HashMap<Integer, Float> similarItems = this.getModel().getSimilaritiesForObject(itemID);
+
+        if(similarItems == null){
+            System.out.println("uh oh... no similar items for item " + itemID);
+
+            return prediction;
+        }
+
+        // variables to store sums
+        float numerator = 0f;
+        float denominator = 0f;
+
+        /////////////////
+        // CALCULATION //
+        /////////////////
+
+        // iterating through items
+        for(Entry<Integer, Float> similarItem : similarItems.entrySet()){
+            int similarItemID = similarItem.getKey();
+            float similarityOfSimilarItem = similarItem.getValue();
+
+            if(similarityOfSimilarItem < 0){
+                continue;
+            }
+
+            // NUMERATOR //
+
+            // getting user rating of this item
+            Float userRatingOfSimilarItem = this.getTrainingDataset().getUserRatingOfItem(userID, similarItemID);
+
+            // continuing if user didnt rate the item (cant consider similarity)
+            if(userRatingOfSimilarItem == null){
+                continue;
+            }
+
+            // addding to numerator
+            numerator += (similarityOfSimilarItem * userRatingOfSimilarItem);
+
+            // DENOMINATOR //
+
+            // adding to denominator
+            denominator += similarityOfSimilarItem;
+        }
+
+        // getting final result
+        if(denominator == 0){
+            return prediction;
+        }
+        prediction = numerator / denominator;
+
+        //////////////
+        // RETURING //
+        //////////////
+
+        System.out.println("\t Prediction : " + prediction);
+
+        if(prediction.isNaN()){
+            return 0f;
+        }
+
+        // returning prediction
+        return prediction;
     }
 }

@@ -1,6 +1,7 @@
 package cp6g18.CFRecommenderSystem.Model;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -82,18 +83,9 @@ public class SimilarityMatrix {
         }
     }
 
-    /////////////////////////
-    // GETTERS AND SETTERS //
-    /////////////////////////
-
-    /**
-     * // TODO
-     * 
-     * @return
-     */
-    public HashMap<Integer, HashMap<Integer,Float>> getSimilarities(){
-        return this.similarities;
-    }
+    ///////////////////////////
+    // GETTING SIMMILARITIES //
+    ///////////////////////////
 
     /**
      * // TODO
@@ -114,57 +106,57 @@ public class SimilarityMatrix {
      */
     public HashMap<Integer, Float> getSimilaritiesForObject(int objectID){
         return this.similarities.get(objectID);
-    }
+    }   
 
-    // TODO
+    /**
+     * // TODO
+     * 
+     * @param objectID
+     * @return
+     */
+    public ArrayList<String> getNMostSimilarObjects(String object, int n){
+        return null;
 
-    // /**
-    //  * // TODO
-    //  * 
-    //  * @param objectID
-    //  * @return
-    //  */
-    // public ArrayList<String> getNMostSimilarObjects(String object, int n){
-    //     // new similarity matrix to store most similar items
-    //     ArrayList<String> mostSimilarItems = new ArrayList<String>();
+        // // new similarity matrix to store most similar items
+        // ArrayList<String> mostSimilarItems = new ArrayList<String>();
 
-    //     // getting similarities for object
-    //     SimilarityMatrix objectSimilarities = this.getSimilaritiesForObject(object);
+        // // getting similarities for object
+        // SimilarityMatrix objectSimilarities = this.getSimilaritiesForObject(object);
 
-    //     // SORTING THE SIMILARITIES //
+        // // SORTING THE SIMILARITIES //
 
-    //     // defining a comparator to sort the similarities
-    //     Comparator<Entry<Tuple<Integer, Integer>, Float>> valueComparator = new Comparator<Entry<Tuple<Integer, Integer>,Float>>() {
+        // // defining a comparator to sort the similarities
+        // Comparator<Entry<Tuple<Integer, Integer>, Float>> valueComparator = new Comparator<Entry<Tuple<Integer, Integer>,Float>>() {
             
-    //         @Override
-    //         public int compare(Entry<Tuple<Integer, Integer>, Float> e1, Entry<Tuple<Integer, Integer>, Float> e2) {
-    //             Float v1 = e1.getValue();
-    //             Float v2 = e2.getValue();
-    //             return v1.compareTo(v2);
-    //         }
-    //     };
+        //     @Override
+        //     public int compare(Entry<Tuple<Integer, Integer>, Float> e1, Entry<Tuple<Integer, Integer>, Float> e2) {
+        //         Float v1 = e1.getValue();
+        //         Float v2 = e2.getValue();
+        //         return v1.compareTo(v2);
+        //     }
+        // };
         
-    //     // Sort method needs a List
-    //     ArrayList<Entry<Tuple<Integer, Integer>, Float>> listOfObjectSimilarities = new ArrayList<Entry<Tuple<Integer, Integer>, Float>>(objectSimilarities.getSimilarities().entrySet());
+        // // Sort method needs a List
+        // ArrayList<Entry<Tuple<Integer, Integer>, Float>> listOfObjectSimilarities = new ArrayList<Entry<Tuple<Integer, Integer>, Float>>(objectSimilarities.getSimilarities().entrySet());
         
-    //     // sorting HashMap by values using comparator
-    //     Collections.sort(listOfObjectSimilarities, Collections.reverseOrder(valueComparator));
+        // // sorting HashMap by values using comparator
+        // Collections.sort(listOfObjectSimilarities, Collections.reverseOrder(valueComparator));
 
-    //     // GETTING MOST SIMILAR ITEMS //
+        // // GETTING MOST SIMILAR ITEMS //
 
-    //     // selecting n most similar objects
-    //     for(int i = 0; i < n; i++){
-    //         if(listOfObjectSimilarities.get(i).getKey().object1.equals(object)){
-    //             mostSimilarItems.add(listOfObjectSimilarities.get(i).getKey().object2);
-    //         }
-    //         else{
-    //             mostSimilarItems.add(listOfObjectSimilarities.get(i).getKey().object1);
-    //         }
-    //     }
+        // // selecting n most similar objects
+        // for(int i = 0; i < n; i++){
+        //     if(listOfObjectSimilarities.get(i).getKey().object1.equals(object)){
+        //         mostSimilarItems.add(listOfObjectSimilarities.get(i).getKey().object2);
+        //     }
+        //     else{
+        //         mostSimilarItems.add(listOfObjectSimilarities.get(i).getKey().object1);
+        //     }
+        // }
 
-    //     // returning most similar items
-    //     return mostSimilarItems;
-    // }
+        // // returning most similar items
+        // return mostSimilarItems;
+    }
 
     ////////////////////
     // HELPER METHODS //

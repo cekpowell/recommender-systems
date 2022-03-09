@@ -96,14 +96,20 @@ public class Task1 {
             FileHandler.writeObjectToFileAsString(evaluation, new File(Task1.RESULTS_FILE));
 
             // logging
-            Logger.logSubTaskEnd("EVALUATING");
+            Logger.logSubTaskEnd("RECORDING");
 
             ////////////////
             // FINISHING //
             ///////////////
 
+            // logging
+            Logger.logSubTaskStart("FINISHING");
+
             // closing the database
             database.close();
+
+            // logging
+            Logger.logSubTaskEnd("FINISHING");
 
             // logging
             Logger.logTaskEnd(1);
