@@ -18,8 +18,8 @@ public abstract class TrainingDataset extends Dataset{
     // member variables
     private HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>> data; // {user ID -> {item ID -> (rating,timestamp)}} OR {item ID -> {user ID -> (rating,timestamp)}}.
     private Tuple<Float, Integer> totalDatasetRating; // (total rating in dataset, number of ratings in dataset)
-    private HashMap<Integer, Tuple<Integer, Float>> totalUserRatings; // {userID -> (numberOfRatings given by user, total rating given by user)}
-    private HashMap<Integer, Tuple<Integer, Float>> totalItemRatings; // {itemID -> (number of ratings given to item, total rating given to item)}
+    private HashMap<Integer, Tuple<Float, Integer>> totalUserRatings; // {userID -> (total rating given by user, numberOfRatings given by user)}
+    private HashMap<Integer, Tuple<Float, Integer>> totalItemRatings; // {itemID -> (total rating given to item, number of ratings given to item)}
 
     //////////////////
     // INITIALIZING //
@@ -32,8 +32,8 @@ public abstract class TrainingDataset extends Dataset{
         // initializing
         this.data = new HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>>();
         this.totalDatasetRating = new Tuple<Float, Integer>();
-        this.totalUserRatings = new HashMap<Integer, Tuple<Integer, Float>>();
-        this.totalItemRatings = new HashMap<Integer, Tuple<Integer, Float>>();
+        this.totalUserRatings = new HashMap<Integer, Tuple<Float, Integer>>();
+        this.totalItemRatings = new HashMap<Integer, Tuple<Float, Integer>>();
     }
 
     ////////////////////////////////
@@ -59,22 +59,22 @@ public abstract class TrainingDataset extends Dataset{
      */
     public void updateTotalRatings(int userID, int itemID, float rating){
         // incrementing total user rating
-        Tuple<Integer, Float> totalUserRating = this.getTotalUserRatings().get(userID);
+        Tuple<Float, Integer> totalUserRating = this.getTotalUserRatings().get(userID);
         if(totalUserRating == null){
-            totalUserRating = new Tuple<Integer, Float>(0, 0f);
+            totalUserRating = new Tuple<Float, Integer>(0f, 0);
             this.getTotalUserRatings().put(userID, totalUserRating);
         }
-        totalUserRating.first++;
-        totalUserRating.second += rating;
+        totalUserRating.first += rating;
+        totalUserRating.second++;
 
         // incrementing item total rating
-        Tuple<Integer, Float> totalItemRating = this.getTotalItemRatings().get(itemID);
+        Tuple<Float, Integer> totalItemRating = this.getTotalItemRatings().get(itemID);
         if(totalItemRating == null){
-            totalItemRating = new Tuple<Integer, Float>(0, 0f);
+            totalItemRating = new Tuple<Float, Integer>(0f, 0);
             this.getTotalItemRatings().put(itemID, totalItemRating);
         }
-        totalItemRating.first++;
-        totalItemRating.second += rating;
+        totalItemRating.first += rating;
+        totalItemRating.second++;
     }
 
     ///////////////////////////////////
@@ -170,12 +170,31 @@ public abstract class TrainingDataset extends Dataset{
         HashMap<Integer, Float> averageUserRatings = new HashMap<Integer, Float>();
 
         // adding average ratings to the hashmap
-        for(Entry<Integer, Tuple<Integer, Float>> totalUserRating : this.totalUserRatings.entrySet()){
-            averageUserRatings.put(totalUserRating.getKey(), (totalUserRating.getValue().second / totalUserRating.getValue().first));
+        for(Entry<Integer, Tuple<Float, Integer>> totalUserRating : this.totalUserRatings.entrySet()){
+            averageUserRatings.put(totalUserRating.getKey(), (totalUserRating.getValue().first / totalUserRating.getValue().second));
         }
 
         // returning the hashamp
         return averageUserRatings;
+    }
+
+    /**
+     * // TODO
+     * 
+     * @param userID
+     * @return
+     */
+    public Float getAverageUserRating(int userID){
+        try{
+            // calculating the average rating for the user
+            Float averageUserRating = this.totalUserRatings.get(userID).first / this.totalUserRatings.get(userID).second;
+
+            // returning the average rating for the user
+            return averageUserRating;
+        }
+        catch(NullPointerException e){
+            return null;
+        }
     }
 
     /**
@@ -188,12 +207,31 @@ public abstract class TrainingDataset extends Dataset{
         HashMap<Integer, Float> averageItemRatings = new HashMap<Integer, Float>();
 
         // adding average ratings to the hashmap
-        for(Entry<Integer, Tuple<Integer, Float>> itemUserRating : this.totalItemRatings.entrySet()){
-            averageItemRatings.put(itemUserRating.getKey(), (itemUserRating.getValue().second / itemUserRating.getValue().first));
+        for(Entry<Integer, Tuple<Float, Integer>> itemUserRating : this.totalItemRatings.entrySet()){
+            averageItemRatings.put(itemUserRating.getKey(), (itemUserRating.getValue().first / itemUserRating.getValue().second));
         }
 
         // returning the hashamp
         return averageItemRatings;
+    }
+
+    /**
+     * // TODO
+     * 
+     * @param itemID
+     * @return
+     */
+    public Float getAverageItemRating(int itemID){
+        try{
+            // calculating the average rating for the item
+            Float averageItemRating = this.totalItemRatings.get(itemID).first / this.totalItemRatings.get(itemID).second;
+
+            // returning the average rating for the item
+            return averageItemRating;
+        }
+        catch(NullPointerException e){
+            return null;
+        }
     }
 
     ////////////////////
@@ -242,7 +280,7 @@ public abstract class TrainingDataset extends Dataset{
      * 
      * @return
      */
-    public HashMap<Integer, Tuple<Integer, Float>> getTotalUserRatings(){
+    public HashMap<Integer, Tuple<Float, Integer>> getTotalUserRatings(){
         return this.totalUserRatings;
     }
 
@@ -251,7 +289,7 @@ public abstract class TrainingDataset extends Dataset{
      * 
      * @return
      */
-    public HashMap<Integer, Tuple<Integer, Float>> getTotalItemRatings(){
+    public HashMap<Integer, Tuple<Float, Integer>> getTotalItemRatings(){
         return this.totalItemRatings;
     }
 }

@@ -118,6 +118,9 @@ public abstract class Recommender<T extends TrainingDataset>{
      * @throws
      */
     public TestingDataset makePredictions(TestingDataset dataset) throws Exception{
+        // logging
+        Logger.logProcessStart("Making predictions");
+
         // checking system has been trained               
         if(this.isTrained){
             // creating new testing dataset for the result (so that original one is kept)
@@ -136,6 +139,9 @@ public abstract class Recommender<T extends TrainingDataset>{
                 // adding new rating object to predictions
                 predictions.addRating(userID, itemID, predictedRating, rating.getTimestamp());
             }
+
+            // logging
+            Logger.logProcessEnd("Predictions made successfully");
 
             // returning predictions
             return predictions;

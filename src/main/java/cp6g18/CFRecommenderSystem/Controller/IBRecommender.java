@@ -1,12 +1,10 @@
 package cp6g18.CFRecommenderSystem.Controller;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Map.Entry;
 
 import cp6g18.CFRecommenderSystem.Model.IBTrainingDataset;
-import cp6g18.CFRecommenderSystem.Model.Tuple;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -22,7 +20,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
     // CONSTANTS //
     private static final int SIGNIFICANCE_VALUE = 50; // TODO
     private static final float MIN_SIMILARITY = 0.0f; // TODO
-    private static final int K = 100; // TODO
+    private static final int K = 200; // TODO
 
     //////////////////
     // INITIALISING //
@@ -162,27 +160,21 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
         //////////////////////////////
 
         // gathering user and item averages
-        Float averageUserRating = this.getTrainingDataset().getAverageUserRatings().get(userID);
-        Float averageItemRating = this.getTrainingDataset().getAverageItemRatings().get(itemID);
+        Float averageUserRating = this.getTrainingDataset().getAverageUserRating(userID);
+        Float averageItemRating = this.getTrainingDataset().getAverageItemRating(itemID);
 
         // USER AND ITEM COLD START //
         if(averageUserRating == null && averageItemRating == null){
-            System.out.println("Cold start for User " + userID + " and item " + itemID);
-
             // return sensible value - average rating across all items
             return this.getTrainingDataset().getDatasetAverageRating();
         }
         // USER COLD START //
         else if(averageUserRating == null){
-            System.out.println("Cold start for User " + userID);
-
             // return sensible value - average rating of item
             return averageItemRating;
         }
         // ITEM COLD START //
         else if(averageItemRating == null){
-            System.out.println("Cold start for item " + itemID);
-
             // return sensible value - average rating of user
             return averageUserRating;
         }
@@ -192,7 +184,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
         /////////////////
 
         // variable to store prediction
-        Float prediction = 1f; // base recommendation = 1.0 - the lowest possible rating.
+        Float prediction = 1f; // base recommendation = 1.0 (the lowest possible rating).
 
         // getting neighbourhood of similar items
         //ArrayList<Entry<Integer, Float>> similarItems = this.getModel().getKNearestSimilaritiesForObject(itemID, IBRecommender.K);
@@ -213,7 +205,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
             // gathering item ID and similatity value
             int similarItemID = similarItem.getKey();
             Float similarityOfSimilarItem = similarItem.getValue();
-            float similarItemAverageRating = this.getTrainingDataset().getAverageItemRatings().get(similarItemID);
+            float similarItemAverageRating = this.getTrainingDataset().getAverageItemRating(similarItemID);
 
             // // CHECKING FOR DISSIMILARITY //
             if(similarityOfSimilarItem <= IBRecommender.MIN_SIMILARITY){
@@ -239,15 +231,13 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
 
         // USER HAS NOT RATED ANY SIMILAR ITEMS //
         if(denominator == 0 && numerator == 0){
-            System.out.println("User " + userID + " has not rated any of the items similar to item " + itemID);
-
             // return sensble prediction - average of average rating of user and average rating of item
             return ((averageItemRating + averageUserRating) / 2); 
         }
 
         // getting final results
         prediction = averageItemRating + (numerator / denominator);
-
+        
         //////////////
         // RETURING //
         //////////////
