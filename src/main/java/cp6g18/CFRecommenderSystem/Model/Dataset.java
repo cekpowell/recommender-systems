@@ -17,6 +17,23 @@ import java.util.Set;
  */
 public abstract class Dataset implements Serializable{
 
+    // member variables
+    private int minTimestamp; // minimum timestamp value seen in the dataset
+    private int maxTimestamp; // maximum timestamp value seen in the dataset
+
+    //////////////////
+    // INITIALIZING //
+    //////////////////
+
+    /**
+     * Class constructor
+     */
+    public Dataset(){
+        // initializing
+        this.minTimestamp = Integer.MAX_VALUE;
+        this.maxTimestamp = Integer.MIN_VALUE;
+    }
+
     //////////////////////////////
     // ADDING RATING TO DATASET //
     //////////////////////////////
@@ -30,6 +47,21 @@ public abstract class Dataset implements Serializable{
      * @param timestamp
      */
     public abstract void addRating(int userID, int itemID, float itemRating, int timestamp);
+
+    /**
+     * // TODO
+     * 
+     * @param timestamp
+     */
+    public void updateMaxAndMinTimestamps(int timestamp){
+        if(timestamp > this.maxTimestamp){
+            this.maxTimestamp = timestamp;
+        }
+
+        if(timestamp < this.minTimestamp){
+            this.minTimestamp = timestamp;
+        }
+    }
 
     ////////////////////
     // HELPER METHODS //
@@ -68,5 +100,27 @@ public abstract class Dataset implements Serializable{
 
         // returning common elements
         return commonElements;
+    }
+
+    /////////////////////////
+    // GETTERS AND SETTERS //
+    /////////////////////////
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public int getMinTimestamp(){
+        return this.minTimestamp;
+    }
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public int getMaxTimestamp(){
+        return this.maxTimestamp;
     }
 }

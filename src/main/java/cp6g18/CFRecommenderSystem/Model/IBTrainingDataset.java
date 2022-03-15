@@ -45,27 +45,11 @@ public class IBTrainingDataset extends TrainingDataset{
         // adding this rating to the user's ratings
         itemRatings.put(userID, new Tuple<Float, Integer>(rating, timestamp));
 
-        /////////////////////////
-        // INCREMENTING TOTALS //
-        /////////////////////////
+        // updating total user ratings
+        this.updateTotalRatings(userID, itemID, rating);
 
-        // incrementing total user rating
-        Tuple<Integer, Float> totalUserRating = this.getTotalUserRatings().get(userID);
-        if(totalUserRating == null){
-            totalUserRating = new Tuple<Integer, Float>(0, 0f);
-            this.getTotalUserRatings().put(userID, totalUserRating);
-        }
-        totalUserRating.first++;
-        totalUserRating.second += rating;
-
-        // incrementing item total rating
-        Tuple<Integer, Float> totalItemRating = this.getTotalItemRatings().get(itemID);
-        if(totalItemRating == null){
-            totalItemRating = new Tuple<Integer, Float>(0, 0f);
-            this.getTotalItemRatings().put(itemID, totalItemRating);
-        }
-        totalItemRating.first++;
-        totalItemRating.second += rating;
+        // updating maximum and minimum timestamps
+        this.updateMaxAndMinTimestamps(timestamp);
     }
 
     ///////////////////////////////////
@@ -175,5 +159,23 @@ public class IBTrainingDataset extends TrainingDataset{
         catch(NullPointerException e){
             return null;
         } 
+    }
+
+    /**
+     * // TODO
+     * 
+     * @param userID
+     * @param itemID
+     * @return 
+     */
+    public Integer getTimestampOfRating(int userID, int itemID){
+        try{
+            // returning the rating's timestamp
+            return (this.getData().get(itemID).get(userID).second);
+        }        
+        // rating does not exist
+        catch(NullPointerException e){
+            return null;
+        }
     }
 }

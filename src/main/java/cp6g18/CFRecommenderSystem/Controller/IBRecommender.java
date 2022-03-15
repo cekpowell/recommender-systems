@@ -1,10 +1,12 @@
 package cp6g18.CFRecommenderSystem.Controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Map.Entry;
 
 import cp6g18.CFRecommenderSystem.Model.IBTrainingDataset;
+import cp6g18.CFRecommenderSystem.Model.Tuple;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -16,6 +18,11 @@ import cp6g18.CFRecommenderSystem.Model.IBTrainingDataset;
  * // TODO
  */
 public class IBRecommender extends Recommender<IBTrainingDataset>{
+
+    // CONSTANTS //
+    private static final int SIGNIFICANCE_VALUE = 50; // TODO
+    private static final float MIN_SIMILARITY = 0.0f; // TODO
+    private static final int K = 100; // TODO
 
     //////////////////
     // INITIALISING //
@@ -47,6 +54,9 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
          * - Calculate numerator of equation
          * - Calculator demoninator of equation
          * - return result
+         * 
+         * - Edge Cases:
+         *  - There are no users that have rated both items - similarity of zero.
          */
 
         /////////////////
@@ -107,6 +117,11 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
 
         similarity = numerator / denominator;
 
+        // DETERMINING SIGNIFICANCE //
+
+        // adjusting similarity based on number of common users - items with less common users have lower similarities (https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf
+        similarity *= (float) Math.min(commonUsers.size(), IBRecommender.SIGNIFICANCE_VALUE) / IBRecommender.SIGNIFICANCE_VALUE;
+
         //////////////////////
         // RETURNING RESULT //
         //////////////////////
@@ -125,40 +140,64 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
      * @param model
      * @param userID
      * @param itemID
+     * @param timestamp
      * @return
      */
-    protected float makePrediction(int userID, int itemID){
+    protected float makePrediction(int userID, int itemID, int timestamp){
 
         /**
-         * Things that could go wrong:
-         * - GENERAL:
-         *  - Item cold start - This item has not been seen before, so there are no similar itms.
-         *      - Return sensible prediction for the item (i.e., user average rating).
-         *  - User cold start - This user has not rated any items.
-         *      - Return sensible prediction for the item (i.e., item average rating).
-         * - Both user and item have not been seen before
-         *      - Return sensble prediction for the item (e.g., average rating of all items/all users)
-         * - WHEN LOOPING THROUGH SIMILAR ITEMS:
-         *  - The similar item has a negative similarity.
-         *  - The user hasnt rated the similar item.
+         * Edge Cases:
+         *  - General:
+         *      - Item Cold start - the item has not been seen before, so there are no similar items.
+         *      - User Cold Start - The user has not been seen before, so there are no ratings for them.
+         *      - User and Item Cold Start
+         *      - User has not rated any of the similar items.
+         *  - When looping through similar items:
+         *      - Item has negative similarity
+         *      - The user has not rated the similar item.
          */
+
+        //////////////////////////////
+        // CHECKING FOR COLD STARTS //
+        //////////////////////////////
+
+        // gathering user and item averages
+        Float averageUserRating = this.getTrainingDataset().getAverageUserRatings().get(userID);
+        Float averageItemRating = this.getTrainingDataset().getAverageItemRatings().get(itemID);
+
+        // USER AND ITEM COLD START //
+        if(averageUserRating == null && averageItemRating == null){
+            System.out.println("Cold start for User " + userID + " and item " + itemID);
+
+            // return sensible value - average rating across all items
+            return this.getTrainingDataset().getDatasetAverageRating();
+        }
+        // USER COLD START //
+        else if(averageUserRating == null){
+            System.out.println("Cold start for User " + userID);
+
+            // return sensible value - average rating of item
+            return averageItemRating;
+        }
+        // ITEM COLD START //
+        else if(averageItemRating == null){
+            System.out.println("Cold start for item " + itemID);
+
+            // return sensible value - average rating of user
+            return averageUserRating;
+        }
 
         /////////////////
         // PREPERATION //
         /////////////////
 
         // variable to store prediction
-        Float prediction = 1f; // TODO what should the base recommendation be? 1 because 0 rating is not possible ?
+        Float prediction = 1f; // base recommendation = 1.0 - the lowest possible rating.
 
-        // getting simiilarity to other ites
+        // getting neighbourhood of similar items
+        //ArrayList<Entry<Integer, Float>> similarItems = this.getModel().getKNearestSimilaritiesForObject(itemID, IBRecommender.K);
+        //ArrayList<Entry<Integer, Float>> similarItems = this.getModel().getSortedSimilaritiesForObject(itemID);
         HashMap<Integer, Float> similarItems = this.getModel().getSimilaritiesForObject(itemID);
-
-        // CHECKING FOR ITEM COLD START //
-        if(similarItems == null){
-            System.out.println("Cold start for ITEM " + itemID);
-
-            return 0f; // TODO return sensible prediction - e.g., user's average rating
-        }
 
         // variables to store sums
         float numerator = 0f;
@@ -170,43 +209,44 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
 
         // iterating through items
         for(Entry<Integer, Float> similarItem : similarItems.entrySet()){
+
+            // gathering item ID and similatity value
             int similarItemID = similarItem.getKey();
             Float similarityOfSimilarItem = similarItem.getValue();
+            float similarItemAverageRating = this.getTrainingDataset().getAverageItemRatings().get(similarItemID);
 
-            // CHECKING FOR DISSIMILARITY //
-            if(similarityOfSimilarItem <= 0){
+            // // CHECKING FOR DISSIMILARITY //
+            if(similarityOfSimilarItem <= IBRecommender.MIN_SIMILARITY){
                 // dont want to consider items that are not similar
-                // within the prediction
                 continue;
             }
-
-            // NUMERATOR //
 
             // getting user rating of this item
             Float userRatingOfSimilarItem = this.getTrainingDataset().getUserRatingOfItem(userID, similarItemID);
 
-            // CHECKING USER HAS RATED SIMILAR ITEM //
+            // checking user has rated similar item
             if(userRatingOfSimilarItem == null){
-                // cant include this item if the user has not rated it // TODO use the item's average rating instead
+                // using user's average rating instead
                 continue;
             }
 
-            // addding to numerator
-            numerator += ((float) similarityOfSimilarItem * userRatingOfSimilarItem);
+            // incrementing numerator
+            numerator += ((float) similarityOfSimilarItem * (userRatingOfSimilarItem - similarItemAverageRating));
 
-            // DENOMINATOR //
-
-            // adding to denominator
-            denominator += similarityOfSimilarItem;
+            // incrementing denominator
+            denominator += Math.abs(similarityOfSimilarItem);
         }
 
-        // CHECKING FOR USER COLD START // (if denominator and numerator are both zero, they were nevr incremented cus the user had no ratings, thus it is user cold start)
+        // USER HAS NOT RATED ANY SIMILAR ITEMS //
         if(denominator == 0 && numerator == 0){
-            return 0f; // TODO return sensble prediction - i.e., average rating of item.
+            System.out.println("User " + userID + " has not rated any of the items similar to item " + itemID);
+
+            // return sensble prediction - average of average rating of user and average rating of item
+            return ((averageItemRating + averageUserRating) / 2); 
         }
 
         // getting final results
-        prediction = numerator / denominator;
+        prediction = averageItemRating + (numerator / denominator);
 
         //////////////
         // RETURING //

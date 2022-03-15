@@ -33,6 +33,11 @@ public class Tuple<T,S> implements Serializable{
         this.second = second;
     }
 
+    /**
+     * Default constructor.
+     */
+    public Tuple(){}
+
     ////////////////////
     // HELPER METHODS //
     ////////////////////

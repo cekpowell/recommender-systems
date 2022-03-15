@@ -26,7 +26,7 @@ public class UBTrainingDataset extends TrainingDataset{
      * @param itemRating
      * @param timestamp
      */
-    public void addRating(int userID, int itemID, float itemRating, int timestamp){
+    public void addRating(int userID, int itemID, float rating, int timestamp){
         ///////////////////
         // ADDING RATING //
         ///////////////////
@@ -41,29 +41,13 @@ public class UBTrainingDataset extends TrainingDataset{
         }
 
         // adding this rating to the user's ratings
-        userRatings.put(itemID, new Tuple<Float, Integer>(itemRating, timestamp));
+        userRatings.put(itemID, new Tuple<Float, Integer>(rating, timestamp));
 
-        /////////////////////////
-        // INCREMENTING TOTALS //
-        /////////////////////////
+        // updating total user ratings
+        this.updateTotalRatings(userID, itemID, rating);
 
-        // incrementing total user rating
-        Tuple<Integer, Float> totalUserRating = this.getTotalUserRatings().get(userID);
-        if(totalUserRating == null){
-            totalUserRating = new Tuple<Integer, Float>(0, 0f);
-            this.getTotalUserRatings().put(userID, totalUserRating);
-        }
-        totalUserRating.first++;
-        totalUserRating.second += itemRating;
-
-        // incrementing item total rating
-        Tuple<Integer, Float> totalItemRating = this.getTotalItemRatings().get(itemID);
-        if(totalItemRating == null){
-            totalItemRating = new Tuple<Integer, Float>(0, 0f);
-            this.getTotalItemRatings().put(itemID, totalItemRating);
-        }
-        totalItemRating.first++;
-        totalItemRating.second += itemRating;
+        // updating maximum and minimum timestamps
+        this.updateMaxAndMinTimestamps(timestamp);
     }
 
     ///////////////////////////////////
@@ -146,5 +130,23 @@ public class UBTrainingDataset extends TrainingDataset{
     public Float getUserRatingOfItem(int userID, int itemID){
         // TODO
         return null;
+    }
+
+    /**
+     * // TODO
+     * 
+     * @param userID
+     * @param itemID
+     * @return 
+     */
+    public Integer getTimestampOfRating(int userID, int itemID){
+        try{
+            // returning the rating's timestamp
+            return (this.getData().get(userID).get(itemID).second);
+        }        
+        // rating does not exist
+        catch(NullPointerException e){
+            return null;
+        }
     }
 }

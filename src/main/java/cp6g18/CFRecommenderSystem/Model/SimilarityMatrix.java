@@ -2,7 +2,15 @@ package cp6g18.CFRecommenderSystem.Model;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @module  COMP3208: Social Computing Techniques
@@ -107,6 +115,64 @@ public class SimilarityMatrix {
      */
     public HashMap<Integer, Float> getSimilaritiesForObject(int objectID){
         return this.similarities.get(objectID);
+    }
+
+    /**
+     * // TODO
+     * 
+     * @param objectID
+     * @param k
+     * @return
+     */
+    public ArrayList<Entry<Integer, Float>> getSortedSimilaritiesForObject(int objectID) { 
+        // getting all similarities
+        HashMap<Integer, Float> similarities = this.similarities.get(objectID);
+
+        // copying entry set into list
+        ArrayList<Entry<Integer, Float>> listOfSimilarities = new ArrayList<Entry<Integer, Float>>(similarities.entrySet());
+
+        // sorting list using custom comparator
+        Collections.sort(listOfSimilarities, new Comparator<Entry<Integer,Float>>() {
+            public int compare(Entry<Integer,Float> o1, Entry<Integer,Float> o2) {
+                return ((o2)).getValue().compareTo((o1).getValue());
+            }
+        });
+
+        // returning k most similar objects
+        return listOfSimilarities;
+    }
+
+    /**
+     * // TODO
+     * 
+     * @param objectID
+     * @param k
+     * @return
+     */
+    public ArrayList<Entry<Integer, Float>> getKNearestSimilaritiesForObject(int objectID, int k) { 
+        // getting all similarities
+        HashMap<Integer, Float> similarities = this.similarities.get(objectID);
+
+        // copying entry set into list
+        LinkedList<Entry<Integer, Float>> listOfSimilarities = new LinkedList<Entry<Integer, Float>>(similarities.entrySet());
+
+        // sorting list using custom comparator
+        Collections.sort(listOfSimilarities, new Comparator<Entry<Integer,Float>>() {
+            public int compare(Entry<Integer,Float> o1, Entry<Integer,Float> o2) {
+                return ((o2)).getValue().compareTo((o1).getValue());
+            }
+        });
+ 
+        // new list to storefor k most similar similarites
+        ArrayList<Entry<Integer, Float>> kNearestSimilarities = new ArrayList<Entry<Integer, Float>>();
+
+        // copying K entries into a list
+        for(int i = 0; i < k; i++){
+            kNearestSimilarities.add(listOfSimilarities.get(i));
+        }
+
+        // returning k most similar objects
+        return kNearestSimilarities;
     }
 
     ////////////////////

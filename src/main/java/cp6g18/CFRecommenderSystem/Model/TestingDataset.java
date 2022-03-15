@@ -16,8 +16,6 @@ public class TestingDataset extends Dataset{
 
     // member variables
     private ArrayList<Rating> data; // TODO
-    private HashMap<Integer, Tuple<Integer, Float>> totalUserRatings; // {userID -> (numberOfRatings given by user, total rating given by user)}
-    private HashMap<Integer, Tuple<Integer, Float>> totalItemRatings; // {itemID -> (number of ratings given to item, total rating given to item)}
 
     //////////////////
     // INITIALIZING //
@@ -31,8 +29,6 @@ public class TestingDataset extends Dataset{
     public TestingDataset(){
         // initializing
         this.data = new ArrayList<Rating>();
-        this.totalUserRatings = new HashMap<Integer, Tuple<Integer, Float>>();
-        this.totalItemRatings = new HashMap<Integer, Tuple<Integer, Float>>();
     }
 
     ////////////////////////////////
@@ -54,25 +50,8 @@ public class TestingDataset extends Dataset{
         // adding rating object to dataset
         this.data.add(rating);
 
-        // INCREMENTING TOTALS //
-
-        // incrementing total user rating
-        Tuple<Integer, Float> totalUserRating = this.totalUserRatings.get(userID);
-        if(totalUserRating == null){
-            totalUserRating = new Tuple<Integer, Float>(0, 0f);
-            this.totalUserRatings.put(userID, totalUserRating);
-        }
-        totalUserRating.first++;
-        totalUserRating.second += itemRating;
-
-        // incrementing item total rating
-        Tuple<Integer, Float> totalItemRating = this.totalItemRatings.get(itemID);
-        if(totalItemRating == null){
-            totalItemRating = new Tuple<Integer, Float>(0, 0f);
-            this.totalItemRatings.put(itemID, totalItemRating);
-        }
-        totalItemRating.first++;
-        totalItemRating.second += itemRating;
+        // updating maximum and minimum timestamps
+        this.updateMaxAndMinTimestamps(timestamp);
     }
 
     ///////////////////////////////////

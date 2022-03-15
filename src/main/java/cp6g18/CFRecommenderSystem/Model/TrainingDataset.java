@@ -17,6 +17,7 @@ public abstract class TrainingDataset extends Dataset{
 
     // member variables
     private HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>> data; // {user ID -> {item ID -> (rating,timestamp)}} OR {item ID -> {user ID -> (rating,timestamp)}}.
+    private Tuple<Float, Integer> totalDatasetRating; // (total rating in dataset, number of ratings in dataset)
     private HashMap<Integer, Tuple<Integer, Float>> totalUserRatings; // {userID -> (numberOfRatings given by user, total rating given by user)}
     private HashMap<Integer, Tuple<Integer, Float>> totalItemRatings; // {itemID -> (number of ratings given to item, total rating given to item)}
 
@@ -30,6 +31,7 @@ public abstract class TrainingDataset extends Dataset{
     public TrainingDataset(){
         // initializing
         this.data = new HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>>();
+        this.totalDatasetRating = new Tuple<Float, Integer>();
         this.totalUserRatings = new HashMap<Integer, Tuple<Integer, Float>>();
         this.totalItemRatings = new HashMap<Integer, Tuple<Integer, Float>>();
     }
@@ -47,6 +49,33 @@ public abstract class TrainingDataset extends Dataset{
      * @param timestamp
      */
     public abstract void addRating(int userID, int itemID, float rating, int timestamp);
+
+    /**
+     * // TODO
+     * 
+     * @param userID
+     * @param itemID
+     * @param rating
+     */
+    public void updateTotalRatings(int userID, int itemID, float rating){
+        // incrementing total user rating
+        Tuple<Integer, Float> totalUserRating = this.getTotalUserRatings().get(userID);
+        if(totalUserRating == null){
+            totalUserRating = new Tuple<Integer, Float>(0, 0f);
+            this.getTotalUserRatings().put(userID, totalUserRating);
+        }
+        totalUserRating.first++;
+        totalUserRating.second += rating;
+
+        // incrementing item total rating
+        Tuple<Integer, Float> totalItemRating = this.getTotalItemRatings().get(itemID);
+        if(totalItemRating == null){
+            totalItemRating = new Tuple<Integer, Float>(0, 0f);
+            this.getTotalItemRatings().put(itemID, totalItemRating);
+        }
+        totalItemRating.first++;
+        totalItemRating.second += rating;
+    }
 
     ///////////////////////////////////
     // GETTING DATA FROM THE DATASET //
@@ -108,6 +137,28 @@ public abstract class TrainingDataset extends Dataset{
      * @return
      */
     public abstract Float getUserRatingOfItem(int userID, int itemID);
+
+    /**
+     * // TODO
+     * 
+     * @param userID
+     * @param itemID
+     * @return
+     */
+    public abstract Integer getTimestampOfRating(int userID, int itemID);
+
+    /**
+     * // TODO
+     * 
+     * @return
+     */
+    public Float getDatasetAverageRating(){
+        // calculating the average rating for the dataset.
+        float datasetAverageRating = this.totalDatasetRating.first / this.totalDatasetRating.second;
+
+        // returning the average rating for the dataset.
+        return datasetAverageRating;
+    }
 
     /**
      * // TODO
@@ -176,6 +227,14 @@ public abstract class TrainingDataset extends Dataset{
      */
     public HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>> getData(){
         return this.data;
+    }
+
+    /**
+     * // TODO
+     * @return
+     */
+    public Tuple<Float, Integer> getTotalDatasetRating(){
+        return this.totalDatasetRating;
     }
 
     /**

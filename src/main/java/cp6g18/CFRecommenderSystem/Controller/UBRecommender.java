@@ -55,9 +55,10 @@ public class UBRecommender extends Recommender<UBTrainingDataset>{
      * @param model
      * @param userID
      * @param itemID
+     * @param timestamp
      * @return
      */
-    protected float makePrediction(int userID, int itemID){
+    protected float makePrediction(int userID, int itemID, int timestamp){
         // TODO
         return 0f;
     }

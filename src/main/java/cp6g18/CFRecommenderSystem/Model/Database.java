@@ -3,6 +3,7 @@ package cp6g18.CFRecommenderSystem.Model;
 import java.io.File;
 import java.util.Random;
 
+import com.almworks.sqlite4java.SQLite;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteStatement;
 
@@ -39,14 +40,14 @@ public class Database{
     public Database(String databaseFilename) throws SQLiteException{
         // configuring SQLite4Java - necesarry because of this: https://github.com/aws-samples/aws-dynamodb-examples/issues/22
         System.out.println();
-        System.setProperty("sqlite4java.library.path", "src/main/resources/libs/");
+        SQLite.setLibraryPath("src/main/resources/libs/");
 
         // initializing
         this.databaseFilename = databaseFilename;
-        this.connection = new SQLiteConnection(new File(Database.class.getClassLoader().getResource(this.databaseFilename).getFile()));
+        this.connection = new SQLiteConnection(new File(this.databaseFilename));
 
         // connecting to database
-        this.open(false);
+        this.open(true);
     }
 
     /////////////////////////////////////////
@@ -168,7 +169,7 @@ public class Database{
 	 * @param tableName The name of the table to be added to the databaxse
      * @throws SQLiteException Thrown due to error with sqlite4java library.
 	 */
-	private void createTable(String tableName) throws SQLiteException{
+	public void createTable(String tableName) throws SQLiteException{
         // logging
         Logger.logProcessStart("Creating table '" + tableName + "' (if it does not yet exist, clearing it if it does) in database '" + this.databaseFilename + "'");
 
@@ -181,6 +182,23 @@ public class Database{
         // logging
         Logger.logProcessEnd("Successfully created table '" + tableName + "' in database '" + this.databaseFilename + "'");
 	}
+
+    /**
+     * Drops the provided table from the database if it exists.
+     * 
+     * @param tableName The name of the table being dropped from the database.
+     * @throws SQLiteException Thrown due to an error with sqlite4java library.
+     */
+    public void dropTable(String tableName)throws SQLiteException{
+        // logging
+        Logger.logProcessStart("Dropping table '" + tableName + "' from database '" + this.databaseFilename + "'");
+
+        // create the table if it does not exist
+        this.connection.exec("DROP TABLE IF EXISTS " + tableName);
+
+        // logging
+        Logger.logProcessEnd("Successfully dropped table '" + tableName + "' from database '" + this.databaseFilename + "'");
+    }
 
     /**
      * // TODO
@@ -217,7 +235,7 @@ public class Database{
         int count = 0;
 
         // incrementing count by random amount (to add randomness to generated sets)
-        count += new Random().nextInt(ratio);
+        //count += new Random().nextInt(ratio);
 
         ///////////////////////////////
         // ADDING DATA TO NEW TABLES //
@@ -256,8 +274,9 @@ public class Database{
                 newTrainingTableStatement.reset();
             }
             
-            // incrementing count
-            count++;
+            // incrementing count by 1 or 2 (to make training and testing sets more random)
+            int randomIncrement = new Random().nextInt(2) + 1;
+            count++;// randomIncrement;
         }
 
         // commiting changes (commiting all changes made since the last begin statement).

@@ -33,13 +33,18 @@ public class Evaluator {
      * @return
      */
     public static <T extends TrainingDataset> Evaluation evaluateRecommender(Recommender<T> recommender, T trainingDataset, Database database, String trainingTableName) throws Exception{
+
+        ///////////////
+        // PREPARING //
+        ///////////////
+
         // names for new training and testing tables
         String newTrainingTableName = "NEWtraining";
         String newTestingTableName = "NEWtesting";
-        String newTestingTableTruthsName = "NEWtestingTRUTHS";
+        String newTestingTruthsTableName = "NEWtestingTRUTHS";
 
         // creating new trainning and testing sets
-        database.createNewTrainingAndTestingTables(trainingTableName, newTrainingTableName, newTestingTableName, newTestingTableTruthsName, 10);
+        database.createNewTrainingAndTestingTables(trainingTableName, newTrainingTableName, newTestingTableName, newTestingTruthsTableName, 10);
 
         // loadinng new training set
         database.loadRatingsDataset(trainingDataset, newTrainingTableName);
@@ -50,7 +55,16 @@ public class Evaluator {
 
         // loading truths
         TestingDataset truths = new TestingDataset();
-        database.loadRatingsDataset(truths, newTestingTableTruthsName);
+        database.loadRatingsDataset(truths, newTestingTruthsTableName);
+
+        // dropping new training and testing tables from database
+        database.dropTable(newTrainingTableName);
+        database.dropTable(newTestingTableName);
+        database.dropTable(newTestingTruthsTableName);
+
+        ////////////////
+        // PREDICTING //
+        ////////////////
 
         // training recommender
         recommender.train(trainingDataset);
@@ -58,8 +72,16 @@ public class Evaluator {
         // making predictions
         TestingDataset predictions = recommender.makePredictions(testingDataset);
 
+        ////////////////
+        // EVALUATING //
+        ////////////////
+
         // gathering evaluation
         Evaluation evaluation = Evaluator.evaluatePredictions(predictions.getRatings(), truths.getRatings());
+
+        ///////////////
+        // RETURNING //
+        ///////////////
         
         // returning evaluation
         return evaluation;

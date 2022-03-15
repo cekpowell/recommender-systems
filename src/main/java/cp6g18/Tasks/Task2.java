@@ -27,14 +27,14 @@ import cp6g18.Tools.Logger;
 public class Task2 {
     
     // constants
-    private static final String DATBASE_FILENAME = "Task2" + File.separator + "database.db"; // the name of the database file storing the data
+    private static final String DATBASE_FILENAME = "data" + File.separator + "Task2" + File.separator + "database.db"; // the name of the database file storing the data
     private static final String TRAINING_TABLE_NAME = "training"; // the name of the table containing the training datas
     private static final String TESTING_TABLE_NAME = "testing"; // the name of the table containing the testing datas
 
-    private static final String TRAINING_FILE = "Task2" + File.separator + "training.csv"; // Name of file containing training ratings
-    private static final String TESTING_FILE = "Task2" + File.separator + "testing.csv"; // Name of file containing testing ratings
+    private static final String TRAINING_FILE = "data" + File.separator + "Task2" + File.separator + "training.csv"; // Name of file containing training ratings
+    private static final String TESTING_FILE = "data" + File.separator + "Task2" + File.separator + "testing.csv"; // Name of file containing testing ratings
 
-    private static final String RESULTS_FILE = "task2_results.csv"; // The name of the file the task 1 results will be written to
+    private static final String RESULTS_FILE = "out" + File.separator + "Task2/results.csv"; // The name of the file the task 1 results will be written to
 
     //////////////////
     // RUNNING TASK //

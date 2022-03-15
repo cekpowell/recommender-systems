@@ -20,9 +20,9 @@ import cp6g18.Tools.Logger;
 public abstract class Recommender<T extends TrainingDataset>{
 
     // member variables
-    private boolean isTrained;
     private T trainingDataset;
     private SimilarityMatrix model;
+    private boolean isTrained;
     
     //////////////////
     // INITIALIZING //
@@ -128,9 +128,10 @@ public abstract class Recommender<T extends TrainingDataset>{
                 // gathering needed information
                 int userID = rating.getUserID();
                 int itemID = rating.getItemID();
+                int timestamp = rating.getTimestamp();
 
                 // gathering predicted rating for this entry
-                float predictedRating = this.makePrediction(userID, itemID);
+                float predictedRating = this.makePrediction(userID, itemID, timestamp);
 
                 // adding new rating object to predictions
                 predictions.addRating(userID, itemID, predictedRating, rating.getTimestamp());
@@ -152,7 +153,7 @@ public abstract class Recommender<T extends TrainingDataset>{
      * @param itemID
      * @return
      */
-    protected abstract float makePrediction(int userID, int itemID);
+    protected abstract float makePrediction(int userID, int itemID, int timestamp);
 
     /////////////////////////
     // GETTERS AND SETTERS //
