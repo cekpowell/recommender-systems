@@ -13,14 +13,14 @@ import cp6g18.CFRecommenderSystem.Model.IBTrainingDataset;
  * 
  * -- DESCRIPTION -- 
  * 
- * // TODO
+ * TODO
  */
 public class IBRecommender extends Recommender<IBTrainingDataset>{
 
     // CONSTANTS //
     private static final int SIGNIFICANCE_VALUE = 50; // TODO
     private static final float MIN_SIMILARITY = 0.0f; // TODO
-    private static final int K = 200; // TODO
+    private static final float TEMPORAL_WEIGHT_FACTOR = 0.001f; // TODO
 
     //////////////////
     // INITIALISING //
@@ -39,7 +39,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
     /////////////////////////////
 
     /**
-     * // TODO
+     * TODO
      * 
      * @param trainingDataset
      * @param item1ID
@@ -87,18 +87,28 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
             // getting user's average rating
             float userAverageRating = userAverageRatings.get(user);
 
+            // getting timestamp of ratings
+            int item1RatingTimestamp = trainingDataset.getTimestampOfRating(user, item1ID);
+            int item2RatingTimestamp = trainingDataset.getTimestampOfRating(user, item2ID);
+
+            // weighting function
+            // f(t_ui) = e ^^ (-a (| t_uj - t_ui |))
+            // 0 < a < 1 - higher values of a = weight more sensitive to time, having a = 0 : no time consideration at all
+            float timeDif = Math.abs(item1RatingTimestamp - item2RatingTimestamp);
+            float temporalWeight = (float) Math.exp((-1 * IBRecommender.TEMPORAL_WEIGHT_FACTOR) * timeDif);
+
             // NUMERATOR //
 
             // numerator
-            numerator += (trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating) * (trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating);
+            numerator += ((trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating) * temporalWeight) * ((trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating) * temporalWeight);
 
             // DENOMINATOR //
 
             // lhs
-            denominatorLhs += (trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating) * (trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating);
+            denominatorLhs += ((trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating) * temporalWeight) * ((trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating) * temporalWeight);
 
             // rhs
-            denominatorRhs += (trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating) * (trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating);
+            denominatorRhs += ((trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating) * temporalWeight) * ((trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating) * temporalWeight);
         }
 
         // finalising calculations
@@ -106,7 +116,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
         denominatorRhs = (float) Math.sqrt((double) denominatorRhs);
         denominator = denominatorLhs * denominatorRhs;
 
-        // CHECKING FOR INVALID DENOMINATOR // denominator can have value of 0, which causes NaN error // TODO look as to why this can happen and what it means
+        // CHECKING FOR INVALID DENOMINATOR // denominator can have value of 0, which causes NaN error
         if(denominator == 0){
             return similarity;
         }
@@ -222,11 +232,20 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
                 continue;
             }
 
+            // gathering timestamp of the rating of the similar item
+            int timestampOfUserRatingOfSimilarItem = this.getTrainingDataset().getTimestampOfRating(userID, similarItemID);
+
+            // weighting function
+            // f(t_ui) = e ^^ (-a (| t_uj - t_ui |))
+            // 0 < a < 1 - higher values of a = weight more sensitive to time, having a = 0 : no time consideration at all
+            float timeDif = Math.abs(timestamp - timestampOfUserRatingOfSimilarItem);
+            float temporalWeight = (float) Math.exp((-1 * IBRecommender.TEMPORAL_WEIGHT_FACTOR) * timeDif);
+
             // incrementing numerator
-            numerator += ((float) similarityOfSimilarItem * (userRatingOfSimilarItem - similarItemAverageRating));
+            numerator += ((float) similarityOfSimilarItem * (userRatingOfSimilarItem - similarItemAverageRating) * temporalWeight);
 
             // incrementing denominator
-            denominator += Math.abs(similarityOfSimilarItem);
+            denominator += similarityOfSimilarItem * temporalWeight;
         }
 
         // USER HAS NOT RATED ANY SIMILAR ITEMS //

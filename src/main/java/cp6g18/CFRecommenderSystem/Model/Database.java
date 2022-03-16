@@ -235,7 +235,7 @@ public class Database{
         int count = 0;
 
         // incrementing count by random amount (to add randomness to generated sets)
-        count += new Random().nextInt(ratio);
+        //count += new Random().nextInt(ratio);
 
         ///////////////////////////////
         // ADDING DATA TO NEW TABLES //
@@ -275,8 +275,8 @@ public class Database{
             }
             
             // incrementing count by 1 or 2 (to make training and testing sets more random)
-            int randomIncrement = new Random().nextInt(2) + 1;
-            count += randomIncrement;
+            //int randomIncrement = new Random().nextInt(2) + 1;
+            count ++;//= randomIncrement;
         }
 
         // commiting changes (commiting all changes made since the last begin statement).
