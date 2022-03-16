@@ -1,5 +1,6 @@
 package cp6g18.CFRecommenderSystem.Controller;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import cp6g18.CFRecommenderSystem.Model.Database;
@@ -7,6 +8,7 @@ import cp6g18.CFRecommenderSystem.Model.Evaluation;
 import cp6g18.CFRecommenderSystem.Model.Rating;
 import cp6g18.CFRecommenderSystem.Model.TestingDataset;
 import cp6g18.CFRecommenderSystem.Model.TrainingDataset;
+import cp6g18.Tools.FileHandler;
 import cp6g18.Tools.Logger;
 
 /**
@@ -71,6 +73,10 @@ public class Evaluator {
 
         // making predictions
         TestingDataset predictions = recommender.makePredictions(testingDataset);
+
+
+        FileHandler.writeObjectToFileAsString(predictions, new File("Testoutput.csv"));
+        
 
         ////////////////
         // EVALUATING //

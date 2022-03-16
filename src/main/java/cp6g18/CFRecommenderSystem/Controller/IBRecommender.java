@@ -249,13 +249,18 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
         }
 
         // USER HAS NOT RATED ANY SIMILAR ITEMS //
-        if(denominator == 0 && numerator == 0){
+        if(denominator == 0){
             // return sensble prediction - average of average rating of user and average rating of item
             return ((averageItemRating + averageUserRating) / 2); 
         }
 
         // getting final results
         prediction = averageItemRating + (numerator / denominator);
+
+        if(userID == 410 && itemID == 609){
+            System.out.println(numerator);
+            System.out.println(denominator);
+        }
         
         //////////////
         // RETURING //
