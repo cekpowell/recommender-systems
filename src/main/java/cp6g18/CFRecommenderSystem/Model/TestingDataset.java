@@ -1,21 +1,19 @@
 package cp6g18.CFRecommenderSystem.Model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
+ * A dataset used for the purposes of storing the ratings for which a recommender must predict,
+ * and the results of these predictions.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public class TestingDataset extends Dataset{
 
     // member variables
-    private ArrayList<Rating> data; // TODO
+    private ArrayList<Rating> data; // The object used to store the dataset.
 
     //////////////////
     // INITIALIZING //
@@ -36,12 +34,12 @@ public class TestingDataset extends Dataset{
     ////////////////////////////////
 
     /**
-     * // TODO
+     * Adds the provided rating to the dataset.
      * 
-     * @param userID
-     * @param itemID
-     * @param itemRating
-     * @param timestamp
+     * @param userID The ID of the user who made the rating.
+     * @param itemID The ID of the item the rating is for.
+     * @param itemRating The rating given to the item.
+     * @param timestamp The timestamp of the rating.
      */
     public void addRating(int userID, int itemID, float itemRating, int timestamp){
         // creating rating object
@@ -49,9 +47,6 @@ public class TestingDataset extends Dataset{
 
         // adding rating object to dataset
         this.data.add(rating);
-
-        // updating maximum and minimum timestamps
-        this.updateMaxAndMinTimestamps(timestamp);
     }
 
     ///////////////////////////////////
@@ -59,9 +54,9 @@ public class TestingDataset extends Dataset{
     ///////////////////////////////////
 
     /**
-     * // TODO
+     * Getter method for the list of ratings stored in this dataset.
      * 
-     * @return
+     * @return The list of ratings stored in this dataset.
      */
     public ArrayList<Rating> getRatings(){
         // returning ratings
@@ -80,9 +75,9 @@ public class TestingDataset extends Dataset{
     }
 
     /**
-     * // TODO
+     * Converts the dataset to a string.
      * 
-     * @return 
+     * @return A string representation of the dataset.
      */
     public String toString(){
         // creating empty string object

@@ -3,19 +3,17 @@ package cp6g18.CFRecommenderSystem.Model;
 import java.io.Serializable;
 
 /**
+ * A Pair of items. The items do not have to be of the same type.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public class Tuple<T,S> implements Serializable{
 
     // member variables
-    public T first; // TODO
-    public S second; // TODO
+    public T first; // the first item in the pair.
+    public S second; // the second item in the pair.
 
     //////////////////
     // INITIALIZING //
@@ -24,8 +22,8 @@ public class Tuple<T,S> implements Serializable{
     /**
      * Class constructor.
      * 
-     * @param first
-     * @param second
+     * @param first The first item in the pair.
+     * @param second The second item in the pair.
      */
     public Tuple(T first, S second){
         // initializing
@@ -43,9 +41,9 @@ public class Tuple<T,S> implements Serializable{
     ////////////////////
 
     /**
-     * // TODO
+     * Converts the Tuple to a string.
      * 
-     * @return
+     * @return A String representation of the tuple.
      */
     @Override
     public String toString(){

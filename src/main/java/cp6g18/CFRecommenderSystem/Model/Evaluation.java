@@ -2,19 +2,19 @@ package cp6g18.CFRecommenderSystem.Model;
 
 
 /**
+ * Holds the result of the evaluation of a recommender system.
+ * 
+ * Stores the MSE, RMSE, MAE of the evaluation.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public class Evaluation {
-    // member variables (evaluation metrics)
-    private float mse;
-    private float rmse;
-    private float mae;
+    // member variables
+    private float mse; // the Mean Square Error in the predictions
+    private float rmse; // the Root Mean Square Error in the predictions
+    private float mae; // the Mean Absolute Error in the predictions
 
     //////////////////
     // INITIALIZING //

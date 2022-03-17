@@ -6,13 +6,14 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 /**
+ * An implementation of a TrainingDataset that stores data for the purposes of item-based
+ * collaborative filtering recommendations.
+ * 
+ * The data is stored as a mapping of {item -> {user -> (rating, timestamp)}}.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public class IBTrainingDataset extends TrainingDataset{
 
@@ -21,12 +22,12 @@ public class IBTrainingDataset extends TrainingDataset{
     ////////////////////////////////
 
     /**
-     * // TODO
+     * Adds the provided rating to the dataset.
      * 
-     * @param userID
-     * @param itemID
-     * @param itemRating
-     * @param timestamp
+     * @param userID The ID of the user who made the rating.
+     * @param itemID The ID of the item the rating is for.
+     * @param itemRating The rating given to the item.
+     * @param timestamp The timestamp of the rating.
      */
     public void addRating(int userID, int itemID, float rating, int timestamp){
         ///////////////////
@@ -47,9 +48,6 @@ public class IBTrainingDataset extends TrainingDataset{
 
         // updating total user ratings
         this.updateTotalRatings(userID, itemID, rating);
-
-        // updating maximum and minimum timestamps
-        this.updateMaxAndMinTimestamps(timestamp);
     }
 
     ///////////////////////////////////
@@ -57,9 +55,9 @@ public class IBTrainingDataset extends TrainingDataset{
     ///////////////////////////////////
 
     /**
-     * // TODO
+     * Returns the set of all users stored in the dataset.
      * 
-     * @return
+     * @return The set of all users (userIDs) stored in the datset.
      */
     public Set<Integer> getUsers(){
         // creating new set
@@ -77,9 +75,9 @@ public class IBTrainingDataset extends TrainingDataset{
     }
 
     /**
-     * // TODO
+     * Returns the set of all items stored in the dataset.
      * 
-     * @return
+     * @return The set of all items (itemIDs) stored in the datset.
      */
     public Set<Integer> getItems(){
         // returning the items
@@ -87,10 +85,10 @@ public class IBTrainingDataset extends TrainingDataset{
     }
 
     /**
-     * // TODO
+     * Returns the Set of all users who have rated a particular item.
      * 
-     * @param itemID
-     * @return
+     * @param itemID The ID of the item for which the users who have rated it are being gathered.
+     * @return The set of all users (user IDs) who have rated the item.
      */
     public Set<Integer> getUsersWhoRatedItem(int itemID){
         // returning the users
@@ -98,11 +96,11 @@ public class IBTrainingDataset extends TrainingDataset{
     }
 
     /**
-     * // TODO
+     * Returns the set of all users who have rated a pair of items.
      * 
-     * @param item1ID
-     * @param item2ID
-     * @return
+     * @param item1ID The first item the users must have rated. 
+     * @param item2ID The second item the users must have rated.
+     * @return The set of users (user IDs) who have rated both items.
      */
     public Set<Integer> getUsersWhoRatedItems(int item1ID, int item2ID){
         // returning the users
@@ -110,10 +108,10 @@ public class IBTrainingDataset extends TrainingDataset{
     }
 
     /**
-     * // TODO
+     * Returns the set of items rated by a particular user.
      * 
-     * @param userID
-     * @return
+     * @param userID The ID of the user who's ratings are being gathered.
+     * @return The set of items (item IDs) rated by the user.
      */
     public Set<Integer> getItemsRatedByUser(int userID){
         // creating new set
@@ -133,22 +131,22 @@ public class IBTrainingDataset extends TrainingDataset{
     }
 
     /**
-     * // TODO
+     * Returns the set of items rated by a pair of users.
      * 
-     * @param user1ID
-     * @param user2ID
-     * @return
+     * @param user1ID The first user who must have rated the items.
+     * @param user2ID The second user who must have rated the items.
+     * @return The set of items (item IDs) rated by both users.
      */
     public Set<Integer> getItemsRatedByUsers(int user1ID, int user2ID){
         return (Dataset.getCommonElements(this.getItemsRatedByUser(user1ID), this.getItemsRatedByUser(user2ID)));
     }
 
     /**
-     * // TODO
+     * Returns the user's rating of an item.
      * 
-     * @param userID
-     * @param itemID
-     * @return
+     * @param userID The ID of the user who gave the rating.
+     * @param itemID The ID of the item that was rated.
+     * @return The rating (float) given to the item by the user.
      */
     public Float getUserRatingOfItem(int userID, int itemID){
         try{
@@ -162,11 +160,11 @@ public class IBTrainingDataset extends TrainingDataset{
     }
 
     /**
-     * // TODO
+     * Returns the timestamp of a particular rating.
      * 
-     * @param userID
-     * @param itemID
-     * @return 
+     * @param userID The ID of the user who gave the rating.
+     * @param itemID The ID of the item that was rated.
+     * @return The timestamp of the rating (int).
      */
     public Integer getTimestampOfRating(int userID, int itemID){
         try{

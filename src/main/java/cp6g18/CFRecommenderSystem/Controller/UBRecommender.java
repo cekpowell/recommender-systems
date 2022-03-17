@@ -1,18 +1,15 @@
 package cp6g18.CFRecommenderSystem.Controller;
 
 import java.util.HashMap;
-import java.util.Set;
 
 import cp6g18.CFRecommenderSystem.Model.UBTrainingDataset;
 
 /**
+ * // TODO
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public class UBRecommender extends Recommender<UBTrainingDataset>{
 

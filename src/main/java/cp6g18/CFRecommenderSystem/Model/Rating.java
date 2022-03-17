@@ -3,24 +3,23 @@ package cp6g18.CFRecommenderSystem.Model;
 import java.io.Serializable;
 
 /**
+ * An instance of a rating within a TestingDataset - an object who's attributes are the information
+ * surrounding the rating.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public class Rating implements Serializable{
 
     // CONSTANTS //
-    public static final int UNRATED_ITEM_RATING = -1; // TODO
+    public static final int UNRATED_ITEM_RATING = -1; // The value assigned to a rating if no prediction has been made yet.
 
     // member variables
-    private int userID;
-    private int itemID;
-    private float rating;
-    private int timestamp;
+    private int userID; // The ID of the user who gave the rating.
+    private int itemID; // The ID of the item being rated.
+    private float rating; // The predicted rating given to the item (-1 if no prediction has been made yet).
+    private int timestamp; // The timestamp of the rating.
 
     //////////////////
     // INITIALIZING //
@@ -29,12 +28,10 @@ public class Rating implements Serializable{
     /**
      * Class constructor.
      * 
-     * // TODO
-     * 
-     * @param userID
-     * @param itemID
-     * @param rating
-     * @param timestamp
+     * @param userID The ID of the user who gave the rating.
+     * @param itemID The ID of the item being rated.
+     * @param rating The predicted rating given to the item (-1 if no prediction has been made yet).
+     * @param timestamp The timestamp of the rating.
      */
     public Rating(int userID, int itemID, float rating, int timestamp){
         // initializing
@@ -49,9 +46,9 @@ public class Rating implements Serializable{
     ////////////////////
 
     /**
-     * // TODO
+     * Determines if a prediction has been made for this Rating.
      * 
-     * @return
+     * @return True if a prediction has been made, false if not.
      */
     public boolean isUnrated(){
         return (this.rating == Rating.UNRATED_ITEM_RATING);
@@ -71,45 +68,45 @@ public class Rating implements Serializable{
     /////////////////////////
 
     /**
-     * // TODO
+     * Getter method for the ID of the user who gave the rating.
      * 
-     * @return
+     * @return The ID of the user who gave the rating.
      */
     public int getUserID(){
         return this.userID;
     }
 
     /**
-     * // TODO
+     * Getter method for the ID of the item the rating is for.
      * 
-     * @return
+     * @return The ID of the item the rating is for.
      */
     public int getItemID(){
         return this.itemID;
     }
 
     /**
-     * // TODO
+     * Getter method for the predicted rating given to the item.
      * 
-     * @return
+     * @return The predicted rating of the item, -1 if no prediction has been made yet.
      */
     public float getRating(){
         return this.rating;
     }
 
     /**
-     * // TODO
+     * Setter method for the predicted rating.
      * 
-     * @param rating
+     * @param rating The predicted rating for this rating.
      */
     public void setRating(float rating){
         this.rating = rating;
     }
 
     /**
-     * // TODO
+     * Getter method for the timestamp of the rating.
      * 
-     * @return
+     * @return The timestamp of the rating.
      */
     public int getTimestamp(){
         return this.timestamp;

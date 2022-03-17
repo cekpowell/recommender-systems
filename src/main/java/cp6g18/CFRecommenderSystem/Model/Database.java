@@ -6,25 +6,22 @@ import java.util.Random;
 import com.almworks.sqlite4java.SQLite;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteStatement;
+import com.almworks.sqlite4java.SQLiteException;
 
 import cp6g18.Tools.Logger;
 
-import com.almworks.sqlite4java.SQLiteException;
-
 /**
+ * An interface to an SQLite Database through the sqlite4java package.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public class Database{ 
 
     // member variables
-    private String databaseFilename; // TODO
-    private SQLiteConnection connection; // TODO
+    private String databaseFilename; // The name of the file of the associated database.
+    private SQLiteConnection connection; // The Connection to the database.
 
     //////////////////
     // INITIALIZING //
@@ -35,7 +32,7 @@ public class Database{
      * thrown if no database with this filename exists.
      * 
      * @param databaseFilename The name of the database file. 
-     * @throws SQLiteException // TODO
+     * @throws SQLiteException If it is not possible to connect to the database.
      */
     public Database(String databaseFilename) throws SQLiteException{
         // configuring SQLite4Java - necesarry because of this: https://github.com/aws-samples/aws-dynamodb-examples/issues/22
@@ -102,10 +99,11 @@ public class Database{
     ///////////////////////////////////////////
 
     /**
-     * // TODO
+     * Loads a dataset from the provided table name into the provided Dataset object.
      * 
-     * @param dataset
-     * @param tableName
+     * @param dataset The Dataset object the dataset will be loaded into.
+     * @param tableName The name of the database table the dataset will be loaded from.
+     * @throws SQLiteException If an error occurs with the sqlite4java package.
      */
     public void loadRatingsDataset(Dataset dataset, String tableName) throws SQLiteException{
         /////////////////
@@ -201,16 +199,21 @@ public class Database{
     }
 
     /**
-     * // TODO
+     * Creates set of new training and testing datasets (along with the ground truths) within the
+     * database using the provided information.
      * 
-     * @param originalTrainingTableName
-     * @param newTrainingTableName
-     * @param newTestingTableName
-     * @param ratio
-     * @throws SQLiteException
+     * @param originalTrainingTableName The name of the table that the new training and testing
+     * datasets will be constructed from.
+     * @param newTrainingTableName The name of the table that the new training dataset will be
+     * stored within.
+     * @param newTestingTableName The name of the table that the new testing dataset will be stored
+     * in.
+     * @param ratio The split between the new training and testing datasets. 1 in every ratio amount
+     * of data items within the original training dataset will be placed in the new testing dataset,
+     * and the remainder will be placed in the new training dataset.
+     * @throws SQLiteException If there is an error with the sqlite4java package.
      */
 	public void createNewTrainingAndTestingTables(String originalTrainingTableName, String newTrainingTableName, String newTestingTableName, String newTestingTableTruthsName, int ratio) throws SQLiteException{
-
         // logging
         Logger.logProcessStart("Creating new training and testing tables in database '" + this.databaseFilename + "' from table '" + originalTrainingTableName + "'");
 
@@ -235,7 +238,7 @@ public class Database{
         int count = 0;
 
         // incrementing count by random amount (to add randomness to generated sets)
-        //count += new Random().nextInt(ratio);
+        count += new Random().nextInt(ratio);
 
         ///////////////////////////////
         // ADDING DATA TO NEW TABLES //
@@ -275,8 +278,8 @@ public class Database{
             }
             
             // incrementing count by 1 or 2 (to make training and testing sets more random)
-            //int randomIncrement = new Random().nextInt(2) + 1;
-            count ++;//= randomIncrement;
+            int randomIncrement = new Random().nextInt(2) + 1;
+            count += randomIncrement;
         }
 
         // commiting changes (commiting all changes made since the last begin statement).
@@ -301,7 +304,10 @@ public class Database{
 ////////////////////
 
 /**
- * // TODO
+ * Represents the schema of the database. 
+ * 
+ * Each type within the enum represents a column within the database, and stores the information
+ * about this column.
  */
 enum RatingsDatabaseSchema{
     // TYPES // (Each type is a database column)
@@ -331,10 +337,10 @@ enum RatingsDatabaseSchema{
     );
 
     // MEMBER VARIABLES // (information about the columns)
-    private String colName; // TODO
-    private String colDataType; // TODO
-    private int colID; // TODO
-    private int colIndex; // TODO
+    private String colName; // The name of the column
+    private String colDataType; // the datatype of the column
+    private int colID; // The column id of the column
+    private int colIndex; // The index of the column within a list (i.e., ID - 1).
 
     //////////////////
     // INITIALIZING //
@@ -361,9 +367,10 @@ enum RatingsDatabaseSchema{
     ////////////////////////////
 
     /**
-     * // TODO
+     * Helper method to construct the database schema string from theinformation stored
+     * in the enum.
      * 
-     * @return
+     * @return A string that represents the schema of the database.
      */
     public static String getSchemaString(){
         return ("( " + 
@@ -379,36 +386,36 @@ enum RatingsDatabaseSchema{
     /////////////////////////
 
     /**
-     * // TODO
+     * Getter method for the name of the column.
      * 
-     * @return
+     * @return The name of the column
      */
     public String getColName(){
         return this.colName;
     }
 
     /**
-     * // TODO
+     * Getter method for the data type of the column.
      * 
-     * @return
+     * @return The datatype of a particular column.
      */
     public String getColDataType(){
         return this.colDataType;
     }
 
     /**
-     * // TODO
+     * Getter method for the ID of a column.
      * 
-     * @return
+     * @return The ID of a column.
      */
     public int getColID(){
         return this.colID;
     }
 
     /**
-     * // TODO
+     * Getter method for the index of a column.
      * 
-     * @return
+     * @return The index of a column.
      */
     public int getColIndex(){
         return this.colIndex;

@@ -4,13 +4,11 @@ import cp6g18.Tasks.Task1;
 import cp6g18.Tasks.Task2;
 
 /**
+ * Main class for application - used to run the individual tasks.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * Main class for application - used to run the individual tasks.
  */
 public class App 
 {

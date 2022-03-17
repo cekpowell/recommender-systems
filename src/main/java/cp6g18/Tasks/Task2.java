@@ -9,20 +9,13 @@ import cp6g18.CFRecommenderSystem.Model.TestingDataset;
 import cp6g18.Tools.FileHandler;
 import cp6g18.Tools.Logger;
 
-// package cp6g18.Tasks;
-
-// import java.io.File;
-
-// import cp6g18.RecommenderSystem.Model.Dataset.Dataset;
-
 /**
+ * Main Class for Task 2 - Trains an item-based recommender using a training dataset, and makes
+ * a set of predictions for a testing dataset.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * Main Class for Task 2 - \\ TODO
  */
 public class Task2 {
     

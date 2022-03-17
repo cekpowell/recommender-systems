@@ -10,14 +10,12 @@ import cp6g18.Tools.FileHandler;
 import cp6g18.Tools.Logger;
 
 /**
+ * Main Class for Task 1 - finds the MSE, RMSE and MAE for a set of predictions
+ * and truth ratings.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * Main Class for Task 1 - finds the MSE, RMSE and MAE for a set of predictions
- * and truth ratings.
  */
 public class Task1 {
     

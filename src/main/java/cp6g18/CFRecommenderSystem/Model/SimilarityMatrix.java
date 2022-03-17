@@ -1,25 +1,19 @@
 package cp6g18.CFRecommenderSystem.Model;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 /**
+ * A structure that records the similarity between a set of objects (either items or users 
+ * depending on the recommender system type).
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public class SimilarityMatrix {
     
@@ -42,11 +36,11 @@ public class SimilarityMatrix {
     /////////////////////////////////////
 
     /**
-     * // TODO
+     * Sets/replaces a similarity within the similarity matrix.
      * 
-     * @param object1ID
-     * @param object2ID
-     * @param similarity
+     * @param object1ID The first object associated with the similarity.
+     * @param object2ID The second object associated with the similarity.
+     * @param similarity The similarity between the two objects.
      */
     public void setSimilarity(int object1ID, int object2ID, float similarity){
 
@@ -74,11 +68,10 @@ public class SimilarityMatrix {
     }
 
     /**
-     * // TODO
+     * Removes a similarity from the similarity matrix if it is contained within the matrix.
      * 
-     * @param object1ID
-     * @param object1ID
-     * @return
+     * @param object1ID The ID of the first object associated with the similarity.
+     * @param object1ID The ID of the second object associated with the similarity.
      */
     public void removeSimilarity(int object1ID, int object2ID){
         // removing object 1 -> object 2 mapping
@@ -97,32 +90,33 @@ public class SimilarityMatrix {
     ///////////////////////////
 
     /**
-     * // TODO
+     * Getter method for the similarity between two objects.
      * 
-     * @param object1ID
-     * @param object2ID
-     * @return
+     * @param object1ID The first object associated with the similarity.
+     * @param object2ID The second object associated with the similarity.
+     * @return The similarity between the two objects.
      */
     public float getSimilarity(int object1ID, int object2ID ){
         return this.similarities.get(object1ID).get(object2ID);
     }
 
     /**
-     * // TODO
+     * Getter method for all similarities associated with a given object.
      * 
-     * @param objectID
-     * @return
+     * @param objectID The ID of the object who's similarities are being gathered.
+     * @return The similarity between this object and all other objects as a mapping of other
+     * objects to similarity value {object -> Similarity}.
      */
     public HashMap<Integer, Float> getSimilaritiesForObject(int objectID){
         return this.similarities.get(objectID);
     }
 
     /**
-     * // TODO
+     * Helper method that returns an objects similarities as a sorted list, in order of most to 
+     * least similar.
      * 
-     * @param objectID
-     * @param k
-     * @return
+     * @param objectID The ID of the object who's similarities are being gathered.
+     * @return The objects similarities to all other objects, sorted in most to least similar order.
      */
     public ArrayList<Entry<Integer, Float>> getSortedSimilaritiesForObject(int objectID) { 
         // getting all similarities
@@ -143,11 +137,11 @@ public class SimilarityMatrix {
     }
 
     /**
-     * // TODO
+     * Helper method that returns the K most similar objects to the given object.
      * 
-     * @param objectID
-     * @param k
-     * @return
+     * @param objectID The ID of the object who's similarities are being gathered.
+     * @param k The number of similar objects to be gathered.
+     * @return The k most similar objects.
      */
     public ArrayList<Entry<Integer, Float>> getKNearestSimilaritiesForObject(int objectID, int k) { 
         // getting all similarities
@@ -180,11 +174,12 @@ public class SimilarityMatrix {
     ////////////////////
 
     /**
-     * // TODO
+     * Determines if the similarity matrix contains a similarity value for a given pair of objects.
      * 
-     * @param object1ID
-     * @param object1ID
-     * @return
+     * @param object1ID The first object associated with the similarity.
+     * @param object1ID The second object associated with the similarity.
+     * @return True if the matrix contains a similarity value for the given pair of objects, false
+     * if not.
      */
     public boolean hasSimilarity(int object1ID, int object2ID){
         try{
@@ -204,9 +199,9 @@ public class SimilarityMatrix {
     }
 
     /**
-     * // TODO
+     * Converts the similarity matrix to a string.
      * 
-     * @return 
+     * @return String representation of the similarity matrix.
      */
     @Override
     public String toString(){

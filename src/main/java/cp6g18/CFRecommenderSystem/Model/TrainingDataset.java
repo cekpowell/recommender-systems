@@ -5,13 +5,12 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 /**
+ * A dataset used for the purposes of training a Recommender. The data is stored as a nested hashmap
+ * for quick access, and additional hashmaps are maintained for convenience.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public abstract class TrainingDataset extends Dataset{
 
@@ -41,21 +40,22 @@ public abstract class TrainingDataset extends Dataset{
     ////////////////////////////////
 
     /**
-     * // TODO
+     * Adds the provided rating to the dataset.
      * 
-     * @param userID
-     * @param itemID
-     * @param itemRating
-     * @param timestamp
+     * @param userID The ID of the user who made the rating.
+     * @param itemID The ID of the item the rating is for.
+     * @param itemRating The rating given to the item.
+     * @param timestamp The timestamp of the rating.
      */
     public abstract void addRating(int userID, int itemID, float rating, int timestamp);
 
     /**
-     * // TODO
+     * Updates the hashmaps that store a record of the total ratings for the dataset based on a
+     * new rating.
      * 
-     * @param userID
-     * @param itemID
-     * @param rating
+     * @param userID The ID of the user who made the rating.
+     * @param itemID The ID of the item being rated.
+     * @param rating The rating given to the item by the user.
      */
     public void updateTotalRatings(int userID, int itemID, float rating){
         // incrementing total user rating
@@ -82,73 +82,73 @@ public abstract class TrainingDataset extends Dataset{
     ///////////////////////////////////
 
     /**
-     * // TODO
+     * Returns the set of all users stored in the dataset.
      * 
-     * @return
+     * @return The set of all users (userIDs) stored in the datset.
      */
     public abstract Set<Integer> getUsers();
 
     /**
-     * // TODO
+     * Returns the set of all items stored in the dataset.
      * 
-     * @return
+     * @return The set of all items (itemIDs) stored in the datset.
      */
     public abstract Set<Integer> getItems();
 
     /**
-     * // TODO
+     * Returns the Set of all users who have rated a particular item.
      * 
-     * @param itemID
-     * @return
+     * @param itemID The ID of the item for which the users who have rated it are being gathered.
+     * @return The set of all users (user IDs) who have rated the item.
      */
     public abstract Set<Integer> getUsersWhoRatedItem(int itemID);
 
     /**
-     * // TODO
+     * Returns the set of all users who have rated a pair of items.
      * 
-     * @param item1ID
-     * @param item2ID
-     * @return
+     * @param item1ID The first item the users must have rated. 
+     * @param item2ID The second item the users must have rated.
+     * @return The set of users (user IDs) who have rated both items.
      */
     public abstract Set<Integer> getUsersWhoRatedItems(int item1ID, int item2ID);
 
     /**
-     * // TODO
+     * Returns the set of items rated by a particular user.
      * 
-     * @param userID
-     * @return
+     * @param userID The ID of the user who's ratings are being gathered.
+     * @return The set of items (item IDs) rated by the user.
      */
     public abstract Set<Integer> getItemsRatedByUser(int userID);
 
     /**
-     * // TODO
+     * Returns the set of items rated by a pair of users.
      * 
-     * @param user1ID
-     * @param user2ID
-     * @return
+     * @param user1ID The first user who must have rated the items.
+     * @param user2ID The second user who must have rated the items.
+     * @return The set of items (item IDs) rated by both users.
      */
     public abstract Set<Integer> getItemsRatedByUsers(int user1ID, int user2ID);
 
     /**
-     * // TODO
+     * Returns the user's rating of an item.
      * 
-     * @param userID
-     * @param itemID
-     * @return
+     * @param userID The ID of the user who gave the rating.
+     * @param itemID The ID of the item that was rated.
+     * @return The rating (float) given to the item by the user.
      */
     public abstract Float getUserRatingOfItem(int userID, int itemID);
 
     /**
-     * // TODO
+     * Returns the timestamp of a particular rating.
      * 
-     * @param userID
-     * @param itemID
-     * @return
+     * @param userID The ID of the user who gave the rating.
+     * @param itemID The ID of the item that was rated.
+     * @return The timestamp of the rating (int).
      */
     public abstract Integer getTimestampOfRating(int userID, int itemID);
 
     /**
-     * // TODO
+     * 
      * 
      * @return
      */
@@ -161,9 +161,9 @@ public abstract class TrainingDataset extends Dataset{
     }
 
     /**
-     * // TODO
+     * Returns a mapping of user ID's to average rating given by the user.
      * 
-     * @return
+     * @return A mapping of user ID's to average rating given by the user.
      */
     public HashMap<Integer, Float> getAverageUserRatings(){
         // creating new hashmap
@@ -179,10 +179,10 @@ public abstract class TrainingDataset extends Dataset{
     }
 
     /**
-     * // TODO
+     * Returns the average rating given by a user.
      * 
-     * @param userID
-     * @return
+     * @param userID The ID of the user for which the average rating is being gathered.
+     * @return The average rating given by the user.
      */
     public Float getAverageUserRating(int userID){
         try{
@@ -198,9 +198,9 @@ public abstract class TrainingDataset extends Dataset{
     }
 
     /**
-     * // TODO
+     * Returns a mapping of item IDs to their average rating.
      * 
-     * @return
+     * @return A mapping of item IDs to their average rating.
      */
     public HashMap<Integer, Float> getAverageItemRatings(){
         // creating new hashmap
@@ -216,10 +216,10 @@ public abstract class TrainingDataset extends Dataset{
     }
 
     /**
-     * // TODO
+     * Returns the average rating given to an item.
      * 
-     * @param itemID
-     * @return
+     * @param itemID The ID of the item for which the average rating is being gathered.
+     * @return The average rating given to the item.
      */
     public Float getAverageItemRating(int itemID){
         try{
@@ -246,9 +246,9 @@ public abstract class TrainingDataset extends Dataset{
     }
 
     /**
-     * // TODO
+     * Converts the dataset to a String.
      * 
-     * @return
+     * @return A String representation of the dataset.
      */
     public String toString(){
         return this.data.toString();
@@ -259,35 +259,37 @@ public abstract class TrainingDataset extends Dataset{
     /////////////////////////
 
     /**
-     * // TODO
+     * Getter method for the object that holds the dataset's data.
      * 
-     * @return
+     * @return The hashmap that stores the dataset's data.
      */
     public HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>> getData(){
         return this.data;
     }
 
     /**
-     * // TODO
-     * @return
+     * Getter method for the object that stores the information on the total rating stored in
+     * the dataset.
+     * 
+     * @return The Tuple that stores the total rating given within the dataset.
      */
     public Tuple<Float, Integer> getTotalDatasetRating(){
         return this.totalDatasetRating;
     }
 
     /**
-     * // TODO
+     * Getter method for the map that stores the total ratings given by each user.
      * 
-     * @return
+     * @return The map that stores the total ratings given by each user.
      */
     public HashMap<Integer, Tuple<Float, Integer>> getTotalUserRatings(){
         return this.totalUserRatings;
     }
 
     /**
-     * // TODO
+     * Getter method for the map that stores the total ratings given to each item.
      * 
-     * @return
+     * @return The map that stores the total ratings given to each item.
      */
     public HashMap<Integer, Tuple<Float, Integer>> getTotalItemRatings(){
         return this.totalItemRatings;

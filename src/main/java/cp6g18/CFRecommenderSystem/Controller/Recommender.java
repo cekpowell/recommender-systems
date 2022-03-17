@@ -8,21 +8,23 @@ import cp6g18.CFRecommenderSystem.Model.TestingDataset;
 import cp6g18.CFRecommenderSystem.Model.TrainingDataset;
 import cp6g18.Tools.Logger;
 
-/**
+/** 
+ * An abstract class that represents a type of recommender.
+ * 
+ * All recommenders are types based on the type of the underyling training dataset.
+ * 
+ * Defines methods for the training of the recommender, and its use to make predictions.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public abstract class Recommender<T extends TrainingDataset>{
 
     // member variables
-    private T trainingDataset;
-    private SimilarityMatrix model;
-    private boolean isTrained;
+    private T trainingDataset; // the training dataset used to train the recommender
+    private SimilarityMatrix model; // the model learnt from the training dataset
+    private boolean isTrained; // stores whether or not the recommender has been trained yet
     
     //////////////////
     // INITIALIZING //
@@ -43,9 +45,9 @@ public abstract class Recommender<T extends TrainingDataset>{
     /////////////////////
 
     /**
-     * // TODO
+     * Trains the recommender using the provided training dataset.
      * 
-     * @param trainingDataset
+     * @param trainingDataset The training dataset the recommender will be trained on.
      */
     public void train(T trainingDataset){
         // informing
@@ -97,25 +99,25 @@ public abstract class Recommender<T extends TrainingDataset>{
     }
 
     /**
-     * // TODO
+     * Gathers the similarity between two objects (i.e., items or users).
      * 
-     * @param trainingDataset
-     * @param item1ID
-     * @param item2ID
+     * @param trainingDataset The training dataset being used to determine the similarity.
+     * @param object1D The ID of the first object the similarity is being calculated for.
+     * @param object2ID The ID of the second object the similarity is being calclated for.
      * @return 
      */
-    protected abstract float getSimiarity(T trainingDataset, HashMap<Integer, Float> userAverageRatings, int item1ID, int item2ID);
+    protected abstract float getSimiarity(T trainingDataset, HashMap<Integer, Float> userAverageRatings, int object1ID, int object2ID);
 
     ////////////////////////
     // MAKING PREDICTIONS //
     ////////////////////////
 
     /**
-     * // TODO
+     * Makes predictions for the provided testing dataset using the trained system.
      * 
-     * @param dataset
-     * @return
-     * @throws
+     * @param dataset The testing dataset the predictions are being made for.
+     * @return A TestingDataset object that contains the predictions.
+     * @throws Exception If the recommender has not been trained yet.
      */
     public TestingDataset makePredictions(TestingDataset dataset) throws Exception{
         // logging
@@ -152,12 +154,11 @@ public abstract class Recommender<T extends TrainingDataset>{
     }
 
     /**
-     * // TODO
+     * Calculates a predicted rating for the provided user-item pair.
      * 
-     * @param model
-     * @param userID
-     * @param itemID
-     * @return
+     * @param userID The ID of the user in the rating.
+     * @param itemID The ID of the item in the rating.
+     * @return The predicted rating for the user-item pair.
      */
     protected abstract float makePrediction(int userID, int itemID, int timestamp);
 
@@ -166,23 +167,28 @@ public abstract class Recommender<T extends TrainingDataset>{
     /////////////////////////
 
     /**
-     * // TODO
+     * Getter method for the recommender's training dataset.
      * 
-     * @return
+     * @return The training dataset associated with this recommender.
      */
     public T getTrainingDataset(){
         return this.trainingDataset;
     }
 
     /**
-     * // TODO
+     * Getter method for the recommender's model.
      * 
-     * @return
+     * @return The model associated with this recommender.
      */
     public SimilarityMatrix getModel(){
         return this.model;
     }
 
+    /**
+     * Setter method for the recommender's model.
+     * 
+     * @param model The new model to be associated with this recommender.
+     */
     public void setModel(SimilarityMatrix model){
         this.model = model;
     }

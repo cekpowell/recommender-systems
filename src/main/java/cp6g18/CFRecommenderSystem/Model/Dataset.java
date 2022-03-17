@@ -1,91 +1,58 @@
 package cp6g18.CFRecommenderSystem.Model;
 
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * An abstract class that represents an dataset, which could be for training or testing purposes.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public abstract class Dataset implements Serializable{
-
-    // member variables
-    private int minTimestamp; // minimum timestamp value seen in the dataset
-    private int maxTimestamp; // maximum timestamp value seen in the dataset
-
-    //////////////////
-    // INITIALIZING //
-    //////////////////
-
-    /**
-     * Class constructor
-     */
-    public Dataset(){
-        // initializing
-        this.minTimestamp = Integer.MAX_VALUE;
-        this.maxTimestamp = Integer.MIN_VALUE;
-    }
 
     //////////////////////////////
     // ADDING RATING TO DATASET //
     //////////////////////////////
 
     /**
-     * // TODO
+     * Adds the provided rating to the dataset.
      * 
-     * @param userID
-     * @param itemID
-     * @param itemRating
-     * @param timestamp
+     * @param userID The ID of the user who made the rating.
+     * @param itemID The ID of the item the rating is for.
+     * @param itemRating The rating given to the item.
+     * @param timestamp The timestamp of the rating.
      */
-    public abstract void addRating(int userID, int itemID, float itemRating, int timestamp);
-
-    /**
-     * // TODO
-     * 
-     * @param timestamp
-     */
-    public void updateMaxAndMinTimestamps(int timestamp){
-        if(timestamp > this.maxTimestamp){
-            this.maxTimestamp = timestamp;
-        }
-
-        if(timestamp < this.minTimestamp){
-            this.minTimestamp = timestamp;
-        }
-    }
+    public abstract void addRating(int userID, int itemID, float rating, int timestamp);
 
     ////////////////////
     // HELPER METHODS //
     ////////////////////
 
     /**
-     * // TODO
+     * Clears the dataset by removing all of its data (used to free up memory when
+     * using large datasets).
      */
     public abstract void clear();
 
     /**
-     * // TODO
+     * Converts the dataset to a String.
      * 
-     * @return 
+     * @return A String representation of the dataset.
      */
     public abstract String toString();
 
     /**
-     * // TODO
+     * Helper method that returns the intersection of a pair of collections - i.e., the set of items
+     * that are contained within both collections.
      * 
-     * @param <T>
-     * @param list1
-     * @param list2
-     * @return
+     * @param <T> The datatype of the collections.
+     * @param list1 The first list being checked.
+     * @param list2 The second list being checked.
+     * @return A Set containing only those elements that are within both of the input lists.
      */
     public static <T> Set<T> getCommonElements(Collection<T> list1, Collection<T> list2){
         // creating new array list
@@ -100,27 +67,5 @@ public abstract class Dataset implements Serializable{
 
         // returning common elements
         return commonElements;
-    }
-
-    /////////////////////////
-    // GETTERS AND SETTERS //
-    /////////////////////////
-
-    /**
-     * // TODO
-     * 
-     * @return
-     */
-    public int getMinTimestamp(){
-        return this.minTimestamp;
-    }
-
-    /**
-     * // TODO
-     * 
-     * @return
-     */
-    public int getMaxTimestamp(){
-        return this.maxTimestamp;
     }
 }

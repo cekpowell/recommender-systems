@@ -8,13 +8,11 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
 /**
+ * Defines static methods to handle reading/writing data to files.
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * // TODO
  */
 public class FileHandler {
     
@@ -60,11 +58,11 @@ public class FileHandler {
     ////////////////////////////////////////
 
     /**
-     * // TODO
+     * Serializes the given object to the given file.
      * 
-     * @param object
-     * @param file
-     * @throws Exception
+     * @param object The object being serialized to the file.
+     * @param file The file the object will be serialized to.
+     * @throws Exception If the object could not be serialized.
      */
     public static void serializeObjectToFile(Object object, File file) throws Exception{
         try{
@@ -90,11 +88,10 @@ public class FileHandler {
     }
 
     /**
-     * // TODO
+     * Deserializes an object from the give file.
      * 
-     * @param object
-     * @param file
-     * @throws Exception
+     * @param file The File the object is being deserialized from.
+     * @throws Exception If the object could not be deserialized from the file.
      */
     public static Object deSerializeObjectFromFile(File file) throws Exception{
         try{

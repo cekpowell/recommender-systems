@@ -1,7 +1,11 @@
 package cp6g18.Tools;
 
 /**
- * // TODO
+ * Defines static methods to handle logging on STDOUT
+ * 
+ * @module  COMP3208: Social Computing Techniques
+ * @project Coursework
+ * @author  Charles Powell
  */
 public class Logger {
 
@@ -19,9 +23,9 @@ public class Logger {
     //////////////////
 
     /**
-     * // TODO
+     * Logs the start of a task.
      * 
-     * @param taskNumber
+     * @param taskNumber The ID of the task being started.
      */
     public static void logTaskStart(int taskNumber){
         // recording time

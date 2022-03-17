@@ -12,14 +12,12 @@ import cp6g18.Tools.FileHandler;
 import cp6g18.Tools.Logger;
 
 /**
+ * Performs evaluation of a recommender system by comparing it's predicted ratings to a set
+ * of ground truths, using standard evaluation metrics (MSE, RMSE and MAE).
+ * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
- * 
- * -- DESCRIPTION -- 
- * 
- * Performs evaluation of a recommender system's predicted ratings using the 
- * actual ratings (truths) and standard evaluation metrics.
  */
 public class Evaluator {
 
@@ -28,7 +26,13 @@ public class Evaluator {
     ////////////////
 
     /**
-     * // TODO
+     * Evaluates a recommender of the provided type using the provided database and training table.
+     * 
+     * Algorithm:
+     *  - Create a new training and testing datasets using the training table within the database.
+     *  - Train the recommender on the new training data.
+     *  - Test the recommender on the new testing data.
+     *  - Evalaute the performance of the recommender using the ground truths.
      * 
      * @param recommender
      * @param ratingsDatabase
