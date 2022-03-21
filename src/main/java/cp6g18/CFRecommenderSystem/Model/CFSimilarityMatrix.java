@@ -15,9 +15,9 @@ import java.util.Map.Entry;
  * @project Coursework
  * @author  Charles Powell
  */
-public class SimilarityMatrix {
+public class CFSimilarityMatrix {
     
-    // member variables
+    // MEMBER VARIABLES //
     private HashMap<Integer, HashMap<Integer,Float>> similarities; // {object ID -> {object ID -> similarity}
 
     //////////////////
@@ -27,7 +27,7 @@ public class SimilarityMatrix {
     /**
      * Class constructor.
      */
-    public SimilarityMatrix(){
+    public CFSimilarityMatrix(){
         this.similarities = new HashMap<Integer, HashMap<Integer,Float>>();
     }
 

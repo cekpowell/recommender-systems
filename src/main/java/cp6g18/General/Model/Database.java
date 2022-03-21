@@ -1,4 +1,4 @@
-package cp6g18.CFRecommenderSystem.Model;
+package cp6g18.General.Model;
 
 import java.io.File;
 import java.util.Random;
@@ -19,7 +19,7 @@ import cp6g18.Tools.Logger;
  */
 public class Database{ 
 
-    // member variables
+    // MEMBER VARIABLES //
     private String databaseFilename; // The name of the file of the associated database.
     private SQLiteConnection connection; // The Connection to the database.
 
@@ -254,7 +254,7 @@ public class Database{
                 // insert in test set (unknowns)
                 newTestingTableStatement.bind(RatingsDatabaseSchema.USER_ID.getColID(), originalTrainingTableStatement.columnInt(RatingsDatabaseSchema.USER_ID.getColIndex()));
                 newTestingTableStatement.bind(RatingsDatabaseSchema.ITEM_ID.getColID(), originalTrainingTableStatement.columnInt(RatingsDatabaseSchema.ITEM_ID.getColIndex()));
-                newTestingTableStatement.bind(RatingsDatabaseSchema.RATING.getColID(), Rating.UNRATED_ITEM_RATING);
+                newTestingTableStatement.bind(RatingsDatabaseSchema.RATING.getColID(), TestingRating.UNRATED_ITEM_RATING);
                 newTestingTableStatement.bind(RatingsDatabaseSchema.TIMESTAMP.getColID(), originalTrainingTableStatement.columnInt(RatingsDatabaseSchema.TIMESTAMP.getColIndex()));
                 newTestingTableStatement.stepThrough();
                 newTestingTableStatement.reset();

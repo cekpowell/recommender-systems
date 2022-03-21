@@ -1,4 +1,4 @@
-package cp6g18.CFRecommenderSystem.Model;
+package cp6g18.General.Model;
 
 
 /**
@@ -11,7 +11,8 @@ package cp6g18.CFRecommenderSystem.Model;
  * @author  Charles Powell
  */
 public class Evaluation {
-    // member variables
+    
+    // MEMBER VARIABLES //
     private float mse; // the Mean Square Error in the predictions
     private float rmse; // the Root Mean Square Error in the predictions
     private float mae; // the Mean Absolute Error in the predictions

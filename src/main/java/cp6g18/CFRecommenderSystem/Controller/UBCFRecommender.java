@@ -2,7 +2,7 @@ package cp6g18.CFRecommenderSystem.Controller;
 
 import java.util.HashMap;
 
-import cp6g18.CFRecommenderSystem.Model.UBTrainingDataset;
+import cp6g18.CFRecommenderSystem.Model.UBCFTrainingDataset;
 
 /**
  * // TODO
@@ -11,7 +11,7 @@ import cp6g18.CFRecommenderSystem.Model.UBTrainingDataset;
  * @project Coursework
  * @author  Charles Powell
  */
-public class UBRecommender extends Recommender<UBTrainingDataset>{
+public class UBCFRecommender extends CFRecommender<UBCFTrainingDataset>{
 
     //////////////////
     // INITIALISING //
@@ -20,7 +20,7 @@ public class UBRecommender extends Recommender<UBTrainingDataset>{
     /**
      * Class constructor.
      */
-    public UBRecommender(){
+    public UBCFRecommender(){
         // initializing
         super();
     }
@@ -37,7 +37,7 @@ public class UBRecommender extends Recommender<UBTrainingDataset>{
      * @param item2ID
      * @return 
      */
-    public float getSimiarity(UBTrainingDataset trainingDataset, HashMap<Integer, Float> userAverageRatings, int item1ID, int item2ID){
+    public float getSimiarity(UBCFTrainingDataset trainingDataset, HashMap<Integer, Float> userAverageRatings, int item1ID, int item2ID){
         // TODO
         return 0f;
     }

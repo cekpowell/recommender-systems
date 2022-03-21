@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import cp6g18.General.Model.TrainingDataset;
+import cp6g18.General.Model.Tuple;
+
 /**
  * A dataset used for the purposes of training a Recommender. The data is stored as a nested hashmap
  * for quick access, and additional hashmaps are maintained for convenience.
@@ -12,9 +15,9 @@ import java.util.Map.Entry;
  * @project Coursework
  * @author  Charles Powell
  */
-public abstract class TrainingDataset extends Dataset{
+public abstract class CFTrainingDataset extends TrainingDataset{
 
-    // member variables
+    // MEMBER VARIABLES //
     private HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>> data; // {user ID -> {item ID -> (rating,timestamp)}} OR {item ID -> {user ID -> (rating,timestamp)}}.
     private Tuple<Float, Integer> totalDatasetRating; // (total rating in dataset, number of ratings in dataset)
     private HashMap<Integer, Tuple<Float, Integer>> totalUserRatings; // {userID -> (total rating given by user, numberOfRatings given by user)}
@@ -27,7 +30,7 @@ public abstract class TrainingDataset extends Dataset{
     /**
      * Class constructor.
      */
-    public TrainingDataset(){
+    public CFTrainingDataset(){
         // initializing
         this.data = new HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>>();
         this.totalDatasetRating = new Tuple<Float, Integer>();

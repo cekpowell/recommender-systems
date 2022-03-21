@@ -1,4 +1,4 @@
-package cp6g18.CFRecommenderSystem.Model;
+package cp6g18.General.Model;
 
 import java.io.Serializable;
 
@@ -10,12 +10,12 @@ import java.io.Serializable;
  * @project Coursework
  * @author  Charles Powell
  */
-public class Rating implements Serializable{
+public class TestingRating implements Serializable{
 
     // CONSTANTS //
     public static final int UNRATED_ITEM_RATING = -1; // The value assigned to a rating if no prediction has been made yet.
 
-    // member variables
+    // MEMBER VARIABLES //
     private int userID; // The ID of the user who gave the rating.
     private int itemID; // The ID of the item being rated.
     private float rating; // The predicted rating given to the item (-1 if no prediction has been made yet).
@@ -33,7 +33,7 @@ public class Rating implements Serializable{
      * @param rating The predicted rating given to the item (-1 if no prediction has been made yet).
      * @param timestamp The timestamp of the rating.
      */
-    public Rating(int userID, int itemID, float rating, int timestamp){
+    public TestingRating(int userID, int itemID, float rating, int timestamp){
         // initializing
         this.userID = userID;
         this.itemID = itemID;
@@ -51,7 +51,7 @@ public class Rating implements Serializable{
      * @return True if a prediction has been made, false if not.
      */
     public boolean isUnrated(){
-        return (this.rating == Rating.UNRATED_ITEM_RATING);
+        return (this.rating == TestingRating.UNRATED_ITEM_RATING);
     }
 
     /**

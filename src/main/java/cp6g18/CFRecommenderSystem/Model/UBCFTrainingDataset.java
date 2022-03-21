@@ -3,6 +3,8 @@ package cp6g18.CFRecommenderSystem.Model;
 import java.util.HashMap;
 import java.util.Set;
 
+import cp6g18.General.Model.Tuple;
+
 /**
  * // TODO
  * 
@@ -10,7 +12,7 @@ import java.util.Set;
  * @project Coursework
  * @author  Charles Powell
  */
-public class UBTrainingDataset extends TrainingDataset{
+public class UBCFTrainingDataset extends CFTrainingDataset{
 
     ////////////////////////////////
     // ADDING DATA TO THE DATASET //

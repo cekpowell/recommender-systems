@@ -2,10 +2,10 @@ package cp6g18.Tasks;
 
 import java.io.File;
 
-import cp6g18.CFRecommenderSystem.Controller.IBRecommender;
-import cp6g18.CFRecommenderSystem.Model.Database;
-import cp6g18.CFRecommenderSystem.Model.IBTrainingDataset;
-import cp6g18.CFRecommenderSystem.Model.TestingDataset;
+import cp6g18.CFRecommenderSystem.Controller.IBCFRecommender;
+import cp6g18.CFRecommenderSystem.Model.IBCFTrainingDataset;
+import cp6g18.General.Model.Database;
+import cp6g18.General.Model.TestingDataset;
 import cp6g18.Tools.FileHandler;
 import cp6g18.Tools.Logger;
 
@@ -54,11 +54,11 @@ public class Task2 {
             Database database = new Database(Task2.DATBASE_FILENAME);
 
             // gathering training data
-            IBTrainingDataset trainingDataset = new IBTrainingDataset();
+            IBCFTrainingDataset trainingDataset = new IBCFTrainingDataset();
             database.loadRatingsDataset(trainingDataset, Task2.TRAINING_TABLE_NAME);
 
             // creating recommender system
-            IBRecommender recommender = new IBRecommender();
+            IBCFRecommender recommender = new IBCFRecommender();
 
             // logging
             Logger.logSubTaskEnd("LOADING TRAINING DATA");

@@ -1,24 +1,18 @@
-package cp6g18.CFRecommenderSystem.Controller;
-
-import java.util.HashMap;
+package cp6g18.MFRecommenderSystem.Controller;
 
 import cp6g18.General.Controller.Recommender;
-import cp6g18.CFRecommenderSystem.Model.CFSimilarityMatrix;
-import cp6g18.CFRecommenderSystem.Model.CFTrainingDataset;
+import cp6g18.MFRecommenderSystem.Model.MFModel;
+import cp6g18.MFRecommenderSystem.Model.MFTrainingDataset;
 import cp6g18.Tools.Logger;
 
-/** 
- * A collaborative filtering recommender
- * 
- * @module  COMP3208: Social Computing Techniques
- * @project Coursework
- * @author  Charles Powell
+/**
+ * A Matrix Factorisation Recommender.
  */
-public abstract class CFRecommender<T extends CFTrainingDataset> extends Recommender<T>{
+public abstract class MFRecommender<T extends MFTrainingDataset> extends Recommender<T>{
 
     // MEMBER VARIABLES //
     private T trainingDataset; // the training dataset used to train the recommender
-    private CFSimilarityMatrix model; // the model learnt from the training dataset
+    private MFModel model; // the model learnt from the training dataset
     
     //////////////////
     // INITIALIZING //
@@ -27,7 +21,7 @@ public abstract class CFRecommender<T extends CFTrainingDataset> extends Recomme
     /**
      * Class constructor.
      */
-    public CFRecommender(){
+    public MFRecommender(){
         // initializing
         this.trainingDataset = null;
         this.model = null;
@@ -53,29 +47,14 @@ public abstract class CFRecommender<T extends CFTrainingDataset> extends Recomme
         // setting the training dataset
         this.trainingDataset = trainingDataset;
 
-        // creating new similarity matrix instance
-        CFSimilarityMatrix model = new CFSimilarityMatrix();
-
-        // gathering average user ratings
-        HashMap<Integer, Float> userAverageRatings = trainingDataset.getAverageUserRatings();
+        // setting up the model
+        // TODO
 
         /////////////////
         // CALCULATING //
         /////////////////
 
-        // finding similarity between every item
-        for(int item1 : trainingDataset.getItems()){
-            for(int item2 : trainingDataset.getItems()){
-                // calculating if not yet calculated
-                if(!model.hasSimilarity(item1, item2)){
-                    // calculating similarity
-                    float similarity = this.getSimiarity(trainingDataset, userAverageRatings, item1, item2);
-
-                    // adding similarity to the matrix
-                    model.setSimilarity(item1, item2, similarity);
-                }
-            }
-        }
+        // TODO
 
         ///////////////
         // FINISHING //
@@ -87,16 +66,6 @@ public abstract class CFRecommender<T extends CFTrainingDataset> extends Recomme
         // informing
         Logger.logProcessEnd("Recommender system successfully trained");
     }
-
-    /**
-     * Gathers the similarity between two objects (i.e., items or users).
-     * 
-     * @param trainingDataset The training dataset being used to determine the similarity.
-     * @param object1D The ID of the first object the similarity is being calculated for.
-     * @param object2ID The ID of the second object the similarity is being calclated for.
-     * @return 
-     */
-    protected abstract float getSimiarity(T trainingDataset, HashMap<Integer, Float> userAverageRatings, int object1ID, int object2ID);
 
     ////////////////////////
     // MAKING PREDICTIONS //
@@ -129,7 +98,7 @@ public abstract class CFRecommender<T extends CFTrainingDataset> extends Recomme
      * 
      * @return The model associated with this recommender.
      */
-    public CFSimilarityMatrix getModel(){
+    public MFModel getModel(){
         return this.model;
     }
 
@@ -138,7 +107,7 @@ public abstract class CFRecommender<T extends CFTrainingDataset> extends Recomme
      * 
      * @param model The new model to be associated with this recommender.
      */
-    public void setModel(CFSimilarityMatrix model){
+    public void setModel(MFModel model){
         this.model = model;
     }
 }

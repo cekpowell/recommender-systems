@@ -2,10 +2,10 @@ package cp6g18.Tasks;
 
 import java.io.File;
 
-import cp6g18.CFRecommenderSystem.Controller.Evaluator;
-import cp6g18.CFRecommenderSystem.Model.Database;
-import cp6g18.CFRecommenderSystem.Model.Evaluation;
-import cp6g18.CFRecommenderSystem.Model.TestingDataset;
+import cp6g18.General.Controller.Evaluator;
+import cp6g18.General.Model.Database;
+import cp6g18.General.Model.Evaluation;
+import cp6g18.General.Model.TestingDataset;
 import cp6g18.Tools.FileHandler;
 import cp6g18.Tools.Logger;
 

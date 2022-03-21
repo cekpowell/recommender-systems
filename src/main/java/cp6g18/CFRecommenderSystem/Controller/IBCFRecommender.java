@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import cp6g18.CFRecommenderSystem.Model.IBTrainingDataset;
+import cp6g18.CFRecommenderSystem.Model.IBCFTrainingDataset;
 
 /**
- * An implementation of an Item-Based Collaborative Filtering recommender.
+ * An Item-Based Collaborative Filtering recommender.
  * 
  * Similarities and predicted ratings are determined according to an item-based model.
  * 
@@ -15,7 +15,7 @@ import cp6g18.CFRecommenderSystem.Model.IBTrainingDataset;
  * @project Coursework
  * @author  Charles Powell
  */
-public class IBRecommender extends Recommender<IBTrainingDataset>{
+public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
 
     // CONSTANTS //
     private static final int SIGNIFICANCE_VALUE = 50; // The minimum number of co-rated users that must exist between an item pair when determining its similarity.
@@ -29,7 +29,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
     /**
      * Class constructor.
      */
-    public IBRecommender(){
+    public IBCFRecommender(){
         // initializing
         super();
     }
@@ -75,7 +75,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
      * @param item2ID The second item the similarity is being calculated for.
      * @return The Adjusted Cosine Similarity between the two items.
      */
-    public float getSimiarity(IBTrainingDataset trainingDataset, HashMap<Integer, Float> userAverageRatings, int item1ID, int item2ID){
+    public float getSimiarity(IBCFTrainingDataset trainingDataset, HashMap<Integer, Float> userAverageRatings, int item1ID, int item2ID){
         /////////////////
         // PREPERATION //
         /////////////////
@@ -114,7 +114,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
             // f(t_ui) = e ^^ (-a (| t_uj - t_ui |))
             // 0 < a < 1 - higher values of a = weight more sensitive to time, having a = 0 : no time consideration at all
             float timeDif = Math.abs(item1RatingTimestamp - item2RatingTimestamp);
-            float temporalWeight = (float) Math.exp((-1 * IBRecommender.TEMPORAL_WEIGHT_FACTOR) * timeDif);
+            float temporalWeight = (float) Math.exp((-1 * IBCFRecommender.TEMPORAL_WEIGHT_FACTOR) * timeDif);
 
             // NUMERATOR //
 
@@ -147,7 +147,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
         // SIGNIFICANCE WEIGHTING //
 
         // adjusting similarity based on number of common users - items with less common users have lower similarities (https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf
-        similarity *= (float) Math.min(commonUsers.size(), IBRecommender.SIGNIFICANCE_VALUE) / IBRecommender.SIGNIFICANCE_VALUE;
+        similarity *= (float) Math.min(commonUsers.size(), IBCFRecommender.SIGNIFICANCE_VALUE) / IBCFRecommender.SIGNIFICANCE_VALUE;
 
         //////////////////////
         // RETURNING RESULT //
@@ -191,6 +191,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
      *      - Using method described here: https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf
      *  - Mean centering applied to the prediction formula to account for user/item biases.
      *      - Using method described here: https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf
+     *  - Rounding prediction to nearest whole number (because ratings are only in whole numbers).
      * 
      * Edge cases:
      * - General:
@@ -240,6 +241,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
         Float prediction = 1f; // base recommendation = 1.0 (the lowest possible rating).
 
         // getting similarities to other items.
+        //ArrayList<Entry<Integer, Float>> similarItems = this.getModel().getKNearestSimilaritiesForObject(itemID, 1000);
         HashMap<Integer, Float> similarItems = this.getModel().getSimilaritiesForObject(itemID);
 
         // variables to store sums
@@ -258,8 +260,8 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
             Float similarityOfSimilarItem = similarItem.getValue();
             float similarItemAverageRating = this.getTrainingDataset().getAverageItemRating(similarItemID);
 
-            // // CHECKING FOR DISSIMILARITY //
-            if(similarityOfSimilarItem <= IBRecommender.MIN_SIMILARITY){
+            // CHECKING FOR DISSIMILARITY //
+            if(similarityOfSimilarItem <= IBCFRecommender.MIN_SIMILARITY){
                 // dont want to consider items that are not similar
                 continue;
             }
@@ -280,7 +282,7 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
             // f(t_ui) = e ^^ (-a (| t_uj - t_ui |))
             // 0 < a < 1 - higher values of a = weight more sensitive to time, having a = 0 : no time consideration at all
             float timeDif = Math.abs(timestamp - timestampOfUserRatingOfSimilarItem);
-            float temporalWeight = (float) Math.exp((-1 * IBRecommender.TEMPORAL_WEIGHT_FACTOR) * timeDif);
+            float temporalWeight = (float) Math.exp((-1 * IBCFRecommender.TEMPORAL_WEIGHT_FACTOR) * timeDif);
 
             // incrementing numerator
             numerator += ((float) similarityOfSimilarItem * (userRatingOfSimilarItem - similarItemAverageRating) * temporalWeight); // subtracing similarItemAverageRating for mean centering
@@ -297,10 +299,9 @@ public class IBRecommender extends Recommender<IBTrainingDataset>{
 
         // getting final prediction
         prediction = averageItemRating + (numerator / denominator); // adding averageItemRating to account for mean centering
-        if(userID == 410 && itemID == 609){
-            System.out.println(numerator);
-            System.out.println(denominator);
-        }
+
+        // rouding rating to nearest 1 (because ratings are in increments of 1)
+        prediction = (float) Math.round(prediction);
         
         //////////////
         // RETURING //

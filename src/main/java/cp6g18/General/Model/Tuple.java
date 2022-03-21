@@ -1,4 +1,4 @@
-package cp6g18.CFRecommenderSystem.Model;
+package cp6g18.General.Model;
 
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ import java.io.Serializable;
  */
 public class Tuple<T,S> implements Serializable{
 
-    // member variables
+    // MEMBER VARIABLES //
     public T first; // the first item in the pair.
     public S second; // the second item in the pair.
 

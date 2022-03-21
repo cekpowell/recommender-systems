@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import cp6g18.General.Model.Dataset;
+import cp6g18.General.Model.Tuple;
+
 /**
  * An implementation of a TrainingDataset that stores data for the purposes of item-based
  * collaborative filtering recommendations.
@@ -15,7 +18,7 @@ import java.util.Map.Entry;
  * @project Coursework
  * @author  Charles Powell
  */
-public class IBTrainingDataset extends TrainingDataset{
+public class IBCFTrainingDataset extends CFTrainingDataset{
 
     ////////////////////////////////
     // ADDING DATA TO THE DATASET //

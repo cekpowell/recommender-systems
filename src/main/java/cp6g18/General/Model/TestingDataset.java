@@ -1,4 +1,4 @@
-package cp6g18.CFRecommenderSystem.Model;
+package cp6g18.General.Model;
 
 import java.util.ArrayList;
 
@@ -12,8 +12,8 @@ import java.util.ArrayList;
  */
 public class TestingDataset extends Dataset{
 
-    // member variables
-    private ArrayList<Rating> data; // The object used to store the dataset.
+    // MEMBER VARIABLES //
+    private ArrayList<TestingRating> data; // The object used to store the dataset.
 
     //////////////////
     // INITIALIZING //
@@ -26,7 +26,7 @@ public class TestingDataset extends Dataset{
      */
     public TestingDataset(){
         // initializing
-        this.data = new ArrayList<Rating>();
+        this.data = new ArrayList<TestingRating>();
     }
 
     ////////////////////////////////
@@ -43,7 +43,7 @@ public class TestingDataset extends Dataset{
      */
     public void addRating(int userID, int itemID, float itemRating, int timestamp){
         // creating rating object
-        Rating rating = new Rating(userID, itemID, itemRating, timestamp);
+        TestingRating rating = new TestingRating(userID, itemID, itemRating, timestamp);
 
         // adding rating object to dataset
         this.data.add(rating);
@@ -58,7 +58,7 @@ public class TestingDataset extends Dataset{
      * 
      * @return The list of ratings stored in this dataset.
      */
-    public ArrayList<Rating> getRatings(){
+    public ArrayList<TestingRating> getRatings(){
         // returning ratings
         return this.data;
     }
@@ -84,7 +84,7 @@ public class TestingDataset extends Dataset{
         String string = "";
 
         // adding each rating to the string
-        for(Rating rating : this.data){
+        for(TestingRating rating : this.data){
             string += rating.toString() + "\n";
         }
 
