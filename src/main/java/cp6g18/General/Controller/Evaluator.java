@@ -1,5 +1,6 @@
 package cp6g18.General.Controller;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import cp6g18.General.Model.Database;
@@ -7,6 +8,7 @@ import cp6g18.General.Model.Evaluation;
 import cp6g18.General.Model.TestingDataset;
 import cp6g18.General.Model.TestingRating;
 import cp6g18.General.Model.TrainingDataset;
+import cp6g18.Tools.FileHandler;
 import cp6g18.Tools.Logger;
 
 /**
@@ -18,6 +20,9 @@ import cp6g18.Tools.Logger;
  * @author  Charles Powell
  */
 public class Evaluator {
+
+    // CONSTANTS //
+    private static final int TRAINING_TESTING_RATIO = 10; // 1 in every x ratings is testing, the rest are training
 
     ////////////////
     // EVALUATION //
@@ -48,7 +53,7 @@ public class Evaluator {
         String newTestingTruthsTableName = "NEWtestingTRUTHS";
 
         // creating new trainning and testing sets
-        database.createNewTrainingAndTestingTables(trainingTableName, newTrainingTableName, newTestingTableName, newTestingTruthsTableName, 10);
+        database.createNewTrainingAndTestingTables(trainingTableName, newTrainingTableName, newTestingTableName, newTestingTruthsTableName, Evaluator.TRAINING_TESTING_RATIO);
 
         // loadinng new training set
         database.loadRatingsDataset(trainingDataset, newTrainingTableName);
@@ -75,6 +80,8 @@ public class Evaluator {
 
         // making predictions
         TestingDataset predictions = recommender.makePredictions(testingDataset);
+
+        FileHandler.writeObjectToFileAsString(predictions, new File("test output.csv"));
 
         ////////////////
         // EVALUATING //

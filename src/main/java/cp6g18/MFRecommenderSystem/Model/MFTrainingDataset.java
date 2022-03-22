@@ -105,4 +105,26 @@ public class MFTrainingDataset extends TrainingDataset{
         // returning completed string
         return string;
     }
+
+    /////////////////////////
+    // GETTERS AND SETTERS //
+    /////////////////////////
+
+    /**
+     * Getter methods for the set of users contained in this dataset.
+     * 
+     * @return The set of users contained in this dataset.
+     */
+    public HashSet<Integer> getUsers(){
+        return this.users;
+    }
+
+    /**
+     * Getter method for the set of items contained in this dataset.
+     * 
+     * @return The set of items contained in this dataset.
+     */
+    public HashSet<Integer> getItems(){
+        return this.items;
+    }
 }

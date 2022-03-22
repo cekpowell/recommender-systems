@@ -19,14 +19,10 @@ import cp6g18.Tools.Logger;
  */
 public class Task1 {
     
-    // constants
+    // FILE INFORMATION //
     private static final String DATBASE_FILENAME = "data" + File.separator + "Task1" + File.separator + "database.db"; // the name of the database file storing the data
     private static final String PREDICTIONS_TABLE_NAME = "predictions"; // the name of the table containing the predictions
     private static final String TRUTHS_TABLE_NAME = "truths"; // the name of the table containing the truths
-
-    private static final String PREDICTIONS_FILE = "data" + File.separator + "Task1" + File.separator + "predictions.csv"; // Name of file containing rating predictions
-    private static final String TRUTHS_FILE = "data" + File.separator + "Task1" + File.separator + "truths.csv"; // Name of file containing rating truths
-
     private static final String RESULTS_FILE = "out" + File.separator  + "Task1/results.csv"; // The name of the file the task 1 results will be written to
 
     //////////////////

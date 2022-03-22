@@ -1,7 +1,7 @@
 package cp6g18;
 
-import cp6g18.Tasks.Task1;
-import cp6g18.Tasks.Task2;
+import cp6g18.Tasks.*;
+
 
 /**
  * Main class for application - used to run the individual tasks.
@@ -34,7 +34,7 @@ public class App
         // TASK 3 //
         ////////////
 
-        //Task3.run();
+        Task3.run();
 
         ////////////
         // TASK 4 //

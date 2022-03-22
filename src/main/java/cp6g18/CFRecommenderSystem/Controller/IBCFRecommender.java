@@ -17,10 +17,10 @@ import cp6g18.CFRecommenderSystem.Model.IBCFTrainingDataset;
  */
 public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
 
-    // CONSTANTS //
-    private static final int SIGNIFICANCE_VALUE = 50; // The minimum number of co-rated users that must exist between an item pair when determining its similarity.
-    private static final float MIN_SIMILARITY = 0.0f; // The minimum similarity that can be used when calculating predicted ratings.
-    private static final float TEMPORAL_WEIGHT_FACTOR = 0.001f; // The decay rate for the temporal weight applied to the similarity and predicted ratings.
+    // MEMBER VARIABLES //
+    private int significanceValue; // The minimum number of co-rated users that must exist between an item pair when determining its similarity.
+    private float minSimilarity; // The minimum similarity that can be used when calculating predicted ratings.
+    private float temporalWeightFactor; // The decay rate for the temporal weight applied to the similarity and predicted ratings.
 
     //////////////////
     // INITIALISING //
@@ -29,9 +29,12 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
     /**
      * Class constructor.
      */
-    public IBCFRecommender(){
+    public IBCFRecommender(int significanceValue, float minSimilarity, float temporalWeightFactor){
         // initializing
         super();
+        this.significanceValue = significanceValue;
+        this.minSimilarity = minSimilarity;
+        this.temporalWeightFactor = temporalWeightFactor;
     }
 
     /////////////////////////////
@@ -114,7 +117,7 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
             // f(t_ui) = e ^^ (-a (| t_uj - t_ui |))
             // 0 < a < 1 - higher values of a = weight more sensitive to time, having a = 0 : no time consideration at all
             float timeDif = Math.abs(item1RatingTimestamp - item2RatingTimestamp);
-            float temporalWeight = (float) Math.exp((-1 * IBCFRecommender.TEMPORAL_WEIGHT_FACTOR) * timeDif);
+            float temporalWeight = (float) Math.exp((-1 * this.temporalWeightFactor) * timeDif);
 
             // NUMERATOR //
 
@@ -147,7 +150,7 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
         // SIGNIFICANCE WEIGHTING //
 
         // adjusting similarity based on number of common users - items with less common users have lower similarities (https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf
-        similarity *= (float) Math.min(commonUsers.size(), IBCFRecommender.SIGNIFICANCE_VALUE) / IBCFRecommender.SIGNIFICANCE_VALUE;
+        similarity *= (float) Math.min(commonUsers.size(), this.significanceValue) / this.significanceValue;
 
         //////////////////////
         // RETURNING RESULT //
@@ -261,7 +264,7 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
             float similarItemAverageRating = this.getTrainingDataset().getAverageItemRating(similarItemID);
 
             // CHECKING FOR DISSIMILARITY //
-            if(similarityOfSimilarItem <= IBCFRecommender.MIN_SIMILARITY){
+            if(similarityOfSimilarItem <= this.minSimilarity){
                 // dont want to consider items that are not similar
                 continue;
             }
@@ -282,7 +285,7 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
             // f(t_ui) = e ^^ (-a (| t_uj - t_ui |))
             // 0 < a < 1 - higher values of a = weight more sensitive to time, having a = 0 : no time consideration at all
             float timeDif = Math.abs(timestamp - timestampOfUserRatingOfSimilarItem);
-            float temporalWeight = (float) Math.exp((-1 * IBCFRecommender.TEMPORAL_WEIGHT_FACTOR) * timeDif);
+            float temporalWeight = (float) Math.exp((-1 * this.temporalWeightFactor) * timeDif);
 
             // incrementing numerator
             numerator += ((float) similarityOfSimilarItem * (userRatingOfSimilarItem - similarItemAverageRating) * temporalWeight); // subtracing similarItemAverageRating for mean centering

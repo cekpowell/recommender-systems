@@ -24,10 +24,10 @@ public class MFModel {
      * @param items A list of item IDs to be stored in the model's item matrix.
      * @param factors The number of factors (dimensions) to be used in the model's matricies.
      */
-    public MFModel(Collection<Integer> users, Collection<Integer> items, int factors){
+    public MFModel(Collection<Integer> users, Collection<Integer> items, int factors, float mean, float variance){
         // initializing
-        this.userMFMatrix = new MFMatrix(users, factors);
-        this.itemMFMatrix = new MFMatrix(items, factors);
+        this.userMFMatrix = new MFMatrix(users, factors, mean, variance);
+        this.itemMFMatrix = new MFMatrix(items, factors, mean, variance);
     }
 
     ///////////////////////////////////
@@ -39,7 +39,7 @@ public class MFModel {
      * 
      * @return The user matrix assocaited with this model.
      */
-    public MFMatrix getUserMFmatrix(){
+    public MFMatrix getUserMFMatrix(){
         return this.userMFMatrix;
     }
 
@@ -48,7 +48,7 @@ public class MFModel {
      * 
      * @return The item matrix associated with this model.
      */
-    public MFMatrix getItemMfMatrix(){
+    public MFMatrix getItemMFMatrix(){
         return this.itemMFMatrix;
     }
 }

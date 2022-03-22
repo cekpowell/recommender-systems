@@ -2,33 +2,36 @@ package cp6g18.Tasks;
 
 import java.io.File;
 
-import cp6g18.CFRecommenderSystem.Controller.IBCFRecommender;
-import cp6g18.CFRecommenderSystem.Model.IBCFTrainingDataset;
 import cp6g18.General.Model.Database;
 import cp6g18.General.Model.TestingDataset;
+import cp6g18.MFRecommenderSystem.Controller.MFRecommender;
+import cp6g18.MFRecommenderSystem.Model.MFTrainingDataset;
 import cp6g18.Tools.FileHandler;
 import cp6g18.Tools.Logger;
 
 /**
- * Main Class for Task 2 - Trains an item-based recommender using a training dataset, and makes
- * a set of predictions for a testing dataset.
+ * Main Class for Task 2 - Trains an matrix factorisation recommender using a training dataset, 
+ * and makes a set of predictions for a testing dataset.
  * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
  */
-public class Task2 {
+public class Task3 {
     
-    // FILE INFORMATION //
-    private static final String DATBASE_FILENAME = "data" + File.separator + "Task2" + File.separator + "database.db"; // the name of the database file storing the data
+    // CONSTANTS //
+    private static final String DATBASE_FILENAME = "data" + File.separator + "Task3" + File.separator + "database.db"; // the name of the database file storing the data
     private static final String TRAINING_TABLE_NAME = "training"; // the name of the table containing the training datas
-    private static final String TESTING_TABLE_NAME = "testing"; // the name of the table containing the testing data
-    private static final String RESULTS_FILE = "out" + File.separator + "Task2/results.csv"; // The name of the file the task 1 results will be written to
+    private static final String TESTING_TABLE_NAME = "testing"; // the name of the table containing the testing datasName of file containing testing ratings
+    private static final String RESULTS_FILE = "out" + File.separator + "Task3/results.csv"; // The name of the file the task 1 results will be written to
 
     // SYSTEM PARAMETERS //
-    private static final int SIGNIFICANCE_VALUE = 50; // The minimum number of co-rated users that must exist between an item pair when determining its similarity.
-    private static final float MIN_SIMILARITY = 0.0f; // The minimum similarity that can be used when calculating predicted ratings.
-    private static final float TEMPORAL_WEIGHT_FACTOR = 0.001f; // The decay rate for the temporal weight applied to the similarity and predicted ratings.
+    private static final int FACTORS = 40; // the number of latent factors in the matricies.
+    private static final int MIN_ITERATIONS = 100; // the minimum number of iterations the algorithm will be performed.
+    private static final float LEARNING_RATE = 0.1f; // the learning rate of the algorithm
+    private static final float REGULARIZATION_RATE = 0.0f; // the regularization rate of the algorithm
+    private static final float MEAN = 0.0f; // the mean of the gaussian distribution used to generate the initial numbers for the matricies
+    private static final float VARIANCE = 1.0f; // the variance of the gaussian distribution used to generate the initial numbers for the matricies.
 
     //////////////////
     // RUNNING TASK //
@@ -37,13 +40,13 @@ public class Task2 {
     /**
      * Runner funtion for Task 2.
      * 
-     * Creates a new IBCFRecommender, trains the recommender using the training dataset, makes
+     * Creates a new MFRecommender, trains the recommender using the training dataset, makes
      * predictions using the testing dataset, writes the results to a file.
      */
     public static void run(){
         try{
             // logging
-            Logger.logTaskStart(2);
+            Logger.logTaskStart(3);
 
             ///////////////////////////
             // LOADING TRAINING DATA //
@@ -53,14 +56,14 @@ public class Task2 {
             Logger.logSubTaskStart("LOADING TRAINING DATA");
 
             // connecting to task 1 database
-            Database database = new Database(Task2.DATBASE_FILENAME);
+            Database database = new Database(Task3.DATBASE_FILENAME);
 
             // gathering training data
-            IBCFTrainingDataset trainingDataset = new IBCFTrainingDataset();
-            database.loadRatingsDataset(trainingDataset, Task2.TRAINING_TABLE_NAME);
+            MFTrainingDataset trainingDataset = new MFTrainingDataset();
+            database.loadRatingsDataset(trainingDataset, Task3.TRAINING_TABLE_NAME);
 
             // creating recommender system
-            IBCFRecommender recommender = new IBCFRecommender(Task2.SIGNIFICANCE_VALUE, Task2.MIN_SIMILARITY, Task2.TEMPORAL_WEIGHT_FACTOR);
+            MFRecommender recommender = new MFRecommender(Task3.FACTORS, Task3.MIN_ITERATIONS, Task3.LEARNING_RATE, Task3.REGULARIZATION_RATE, Task3.MEAN, Task3.VARIANCE);
 
             // logging
             Logger.logSubTaskEnd("LOADING TRAINING DATA");
@@ -90,7 +93,7 @@ public class Task2 {
 
             // gathering testing datas
             TestingDataset testingDataset = new TestingDataset();
-            database.loadRatingsDataset(testingDataset, Task2.TESTING_TABLE_NAME);
+            database.loadRatingsDataset(testingDataset, Task3.TESTING_TABLE_NAME);
 
             // logging
             Logger.logSubTaskEnd("LOADING TESTING DATA");
@@ -105,7 +108,7 @@ public class Task2 {
             TestingDataset predictions = recommender.makePredictions(testingDataset);
             
             // writing to file
-            FileHandler.writeObjectToFileAsString(predictions, new File(Task2.RESULTS_FILE));
+            FileHandler.writeObjectToFileAsString(predictions, new File(Task3.RESULTS_FILE));
 
             // logging
             Logger.logSubTaskEnd("PREDICTING");
@@ -127,7 +130,7 @@ public class Task2 {
             Logger.logTaskEnd(2);
         }
         catch(Exception e){
-            System.out.println("\nUnable to run Task 2!\n" + 
+            System.out.println("\nUnable to run Task 3!\n" + 
                                "Cause : " + e.toString() + "\n");
             e.printStackTrace();
         }
