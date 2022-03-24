@@ -2,6 +2,8 @@ package cp6g18.MFRecommenderSystem.Model;
 
 import java.util.Collection;
 
+import com.github.sh0nk.matplotlib4j.Plot;
+
 /**
  * The model for a MFRecommender.
  * 
@@ -23,6 +25,8 @@ public class MFModel {
      * @param users A list user IDs to be stored in model's user matrix.
      * @param items A list of item IDs to be stored in the model's item matrix.
      * @param factors The number of factors (dimensions) to be used in the model's matricies.
+     * @param mean The mean on the Gaussian spread of randomly generated initial numbers.
+     * @param variance The variance on the Gaussian spread of randomly generated initial numbers.
      */
     public MFModel(Collection<Integer> users, Collection<Integer> items, int factors, float mean, float variance){
         // initializing
