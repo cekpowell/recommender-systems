@@ -84,6 +84,7 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
             // performing a single training iteration
             float iterationMAE = this.trainOneIteration();
 
+            // logging
             System.out.println("Iteration : " + iterationCount + " completed.");
             System.out.println("\tMAE = " + iterationMAE);
 

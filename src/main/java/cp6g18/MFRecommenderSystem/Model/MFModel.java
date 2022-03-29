@@ -2,8 +2,6 @@ package cp6g18.MFRecommenderSystem.Model;
 
 import java.util.Collection;
 
-import com.github.sh0nk.matplotlib4j.Plot;
-
 /**
  * The model for a MFRecommender.
  * 
