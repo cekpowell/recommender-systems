@@ -19,7 +19,7 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
 
     // MEMBER VARIABLES //
     private int significanceValue; // The minimum number of co-rated users that must exist between an item pair when determining its similarity.
-    private float minSimilarity; // The minimum similarity that can be used when calculating predicted ratings.
+    private float minSimilarity; // The minimum similarity that must exist between two items for the item to be considered when calculating predicted ratings.
     private float temporalWeightFactor; // The decay rate for the temporal weight applied to the similarity and predicted ratings.
 
     //////////////////
@@ -28,6 +28,9 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
 
     /**
      * Class constructor.
+     * @param significanceValue The minimum number of co-rated users that must exist between an item pair when determining its similarity.
+     * @param minSimilarity The minimum similarity that must exist between two items for the item to be considered when calculating predicted ratings.
+     * @param temporalWeightFactor The decay rate for the temporal weight applied to the similarity and predicted ratings.
      */
     public IBCFRecommender(int significanceValue, float minSimilarity, float temporalWeightFactor){
         // initializing
@@ -244,7 +247,6 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
         Float prediction = 1f; // base recommendation = 1.0 (the lowest possible rating).
 
         // getting similarities to other items.
-        //ArrayList<Entry<Integer, Float>> similarItems = this.getModel().getKNearestSimilaritiesForObject(itemID, 1000);
         HashMap<Integer, Float> similarItems = this.getModel().getSimilaritiesForObject(itemID);
 
         // variables to store sums
