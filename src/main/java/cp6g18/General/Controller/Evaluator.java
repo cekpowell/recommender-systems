@@ -81,8 +81,6 @@ public class Evaluator {
         // making predictions
         TestingDataset predictions = recommender.makePredictions(testingDataset);
 
-        FileHandler.writeObjectToFileAsString(predictions, new File("test output.csv"));
-
         ////////////////
         // EVALUATING //
         ////////////////

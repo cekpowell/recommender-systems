@@ -29,8 +29,8 @@ public abstract class CFRecommender<T extends CFTrainingDataset> extends Recomme
      */
     public CFRecommender(){
         // initializing
+        super();
         this.trainingDataset = null;
-        this.model = null;
     }
 
     /////////////////////

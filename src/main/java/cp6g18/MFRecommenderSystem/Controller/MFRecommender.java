@@ -19,7 +19,8 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     private MFTrainingDataset trainingDataset; // the training dataset used to train the recommender
     private MFModel model; // the model learnt from the training dataset
     private int factors; // the number of factors to be used in the user and item vectors
-    private int minIterations; // the minimum number of iterations to be performed by the algorithm
+    private int minIterations; // the minimum number of iterations to be performed by the algorithm (termination factor).
+    private float minChangeInMae; // the change MAE between two iterations that will cause the recommender to stop training if it is reached (termination factor).
     private float learningRate; // the learning rate of the algorithm - controls how much the vectors are adjusted each iteration
     private float regularizationRate; // the regularization rate of the algorithm - controls the extent of the regularization to avoid overfitting.
     private float mean; // The mean on the Gaussian spread of randomly generated initial numbers.
@@ -33,18 +34,21 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * Class constructor. 
      * 
      * @param factors The number of factors to be used in the user and item vectors.
-     * @param minIterations The minimum number of iterations to be performed by the algorithm.
+     * @param minIterations The minimum number of iterations to be performed by the algorithm (termination factor).
+     * @param minChangeInMae the change MAE between two iterations that will cause the recommender to stop training if it is reached (termination factor).
      * @param learningRate The learning rate of the algorithm - controls how much the vectors are adjusted each iteration.
      * @param regularizationRate The regularization rate of the algorithm - controls the extent of the regularization to avoid overfitting.
      * @param mean The mean on the Gaussian spread of randomly generated initial numbers.
      * @param variance The variance on the Gaussian spread of randomly generated initial numbers.
      */
-    public MFRecommender(int factors, int minIterations, float learningRate, float regularizationRate, float mean, float variance){
+    public MFRecommender(int factors, int minIterations, float minChangeInMae, float learningRate, float regularizationRate, float mean, float variance){
         // initializing
+        super();
         this.trainingDataset = null;
         this.model = null;
         this.factors = factors;
         this.minIterations = minIterations;
+        this.minChangeInMae = minChangeInMae;
         this.learningRate = learningRate;
         this.regularizationRate = regularizationRate;
         this.mean = mean;
@@ -78,9 +82,13 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         // CALCULATING //
         /////////////////
 
-        int iterationCount = 1;
+        // variables to help with the process
+        int iterationCount = 1; // the number of iterations that have been performed
+        float previousIterationMae = Float.MAX_VALUE; // the MAE of the previous training iteration
+        float changeInMae = Float.MAX_VALUE; // the most recent change in MAE
+
         // iteratively training the model
-        while(this.continueToTrain(iterationCount)){
+        while(this.continueToTrain(iterationCount, changeInMae)){
             // performing a single training iteration
             float iterationMAE = this.trainOneIteration();
 
@@ -88,8 +96,10 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
             System.out.println("Iteration : " + iterationCount + " completed.");
             System.out.println("\tMAE = " + iterationMAE);
 
-            // incrementing iteration count
+            // updating the variables
             iterationCount++;
+            changeInMae = previousIterationMae - iterationMAE;
+            previousIterationMae = iterationMAE;
         }
 
         ///////////////
@@ -180,10 +190,11 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * criteria for the training of the recommender.
      * 
      * @param numIterations The number of training iterations performed already.
+     * @param changeInMae The change in MAE on the most recent training iteration.
      * @return True if the recommender must still be trained, false otherwise.
      */
-    private boolean continueToTrain(int numIterations){
-        return numIterations <= this.minIterations;
+    private boolean continueToTrain(int numIterations, float changeInMae){
+        return (numIterations <= this.minIterations) || (changeInMae >= this.minChangeInMae);
     }
 
     ////////////////////////
@@ -267,19 +278,18 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     /**
      * Computes the dot product of two vectors.
      * 
-     * @param <T> The type of number stored within the vectors.
      * @param vector1 The first vector.
      * @param vector2 The second vector.
      * @return The dot product of the first and second vectors.
      */
-    public static <T extends Number> float getDotProduct(ArrayList<T> vector1, ArrayList<T> vector2){
+    public static float getDotProduct(ArrayList<Float> vector1, ArrayList<Float> vector2){
         // variable to keep track of sum
         float dotProduct = 0f;
 
         // iterating through the vectors
         for(int i = 0; i < vector1.size(); i++){
             // incrementing the sum
-            dotProduct += (float) (vector1.get(i)) * (float) (vector2.get(i));
+            dotProduct += (vector1.get(i)) * (vector2.get(i));
         }
 
         // returning the sum
@@ -289,20 +299,19 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     /**
      * Computes the scalar product of a vector.
      * 
-     * @param <T> The type of number stored within the vector.
      * @param vector The vector to be scaled.
      * @param scalar The scalar multiplier.
      * @return The scalar product of the vector - every element in the vector multiplied by the 
      * scalar value.
      */
-    public static <T extends Number> ArrayList<Float> getScalarProduct(ArrayList<T> vector, float scalar){
+    public static ArrayList<Float> getScalarProduct(ArrayList<Float> vector, float scalar){
         // arraylist to store result
         ArrayList<Float> scalarProduct = new ArrayList<Float>();
 
         // iterating through the vector
-        for(T number : vector){
+        for(Float number : vector){
             // adding the scalar of this element to the scalar product vector
-            scalarProduct.add(((float) number * scalar));
+            scalarProduct.add(number * scalar);
         }
 
         // returning the scalar product
