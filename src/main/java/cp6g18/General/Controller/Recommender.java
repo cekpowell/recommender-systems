@@ -6,11 +6,12 @@ import cp6g18.General.Model.TrainingDataset;
 import cp6g18.Tools.Logger;
 
 /** 
- * An abstract class that represents a type of recommender.
+ * A Recommender System.
  * 
  * All recommenders are types based on the type of the underyling training dataset.
  * 
- * Defines methods for the training of the recommender, and its use to make predictions.
+ * The recommender defines methods for training the system using a training dataset, and predicting
+ * ratings using a testing dataset.
  * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
@@ -53,9 +54,8 @@ public abstract class Recommender<T extends TrainingDataset>{
      * 
      * @param dataset The testing dataset the predictions are being made for.
      * @return A TestingDataset object that contains the predictions.
-     * @throws Exception If the recommender has not been trained yet.
      */
-    public TestingDataset makePredictions(TestingDataset dataset) throws Exception{
+    public TestingDataset makePredictions(TestingDataset dataset){
         // logging
         Logger.logProcessStart("Making predictions");
 

@@ -27,7 +27,8 @@ public class Task3 {
 
     // SYSTEM PARAMETERS //
     private static final int FACTORS = 40; // the number of latent factors in the matricies.
-    private static final int MIN_ITERATIONS = 100; // the minimum number of iterations the algorithm will be performed.
+    private static final int MIN_ITERATIONS = 10; // the minimum number of iterations the algorithm will perform.
+    private static final int MAX_ITERATIONS = 100; // the maximum number of iterations the algorithm will perform.
     private static final float MIN_CHANGE_IN_MAE = 0.0001f; // the change MAE between two iterations that will cause the recommender to stop training if it is reached.
     private static final float LEARNING_RATE = 0.1f; // the learning rate of the algorithm
     private static final float REGULARIZATION_RATE = 0.0f; // the regularization rate of the algorithm
@@ -64,7 +65,14 @@ public class Task3 {
             database.loadRatingsDataset(trainingDataset, Task3.TRAINING_TABLE_NAME);
 
             // creating recommender system
-            MFRecommender recommender = new MFRecommender(Task3.FACTORS, Task3.MIN_ITERATIONS, Task3.MIN_CHANGE_IN_MAE, Task3.LEARNING_RATE, Task3.REGULARIZATION_RATE, Task3.MEAN, Task3.VARIANCE);
+            MFRecommender recommender = new MFRecommender(Task3.FACTORS, 
+                                                          Task3.MIN_ITERATIONS, 
+                                                          Task3.MAX_ITERATIONS, 
+                                                          Task3.MIN_CHANGE_IN_MAE, 
+                                                          Task3.LEARNING_RATE, 
+                                                          Task3.REGULARIZATION_RATE, 
+                                                          Task3.MEAN, 
+                                                          Task3.VARIANCE);
 
             // logging
             Logger.logSubTaskEnd("LOADING TRAINING DATA");

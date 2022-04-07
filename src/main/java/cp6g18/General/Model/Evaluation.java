@@ -2,9 +2,9 @@ package cp6g18.General.Model;
 
 
 /**
- * Holds the result of the evaluation of a recommender system.
+ * A evaluation metrics object.
  * 
- * Stores the MSE, RMSE, MAE of the evaluation.
+ * Stores the MSE, RMSE, MAE of an evaluation of a recommender system.
  * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework

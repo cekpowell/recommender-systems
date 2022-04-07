@@ -1,33 +1,52 @@
-package cp6g18.CFRecommenderSystem.Controller;
+package cp6g18.IBCFRecommenderSystem.Controller;
 
 import java.util.HashMap;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import cp6g18.CFRecommenderSystem.Model.IBCFTrainingDataset;
+import cp6g18.General.Controller.Recommender;
+import cp6g18.IBCFRecommenderSystem.Model.IBCFSimilarityMatrix;
+import cp6g18.IBCFRecommenderSystem.Model.IBCFTrainingDataset;
+import cp6g18.Tools.Logger;
 
-/**
- * An Item-Based Collaborative Filtering recommender.
+/** 
+ * An item-based collaborative filtering recommender.
  * 
- * Similarities and predicted ratings are determined according to an item-based model.
+ * Training:
+ *      - An item-item similarity matrix is trained using a training dataset of ratings. 
+ *      - The similarity between two items is calculated using the Adjusted Cosine 
+ *      Similarity algorithm.
+ *      - Some additional steps are also included to improve the performance of the algorithm 
+ *      (documentation given at relevant code).
+ * 
+ * Predicting Ratings:
+ *      - Predicted ratings are calculated according to the algorithm presented in the lectures, using the
+ *      trained similarity matrix.
+ *      - Some additional steps are also included to improve the performance of the algorithm.
+ *      (documentation given at relevant code).
  * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
  */
-public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
+public class IBCFRecommender extends Recommender<IBCFTrainingDataset>{
 
     // MEMBER VARIABLES //
+    private IBCFTrainingDataset trainingDataset; // the training dataset used to train the recommender
+    private IBCFSimilarityMatrix model; // the model learnt from the training dataset
+
+    // RECOMMENDER PARAMETERS //
     private int significanceValue; // The minimum number of co-rated users that must exist between an item pair when determining its similarity.
     private float minSimilarity; // The minimum similarity that must exist between two items for the item to be considered when calculating predicted ratings.
     private float temporalWeightFactor; // The decay rate for the temporal weight applied to the similarity and predicted ratings.
-
+    
     //////////////////
-    // INITIALISING //
+    // INITIALIZING //
     //////////////////
 
     /**
-     * Class constructor.
+     * Class constructor. Constructs a new IBCFRecommender using the provided parameters.
+     * 
      * @param significanceValue The minimum number of co-rated users that must exist between an item pair when determining its similarity.
      * @param minSimilarity The minimum similarity that must exist between two items for the item to be considered when calculating predicted ratings.
      * @param temporalWeightFactor The decay rate for the temporal weight applied to the similarity and predicted ratings.
@@ -35,18 +54,79 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
     public IBCFRecommender(int significanceValue, float minSimilarity, float temporalWeightFactor){
         // initializing
         super();
+        this.trainingDataset = null;
         this.significanceValue = significanceValue;
         this.minSimilarity = minSimilarity;
         this.temporalWeightFactor = temporalWeightFactor;
     }
 
-    /////////////////////////////
-    // SIMILARITY CALCULATIONS //
-    /////////////////////////////
+    /////////////////////
+    // TRAINING SYSTEM //
+    /////////////////////
 
     /**
-     * Determines the similarity between two items according to the Adjusted Cosine Similarity
-     * algorithm presented in the lectures.
+     * Trains the recommender using the provided training dataset. 
+     * 
+     * This is done by iterating over all of the items in the training dataset, and for each, 
+     * computing the similarity between it and all other items.
+     * 
+     * The similarity between two items is computed using the getSimilarity() method, and all 
+     * similarities are stored in a SimilarityMatrix object (the model for the recommender).
+     * 
+     * @param trainingDataset The training dataset the recommender will be trained on.
+     */
+    public void train(IBCFTrainingDataset trainingDataset){
+        // informing
+        Logger.logProcessStart("Training recommender system");
+
+        ///////////////
+        // PREPARING //
+        ///////////////
+
+        // setting the training dataset
+        this.trainingDataset = trainingDataset;
+
+        // setting up the model
+        this.model = new IBCFSimilarityMatrix();
+
+        // gathering average user ratings
+        /**
+         * User average ratings are needed for the similarity calculator, but it is quicker
+         * to gather them once and pass the same object in, rather than gather them each time
+         * the similarity algorithm is called.
+         */
+        HashMap<Integer, Float> userAverageRatings = trainingDataset.getAverageUserRatings();
+
+        /////////////////
+        // CALCULATING //
+        /////////////////
+
+        // finding similarity between every item
+        for(int item1 : trainingDataset.getItems()){
+            for(int item2 : trainingDataset.getItems()){
+                // calculating if not yet calculated
+                if(!model.hasSimilarity(item1, item2)){
+                    // calculating similarity
+                    float similarity = this.getSimiarity(item1, item2, userAverageRatings);
+
+                    // adding similarity to the matrix
+                    model.setSimilarity(item1, item2, similarity);
+                }
+            }
+        }
+
+        ///////////////
+        // FINISHING //
+        ///////////////
+
+        // informing
+        Logger.logProcessEnd("Recommender system successfully trained");
+    }
+
+    /**
+     * Calculates the similarity between two items according to the Adjusted Cosine Similarity
+     * algorithm presented in the lectures (with some additions), and based on the ratings present 
+     * in the training dataset.
      * 
      * Formula:
      *  - Calculating similarity between item i1 and item i2.
@@ -76,12 +156,15 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
      * Edge cases:
      *  - There are no users that have rated both items - similarity of zero.
      * 
-     * @param trainingDataset The training dataset used to determine the similarity.
+     * Full Algorithm:
+     *  - // TODO
+     * 
      * @param item1ID The first item the similarity is being calculated for.
      * @param item2ID The second item the similarity is being calculated for.
+     * @param userAverageRatings A mapping of users to the average rating they provided.
      * @return The Adjusted Cosine Similarity between the two items.
      */
-    public float getSimiarity(IBCFTrainingDataset trainingDataset, HashMap<Integer, Float> userAverageRatings, int item1ID, int item2ID){
+    public float getSimiarity(int item1ID, int item2ID, HashMap<Integer, Float> userAverageRatings){
         /////////////////
         // PREPERATION //
         /////////////////
@@ -90,7 +173,7 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
         float similarity = 0f;
 
         // list of user's who have rated both items
-        Set<Integer> commonUsers = trainingDataset.getUsersWhoRatedItems(item1ID, item2ID);
+        Set<Integer> commonUsers = this.getTrainingDataset().getUsersWhoRatedItems(item1ID, item2ID);
 
         // if no common users, similarity is 0, so can return similarity at this point
         if(commonUsers.size() == 0){
@@ -113,27 +196,28 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
             float userAverageRating = userAverageRatings.get(user);
 
             // getting timestamp of ratings
-            int item1RatingTimestamp = trainingDataset.getTimestampOfRating(user, item1ID);
-            int item2RatingTimestamp = trainingDataset.getTimestampOfRating(user, item2ID);
+            int item1RatingTimestamp = this.getTrainingDataset().getTimestampOfRating(user, item1ID);
+            int item2RatingTimestamp = this.getTrainingDataset().getTimestampOfRating(user, item2ID);
 
-            // weighting function
-            // f(t_ui) = e ^^ (-a (| t_uj - t_ui |))
-            // 0 < a < 1 - higher values of a = weight more sensitive to time, having a = 0 : no time consideration at all
+            // applying temporal weighting
+            // weighting function: 
+            //   - f(t_ui) = e ^^ (-a (| t_uj - t_ui |))
+            //   - 0 < a < 1 - higher values of a = weight more sensitive to time, having a = 0 : no time consideration at all
             float timeDif = Math.abs(item1RatingTimestamp - item2RatingTimestamp);
             float temporalWeight = (float) Math.exp((-1 * this.temporalWeightFactor) * timeDif);
 
             // NUMERATOR //
 
             // numerator
-            numerator += ((trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating) * temporalWeight) * ((trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating) * temporalWeight);
+            numerator += ((this.getTrainingDataset().getUserRatingOfItem(user, item1ID) - userAverageRating) * temporalWeight) * ((this.getTrainingDataset().getUserRatingOfItem(user, item2ID) - userAverageRating) * temporalWeight);
 
             // DENOMINATOR //
 
             // lhs
-            denominatorLhs += ((trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating) * temporalWeight) * ((trainingDataset.getUserRatingOfItem(user, item1ID) - userAverageRating) * temporalWeight);
+            denominatorLhs += ((this.getTrainingDataset().getUserRatingOfItem(user, item1ID) - userAverageRating) * temporalWeight) * ((this.getTrainingDataset().getUserRatingOfItem(user, item1ID) - userAverageRating) * temporalWeight);
 
             // rhs
-            denominatorRhs += ((trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating) * temporalWeight) * ((trainingDataset.getUserRatingOfItem(user, item2ID) - userAverageRating) * temporalWeight);
+            denominatorRhs += ((this.getTrainingDataset().getUserRatingOfItem(user, item2ID) - userAverageRating) * temporalWeight) * ((this.getTrainingDataset().getUserRatingOfItem(user, item2ID) - userAverageRating) * temporalWeight);
         }
 
         // finalising calculations
@@ -163,13 +247,13 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
         return similarity;
     }
 
-    ////////////////////////////////////
-    // PREDICTED RATINGS CALCULATIONS //
-    ////////////////////////////////////
+    ////////////////////////
+    // MAKING PREDICTIONS //
+    ////////////////////////
 
     /**
-     * Calculates the predicted rating of a user-item pair according to the item-based algorithm
-     * presented in the lectures.
+     * Calculates the predicted rating of a user-item rating pair according to the item-based 
+     * algorithm presented in the lectures (with some additions).
      * 
      * Formula:
      *  - Predicting rating for:
@@ -193,21 +277,30 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
      * 
      * Aditions:
      *  - Temporal weighting applied to penalise for ratings that are far apart, and reward for
-     *    weightings that are close together 
+     *    weightings that are close together.
      *      - Using method described here: https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf
      *  - Mean centering applied to the prediction formula to account for user/item biases.
      *      - Using method described here: https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf
      *  - Rounding prediction to nearest whole number (because ratings are only in whole numbers).
      * 
      * Edge cases:
-     * - General:
-     *      - Item Cold start - the item has not been seen before, so there are no similar items.
-     *      - User Cold Start - The user has not been seen before, so there are no ratings for them.
-     *      - User and Item Cold Start
+     *  - Cold Starts:
+     *      - Item Cold start - the item has not been seen before, so there are no similar items:
+     *          - Use the user's average rating as the prediction.
+     *      - User Cold Start - The user has not been seen before, so there are no ratings for them:
+     *          - Use the items average prediction as the rating.
+     *      - User and Item Cold Start:
+     *          - Use the average rating of the dataset.
      *  - When looping through similar items:
-     *      - Item has negative similarity
-     *      - The user has not rated a particular similar item.
-     *      - User has not rated any of the similar items.
+     *      - Item has similarity below the threshold:
+     *          - Do not consider this item in the predicted rating calculation.
+     *      - The user has not rated a particular similar item:
+     *          - Do not consider this item in the predicted rating calculation.
+     *      - User has not rated any of the similar items:
+     *          - Return the average of the average user rating and the average item rating.
+     * 
+     * Full Algorithm:
+     *  - // TODO
      * 
      * @param userID The ID of the user the in the rating.
      * @param itemID The ID of the item in this rating.
@@ -257,9 +350,8 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
         // CALCULATION //
         /////////////////
 
-        // iterating through items
+        // iterating through similar items
         for(Entry<Integer, Float> similarItem : similarItems.entrySet()){
-
             // gathering item ID and similatity value
             int similarItemID = similarItem.getKey();
             Float similarityOfSimilarItem = similarItem.getValue();
@@ -283,9 +375,10 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
             // gathering timestamp of the rating of the similar item
             int timestampOfUserRatingOfSimilarItem = this.getTrainingDataset().getTimestampOfRating(userID, similarItemID);
 
-            // weighting function
-            // f(t_ui) = e ^^ (-a (| t_uj - t_ui |))
-            // 0 < a < 1 - higher values of a = weight more sensitive to time, having a = 0 : no time consideration at all
+            // applying temporal weighting
+            // weighting function: 
+            //   - f(t_ui) = e ^^ (-a (| t_uj - t_ui |))
+            //   - 0 < a < 1 - higher values of a = weight more sensitive to time, having a = 0 : no time consideration at all
             float timeDif = Math.abs(timestamp - timestampOfUserRatingOfSimilarItem);
             float temporalWeight = (float) Math.exp((-1 * this.temporalWeightFactor) * timeDif);
 
@@ -314,5 +407,36 @@ public class IBCFRecommender extends CFRecommender<IBCFTrainingDataset>{
 
         // returning prediction
         return prediction;
+    }
+
+    /////////////////////////
+    // GETTERS AND SETTERS //
+    /////////////////////////
+
+    /**
+     * Getter method for the recommender's training dataset.
+     * 
+     * @return The training dataset associated with this recommender.
+     */
+    public IBCFTrainingDataset getTrainingDataset(){
+        return this.trainingDataset;
+    }
+
+    /**
+     * Getter method for the recommender's model.
+     * 
+     * @return The model associated with this recommender.
+     */
+    public IBCFSimilarityMatrix getModel(){
+        return this.model;
+    }
+
+    /**
+     * Setter method for the recommender's model.
+     * 
+     * @param model The new model to be associated with this recommender.
+     */
+    public void setModel(IBCFSimilarityMatrix model){
+        this.model = model;
     }
 }

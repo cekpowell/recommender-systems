@@ -3,7 +3,9 @@ package cp6g18.General.Model;
 import java.io.Serializable;
 
 /**
- * A Pair of items. The items do not have to be of the same type.
+ * A Pair of items. 
+ * 
+ * The items do not have to be of the same type.
  * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
@@ -22,6 +24,10 @@ public class Tuple<T,S> implements Serializable{
     /**
      * Class constructor.
      * 
+     * Constructs a Tuple that contains a pair of items.
+     * 
+     * The items do not have to be of the same type.
+     * 
      * @param first The first item in the pair.
      * @param second The second item in the pair.
      */
@@ -33,6 +39,8 @@ public class Tuple<T,S> implements Serializable{
 
     /**
      * Default constructor.
+     * 
+     * Constructs an empty Typle.
      */
     public Tuple(){}
 

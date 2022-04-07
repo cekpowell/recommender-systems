@@ -3,8 +3,10 @@ package cp6g18.General.Model;
 import java.io.Serializable;
 
 /**
- * An instance of a rating within a TestingDataset - an object who's attributes are the information
- * surrounding the rating.
+ * An instance of a rating within a TestingDataset.
+ * 
+ * The object contains the information relating to the rating and provides accessors to gather this
+ * information.
  * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework

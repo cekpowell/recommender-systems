@@ -10,6 +10,20 @@ import cp6g18.Tools.Logger;
 
 /**
  * A Matrix Factorisation Recommender.
+ * 
+ * Training:
+ *  - Two matricies (one for items against factors, and one for users against factors) are trained
+ *  using a training dataset of ratings.
+ *  - The matricies are trained iteratively, with each iteration updating them so that they provide 
+ *  predicted ratings closer to the values in the training dataset.
+ *  - Some additional steps are included to improve the performance of the algorithm (documentation)
+ *  given at point of relevant code).
+ * 
+ * Predicting Ratings:
+ *  - A predicted rating for user u for item i is calculated by finding the dot product of the user
+ *  vector for user u in the user matrix, and the item vector for the item i in the item matrix.
+ * - Some additional steps are included to improve the performance of the algorithm (documentation)
+ *  given at point of relevant code).
  */
 public class MFRecommender extends Recommender<MFTrainingDataset>{
 
@@ -18,8 +32,11 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     // MEMBER VARIABLES //
     private MFTrainingDataset trainingDataset; // the training dataset used to train the recommender
     private MFModel model; // the model learnt from the training dataset
+
+    // RECOMMENDER PARAMETERS //
     private int factors; // the number of factors to be used in the user and item vectors
     private int minIterations; // the minimum number of iterations to be performed by the algorithm (termination factor).
+    private int maxIterations; // the maximum number of iterations to be performed by the algorithm (termination factor).
     private float minChangeInMae; // the change MAE between two iterations that will cause the recommender to stop training if it is reached (termination factor).
     private float learningRate; // the learning rate of the algorithm - controls how much the vectors are adjusted each iteration
     private float regularizationRate; // the regularization rate of the algorithm - controls the extent of the regularization to avoid overfitting.
@@ -35,19 +52,21 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * 
      * @param factors The number of factors to be used in the user and item vectors.
      * @param minIterations The minimum number of iterations to be performed by the algorithm (termination factor).
+     * @param maxIterations The maximum number of iterations to be performed by the algorithm (termination factor).
      * @param minChangeInMae the change MAE between two iterations that will cause the recommender to stop training if it is reached (termination factor).
      * @param learningRate The learning rate of the algorithm - controls how much the vectors are adjusted each iteration.
      * @param regularizationRate The regularization rate of the algorithm - controls the extent of the regularization to avoid overfitting.
      * @param mean The mean on the Gaussian spread of randomly generated initial numbers.
      * @param variance The variance on the Gaussian spread of randomly generated initial numbers.
      */
-    public MFRecommender(int factors, int minIterations, float minChangeInMae, float learningRate, float regularizationRate, float mean, float variance){
+    public MFRecommender(int factors, int minIterations, int maxIterations, float minChangeInMae, float learningRate, float regularizationRate, float mean, float variance){
         // initializing
         super();
         this.trainingDataset = null;
         this.model = null;
         this.factors = factors;
         this.minIterations = minIterations;
+        this.maxIterations = maxIterations;
         this.minChangeInMae = minChangeInMae;
         this.learningRate = learningRate;
         this.regularizationRate = regularizationRate;
@@ -60,9 +79,17 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     /////////////////////
 
     /**
-     * Trains the recommender using the provided training dataset.
+     * Trains the recommender using the provided training dataset according to the Matrix 
+     * Factorisation algorithm presented in the lectures (with some additions) and based on the 
+     * ratings present in the training dataset.
      * 
-     * @param trainingDataset The training dataset the recommender will be trained on.
+     * The recommender is trained by performing a number of training iterations.
+     * 
+     * Each training iteration is carried out using the trainOneIteration() method.
+     * 
+     * The number of iterations performed is dependent on the performAnotherTrainingIteration() method. 
+     * 
+     * @param trainingDataset The MFTrainingDataset dataset the recommender will be trained on.
      */
     public void train(MFTrainingDataset trainingDataset){
         // informing
@@ -88,15 +115,15 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         float changeInMae = Float.MAX_VALUE; // the most recent change in MAE
 
         // iteratively training the model
-        while(this.continueToTrain(iterationCount, changeInMae)){
+        while(this.performAnotherTrainingIteration(iterationCount, changeInMae)){
             // performing a single training iteration
             float iterationMAE = this.trainOneIteration();
 
-            // logging
-            System.out.println("Iteration : " + iterationCount + " completed.");
-            System.out.println("\tMAE = " + iterationMAE);
+            // logging the results of the iteration
+            Logger.logProcessMessage("Iteration : " + iterationCount + " completed.");
+            Logger.logProcessMessage("\tMAE = " + iterationMAE);
 
-            // updating the variables
+            // updating the helper variables
             iterationCount++;
             changeInMae = previousIterationMae - iterationMAE;
             previousIterationMae = iterationMAE;
@@ -111,16 +138,77 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     }
 
     /**
-     * Performs one iteration of the matrix factorisation training algorithm.
+     * Performs one iteration of the Matrix Factorisation training algorithm, as presented
+     * in the lectures (with some additions), and using the ratings present in the training dataset.
      * 
-     * @return The MAE across this iteration
+     * One training iteration will perform one pass over the training dataset (in random order), 
+     * and for each training rating, will:
+     *  - Make a predicted rating using the current model.
+     *  - Calculate the error in this predicted rating using the known rating.
+     *  - Update the user and item matricies for the current user and item vectors according to the
+     *  update formula (see below).
+     *  - Two parameters control the learning rate (how much each vector changes in each iteration)
+     *  and the regularization rate (the extent of the regularization to avoid overfitting).
+     * 
+     * The method returns the Mean Absolute Error (MAE) of this iteration's
+     * predictions.
+     * 
+     * Formula:
+     *  - P = user matrix
+     *  - p_u = user vector for user u
+     *  - Q = Item Matrix
+     *  - q_i = item vector for item i
+     *  - For each rating in the training dataset:
+     *      - User = u
+     *      - item = i
+     *      - Learning rate = y
+     *          - Controls how much the vectors are adjusted with each iteration.
+     *      - Regularization rate = h
+     *          - Controls the extent of the regularization to avoid overfitting
+     *      - Predicted rating for user u and item i = r'_ui
+     *          - r'_ui = dot product of p_u and q_i = p_u * u_i
+     *      - Actual rating for user u and item i = r_ui 
+     *          - r_ui is gathered from the training dataset.
+     *      - Error in prediction = e_ui = r_ui - r'_ui
+     *      - Updated item vector:
+     *          - q_i = q_i + y((eui * pu) - (h * qi))
+     *      - Updated user vector:
+     *          - p_u = p_u + y((eui * qi) - (h * pu))
+     *   
+     * Base Algorithm:
+     *  - Shuffle the training dataset to avoid training patterns being biassed to the order of the 
+     *  ratings in the dataset.
+     *  - Iterate over the shuffled dataset, and for each rating:
+     *      - Compute the current models prediction for the user-item pair in this rating.
+     *      - Calculate the error between the prediction and the actual rating.
+     *      - Update user and item matrix vectors for the relevant user and item.
+     * 
+     * Additions:
+     *  - // TODO
+     * 
+     * Edge Cases:
+     *  - // TODO
+     * 
+     * Full Algorithm:
+     *  - // TODO
+     * 
+     * @return The MAE across this training iteration.
      */
     private float trainOneIteration(){
-        // variable to keep track of MAE across iteration
+
+        /////////////////
+        // PREPERATION //
+        /////////////////
+
+        // variable to keep track of absolute error across iteration (for MAE calculation)
         float sumOfAbsoluteError = 0f;
 
         // getting shuffled training dataset
         ArrayList<TestingRating> ratings = this.trainingDataset.getShuffledRatings();
+
+        /////////////////
+        // CALCULATING //
+        /////////////////
 
         // iterating over ratings and updating model for each rating
         for(TestingRating rating : ratings){
@@ -129,34 +217,57 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
             // CALCULATING ERROR //
             ////////////////////////
 
-            // getting predicted rating from model
+            // GETTING PREDICTED RATING BASED ON MODEL //
+
+            // p_u
             ArrayList<Float> userVector = this.model.getUserMFMatrix().getObjectVector(rating.getUserID());
+            // q_i
             ArrayList<Float> itemVector = this.model.getItemMFMatrix().getObjectVector(rating.getItemID());
+            /// r'_ui = p_u * q_i
             float predictedRating = MFRecommender.getDotProduct(userVector, itemVector);
 
-            // calculating error between predicted rating and actual rating
+            // CALCULATING ERROR IN PREDICTION //
+
+            // e_ui = r_ui - r'_ui
             float ratingError = rating.getRating() - predictedRating;
 
-            // adding absolute rating error to sum of absolute error
+            // adding absolute rating error to sum of absolute error (for this iterations MAE)
             sumOfAbsoluteError += Math.abs(ratingError);
 
             //////////////////////////
             // UPDATING USER VECTOR //
             //////////////////////////
 
-            /**
-             * qi = qi + y * ((eui * pu) - (h * qi))
+            /*
+             * Error in prediction = e_ui = r_ui - r'_ui
+             * 
+             * Learning rate = y
+             *  - Controls how much the vectors are adjusted with each iteration.
+             * Regularization rate = h
+             *  - Controls the extent of the regularization to avoid overfitting
+             * 
+             * Updated user vector:
+             *  - p_u = p_u + y((eui * qi) - (h * pu))
              */
 
-            // determining update amount
+            // DETERMINING UPDATE AMOUNT //
+
+            // (eu * qui)
             ArrayList<Float> userError = MFRecommender.getScalarProduct(itemVector, ratingError);
+            // (h * pu)
             ArrayList<Float> userRegularization = MFRecommender.getScalarProduct(userVector, this.regularizationRate);
+            // (eu * qi) - (h * pu)
             ArrayList<Float> regularizedUserError = MFRecommender.getVectorSubtraction(userError, userRegularization);
+            // y((eui * qi) - (h * pu))
             ArrayList<Float> userVectorUpdateAmount = MFRecommender.getScalarProduct(regularizedUserError, this.learningRate);
 
-            // computing updated user vector
+            // COMPUTING UPDATED VECTOR //
+
+            // p_u + y((eui * qi) - (h * pu))
             ArrayList<Float> updatedUserVector = MFRecommender.getVectorAddition(userVector, userVectorUpdateAmount);
             
+            // SETTING UPDATED VECTOR INTO MODEL //
+
             // updating the user vector in the model
             this.model.getUserMFMatrix().setObjectVector(rating.getUserID(), updatedUserVector);
 
@@ -164,37 +275,87 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
             // UPDATING ITEM VECTOR //
             //////////////////////////
 
-            /**
-             * pu = pu + y * ((eui * qi) - (h * pu))
+            /*
+             * Error in prediction = e_ui = r_ui - r'_ui
+             * 
+             * Learning rate = y
+             *  - Controls how much the vectors are adjusted with each iteration.
+             * Regularization rate = h
+             *  - Controls the extent of the regularization to avoid overfitting
+             * 
+             * Updated item vector:
+             *    q_i = q_i + y((eui * pu) - (h * qi))
              */
 
-            // determining update amount
+            // DETERMINING UPDATE AMOUNT //
+
+            // (eui * pu)
             ArrayList<Float> itemError = MFRecommender.getScalarProduct(userVector, ratingError);
+            // (h * qi)
             ArrayList<Float> itemRegularization = MFRecommender.getScalarProduct(itemVector, this.regularizationRate);
+            // (eui * pu) - (h * qi)
             ArrayList<Float> regularizedItemError = MFRecommender.getVectorSubtraction(itemError, itemRegularization);
+            // y((eui * pu) - (h * qi))
             ArrayList<Float> itemVectorUpdateAmount = MFRecommender.getScalarProduct(regularizedItemError, this.learningRate);
 
-            // computing updated item vector
+            // COMPUTING UPDATED VECTOR //
+
+            // q_i + y((eui * pu) - (h * qi))
             ArrayList<Float> updatedItemVector = MFRecommender.getVectorAddition(itemVector, itemVectorUpdateAmount);
+
+            // SETTING UPDATED VECTOR INTO MODEL //
 
             // updating the item vector in the model
             this.model.getItemMFMatrix().setObjectVector(rating.getItemID(), updatedItemVector);
         }
 
-        // returning mae for this iteration
+        ///////////////
+        // RETURNING //
+        ///////////////
+
+        // returning MAE for this iteration
         return sumOfAbsoluteError / ratings.size();
     }
 
     /**
-     * Determines if the recommender must still be trained - i.e., it determines the stop
-     * criteria for the training of the recommender.
+     * Determines if the recommender should perform another training iteration based on a set
+     * of termination criteria.
+     * 
+     * The recommender system will perform another training iteration if:
+     *  - The minimum number of training iterations has not yet been performed.
+     *  - The maximum number of training iterations has not yet been exceeded.
+     *  - The change in MAE of the two previous iterations is above the minimum change in MAE.
      * 
      * @param numIterations The number of training iterations performed already.
-     * @param changeInMae The change in MAE on the most recent training iteration.
-     * @return True if the recommender must still be trained, false otherwise.
+     * @param changeInMae The change in MAE between the two previous training iterations.
+     * @return True if the recommender should perform another training iteration, false if not.
      */
-    private boolean continueToTrain(int numIterations, float changeInMae){
-        return (numIterations <= this.minIterations) || (changeInMae >= this.minChangeInMae);
+    private boolean performAnotherTrainingIteration(int numIterations, float changeInMae){
+        // MINIMUM NUMBER OF ITERATIONS NOT PERFORMED //
+        if(numIterations < this.minIterations){
+            // returning true
+            return true;
+        }
+        // MAXIMUM NUMBER OF ITERATIONS PERFORMED //
+        else if(numIterations > this.maxIterations){
+            // logging reason for termination
+            Logger.logProcessMessage("Training terminated: Maximum iterations exceeded!");
+            
+            // returning false
+            return false;
+        }
+        // CHANGE IN MAE BELOW MINIMUM ALLOWED //
+        else if(changeInMae < this.minChangeInMae){
+            // logging reason for termination
+            Logger.logProcessMessage("Training terminated: Change in MAE below minimum!");
+
+            // returning false
+            return false;
+        }
+        // CONTINUE //
+        else{
+            return true;
+        }
     }
 
     ////////////////////////
@@ -202,39 +363,97 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     ////////////////////////
 
     /**
-     * Calculates a predicted rating for the provided user-item pair.
+     * Calculates a predicted rating for the provided user-item pair according to the Matrix 
+     * Factorisation Algorithm.
      * 
+     * Formula:
+     *  - Predicting rating for:
+     *      - User u
+     *      - item i
+     *  - p_u = User vector for user u (the user's vector within the user matrix)
+     *  - q_i = Item vector for item i (the item's vector within the item matrix)
+     *  - Prediction = Dot product of p_u and q_i = p_u * q_i
+     *  - Why?
+     *      - p_u describes how user u connects to each of the factors.
+     *      - q_i descrives how item i connects to each of the factors.
+     *      - User-item pairs that are 'similar' will have 'similar' user factors - e.g., the factor
+     *      values will be high in the same places.
+     *      - User-item pairs that have 'similar' (e.g., similarly high) factors will have higher 
+     *      dot-products and thus higher predicted ratings.
+     * 
+     * Base Algorithm:
+     *  - Gather the user vector for user u.
+     *  - Gather the item vector for item i.
+     *  - Compute the dot product between the user vector and the item vector.
+     *  - Return the result of the dot-product calculation as the predicted rating.
+     * 
+     * Additions:
+     *  - // TODO
+     * 
+     * Edge Cases:
+     *  - Cold Starts:
+     *      - Item Cold start - the item has not been seen before, so there are no similar items:
+     *          - Use the user's average rating as the prediction.
+     *      - User Cold Start - The user has not been seen before, so there are no ratings for them:
+     *          - Use the items average prediction as the rating.
+     *      - User and Item Cold Start:
+     *          - Use the average rating of the dataset.
+     *  - Additional:
+     *      - // TODO
+     * 
+     * Full Algorithm:
+     *  - // TODO
+     *              
      * @param userID The ID of the user in the rating.
      * @param itemID The ID of the item in the rating.
      * @return The predicted rating for the user-item pair.
      */
-    protected float makePrediction(int userID, int itemID, int timestamp){
-        /**
-         * Predicting rating for user u and item i.
-         * 
-         * user vector for user u = p_u
-         * 
-         * item vector for item i = q_i
-         * 
-         * Prediction r_ui = q_i (dot product) p_u
-         */
+    protected float makePrediction(int userID, int itemID, int timestamp){   
         
+        /////////////////
+        // PREPERATION //
+        /////////////////
+
         // variable for predicted rating
         float predictedRating = 0f;
 
-        // gathering vector for user 
+        // gathering vector for user (p_u)
         ArrayList<Float> userVector = this.model.getUserMFMatrix().getObjectVector(userID);
 
-        // gathering vector for item
+        // gathering vector for item (q_i)
         ArrayList<Float> itemVector = this.model.getItemMFMatrix().getObjectVector(itemID);
 
-        // handling cold starts
-        if(userVector == null || itemVector == null){
-            return predictedRating;
+        /////////////////
+        // COLD STARTS //
+        /////////////////
+
+        // USER AND ITEM COLD START //
+        if (userVector == null && itemVector == null){
+            // returning sensible prediction - average rating across dataset
+            return predictedRating; // TODO update to return average rating across dataset.
+        }
+        // USER COLD START //
+        else if(userVector == null){
+            // returning sensible prediction - the average rating of the item
+            return predictedRating; // TODO update to return average rating of the item.
+        }
+        // ITEM COLD START //
+        else if(itemVector == null){
+            // returning sensible prediction - the average rating of the user
+            return predictedRating; // TODO update to return average rating of the user.
         }
 
-        // computing predicted rating as dot product of user and item vectors
+        /////////////////
+        // CALCULATION //
+        /////////////////
+
+        // computing predicted rating (dot product of user and item vectors)
+        // p_u * q_i
         predictedRating = MFRecommender.getDotProduct(userVector, itemVector);
+
+        ///////////////
+        // RETURNING //
+        ///////////////
         
         // returning predicted rating
         return predictedRating;
@@ -271,12 +490,20 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         this.model = model;
     }
 
-    ////////////////////
-    // HELPER METHODS //
-    ////////////////////
+    /////////////////////////////////
+    // VECTOR MANIUPLATION METHODS //
+    /////////////////////////////////
+
+    /*
+     * A number of methods to help with the vector manipulation required within the
+     * matrix factorisation algorithm.
+     */
 
     /**
      * Computes the dot product of two vectors.
+     * 
+     * The dot product of two vectors is the summation of the pairwise multiplication of all elements
+     * in the two vectors.
      * 
      * @param vector1 The first vector.
      * @param vector2 The second vector.
@@ -297,7 +524,7 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     }
 
     /**
-     * Computes the scalar product of a vector.
+     * Computes the scalar product of a vector with some scalar value.
      * 
      * @param vector The vector to be scaled.
      * @param scalar The scalar multiplier.
@@ -319,7 +546,7 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     }
 
     /**
-     * Computes the addition of two vectors - a pairwise addition of each element in the vectors.
+     * Computes the pairwise addition of two vectors.
      * 
      * @param vector1 The first vector.
      * @param vector2 The second vector.
@@ -340,7 +567,7 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     }
 
     /**
-     * Computes the subtraction of two vectors - a pairwise subtraction of each element in the vectors.
+     * Computes the pairwise subtraction of two vectors.
      * 
      * @param vector1 The first vector.
      * @param vector2 The second vector.

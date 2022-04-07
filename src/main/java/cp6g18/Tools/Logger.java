@@ -1,7 +1,7 @@
 package cp6g18.Tools;
 
 /**
- * Defines static methods to handle logging on STDOUT
+ * Defines static methods to handle logging on STDOUT.
  * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
@@ -110,6 +110,16 @@ public class Logger {
 
         // logging
         System.out.println(message + " ! " + Logger.getProcessCompletionTime());
+    }
+
+    /**
+     * // TODO
+     * 
+     * @param message
+     */
+    public static void logProcessMessage(String message){
+        // logging
+        System.out.println("\t" + message);
     }
 
     ////////////////////////////////

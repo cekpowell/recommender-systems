@@ -1,24 +1,31 @@
-package cp6g18.CFRecommenderSystem.Model;
+package cp6g18.IBCFRecommenderSystem.Model;
 
 import java.util.HashMap;
-import java.util.Set;
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import cp6g18.General.Model.Dataset;
 import cp6g18.General.Model.TrainingDataset;
 import cp6g18.General.Model.Tuple;
 
 /**
- * A dataset used for the purposes of training a Recommender. The data is stored as a nested hashmap
- * for quick access, and additional hashmaps are maintained for convenience.
+ * A dataset used for the purposes of training an Item-Based CF Recommender. 
+ * 
+ * The data is stored as a HashMaps of items to ratings of items by users. 
+ * 
+ * Additional HashMaps are maintained for convenience of the recommender algorithms.
+ * 
+ * Serveal methods are provided that allow for quick data retreival from the dataset.
  * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework
  * @author  Charles Powell
  */
-public abstract class CFTrainingDataset extends TrainingDataset{
+public class IBCFTrainingDataset extends TrainingDataset{
 
     // MEMBER VARIABLES //
-    private HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>> data; // {user ID -> {item ID -> (rating,timestamp)}} OR {item ID -> {user ID -> (rating,timestamp)}}.
+    private HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>> data; // {item ID -> {user ID -> (rating,timestamp)}}.
     private Tuple<Float, Integer> totalDatasetRating; // (total rating in dataset, number of ratings in dataset)
     private HashMap<Integer, Tuple<Float, Integer>> totalUserRatings; // {userID -> (total rating given by user, numberOfRatings given by user)}
     private HashMap<Integer, Tuple<Float, Integer>> totalItemRatings; // {itemID -> (total rating given to item, number of ratings given to item)}
@@ -30,7 +37,7 @@ public abstract class CFTrainingDataset extends TrainingDataset{
     /**
      * Class constructor.
      */
-    public CFTrainingDataset(){
+    public IBCFTrainingDataset(){
         // initializing
         this.data = new HashMap<Integer, HashMap<Integer, Tuple<Float, Integer>>>();
         this.totalDatasetRating = new Tuple<Float, Integer>();
@@ -47,10 +54,29 @@ public abstract class CFTrainingDataset extends TrainingDataset{
      * 
      * @param userID The ID of the user who made the rating.
      * @param itemID The ID of the item the rating is for.
-     * @param itemRating The rating given to the item.
+     * @param rating The rating given to the item.
      * @param timestamp The timestamp of the rating.
      */
-    public abstract void addRating(int userID, int itemID, float rating, int timestamp);
+    public void addRating(int userID, int itemID, float rating, int timestamp){
+        ///////////////////
+        // ADDING RATING //
+        ///////////////////
+
+        // loading the hashmap for this item
+        HashMap<Integer, Tuple<Float, Integer>> itemRatings = this.getData().get(itemID);
+
+        // instantiating the hashamp if it was null
+        if(itemRatings == null){
+            itemRatings = new HashMap<Integer, Tuple<Float, Integer>>();
+            this.getData().put(itemID, itemRatings);
+        }
+
+        // adding this rating to the user's ratings
+        itemRatings.put(userID, new Tuple<Float, Integer>(rating, timestamp));
+
+        // updating total user ratings
+        this.updateTotalRatings(userID, itemID, rating);
+    }
 
     /**
      * Updates the hashmaps that store a record of the total ratings for the dataset based on a
@@ -89,14 +115,30 @@ public abstract class CFTrainingDataset extends TrainingDataset{
      * 
      * @return The set of all users (userIDs) stored in the datset.
      */
-    public abstract Set<Integer> getUsers();
+    public Set<Integer> getUsers(){
+        // creating new set
+        Set<Integer> users = new HashSet<Integer>();
+
+        // iterating through data and adding each item to the set
+        for(HashMap<Integer, Tuple<Float, Integer>> rating : this.getData().values()){
+            for(int user : rating.keySet()){
+                users.add(user);
+            }
+        }
+        
+        // returning set as list
+        return users;
+    }
 
     /**
      * Returns the set of all items stored in the dataset.
      * 
      * @return The set of all items (itemIDs) stored in the datset.
      */
-    public abstract Set<Integer> getItems();
+    public Set<Integer> getItems(){
+        // returning the items
+        return this.getData().keySet();
+    }
 
     /**
      * Returns the Set of all users who have rated a particular item.
@@ -104,7 +146,10 @@ public abstract class CFTrainingDataset extends TrainingDataset{
      * @param itemID The ID of the item for which the users who have rated it are being gathered.
      * @return The set of all users (user IDs) who have rated the item.
      */
-    public abstract Set<Integer> getUsersWhoRatedItem(int itemID);
+    public Set<Integer> getUsersWhoRatedItem(int itemID){
+        // returning the users
+        return this.getData().get(itemID).keySet();
+    }
 
     /**
      * Returns the set of all users who have rated a pair of items.
@@ -113,7 +158,10 @@ public abstract class CFTrainingDataset extends TrainingDataset{
      * @param item2ID The second item the users must have rated.
      * @return The set of users (user IDs) who have rated both items.
      */
-    public abstract Set<Integer> getUsersWhoRatedItems(int item1ID, int item2ID);
+    public Set<Integer> getUsersWhoRatedItems(int item1ID, int item2ID){
+        // returning the users
+        return (Dataset.getCommonElements(this.getUsersWhoRatedItem(item1ID), this.getUsersWhoRatedItem(item2ID)));
+    }
 
     /**
      * Returns the set of items rated by a particular user.
@@ -121,7 +169,22 @@ public abstract class CFTrainingDataset extends TrainingDataset{
      * @param userID The ID of the user who's ratings are being gathered.
      * @return The set of items (item IDs) rated by the user.
      */
-    public abstract Set<Integer> getItemsRatedByUser(int userID);
+    public Set<Integer> getItemsRatedByUser(int userID){
+        // creating new set
+        Set<Integer> items = new HashSet<Integer>();
+            
+        // finding which items the user has rated
+        for(Entry<Integer, HashMap<Integer, Tuple<Float, Integer>>> rating : this.getData().entrySet()){
+            // seeing if this rating is from the user
+            if(rating.getValue().containsKey(userID)){
+                // adding the user to the list if it is
+                items.add(rating.getKey());
+            }
+        }
+
+        // returning the set of items
+        return items;
+    }
 
     /**
      * Returns the set of items rated by a pair of users.
@@ -130,7 +193,9 @@ public abstract class CFTrainingDataset extends TrainingDataset{
      * @param user2ID The second user who must have rated the items.
      * @return The set of items (item IDs) rated by both users.
      */
-    public abstract Set<Integer> getItemsRatedByUsers(int user1ID, int user2ID);
+    public Set<Integer> getItemsRatedByUsers(int user1ID, int user2ID){
+        return (Dataset.getCommonElements(this.getItemsRatedByUser(user1ID), this.getItemsRatedByUser(user2ID)));
+    }
 
     /**
      * Returns the user's rating of an item.
@@ -139,7 +204,16 @@ public abstract class CFTrainingDataset extends TrainingDataset{
      * @param itemID The ID of the item that was rated.
      * @return The rating (float) given to the item by the user.
      */
-    public abstract Float getUserRatingOfItem(int userID, int itemID);
+    public Float getUserRatingOfItem(int userID, int itemID){
+        try{
+            // returning the rating
+            return (this.getData().get(itemID).get(userID).first);
+        }
+        // case where rating does not exist
+        catch(NullPointerException e){
+            return null;
+        } 
+    }
 
     /**
      * Returns the timestamp of a particular rating.
@@ -148,7 +222,16 @@ public abstract class CFTrainingDataset extends TrainingDataset{
      * @param itemID The ID of the item that was rated.
      * @return The timestamp of the rating (int).
      */
-    public abstract Integer getTimestampOfRating(int userID, int itemID);
+    public Integer getTimestampOfRating(int userID, int itemID){
+        try{
+            // returning the rating's timestamp
+            return (this.getData().get(itemID).get(userID).second);
+        }        
+        // rating does not exist
+        catch(NullPointerException e){
+            return null;
+        }
+    }
 
     /**
      * 

@@ -2,10 +2,10 @@ package cp6g18.Tasks;
 
 import java.io.File;
 
-import cp6g18.CFRecommenderSystem.Controller.IBCFRecommender;
-import cp6g18.CFRecommenderSystem.Model.IBCFTrainingDataset;
 import cp6g18.General.Model.Database;
 import cp6g18.General.Model.TestingDataset;
+import cp6g18.IBCFRecommenderSystem.Controller.IBCFRecommender;
+import cp6g18.IBCFRecommenderSystem.Model.IBCFTrainingDataset;
 import cp6g18.Tools.FileHandler;
 import cp6g18.Tools.Logger;
 

@@ -8,12 +8,16 @@ import java.util.Random;
 /**
  * A matrix used within the Matrix Factorization algorithm.
  * 
- * Stores either a user-factor mappinigs, or item-factor mappings.
+ * Each matrix stores a mapping of object IDs (where objects are either items or users) to a list
+ * of factors (i.e., vector of values).
+ * 
+ * Each list of factors is learnt during the Matrix Factorisation algorithm, and describes it's
+ * corresponding object.
  */
 public class MFMatrix{
     
     // MEMBER VARIABLES //
-    private HashMap<Integer, ArrayList<Float>> matrix; // {object ID -> {factor ID -> value}}
+    private HashMap<Integer, ArrayList<Float>> matrix; // {object ID -> [factor]} (object is either user or item depending on matrix type)
 
     //////////////////
     // INITIALIZING //
@@ -24,6 +28,7 @@ public class MFMatrix{
      * 
      * @param objects A list of object IDs to be stored in the matrix.
      * @param factors The number of factors (Dimensions) within the matrix for each object.
+     * (i.e., the dimensionality of each object's vector).
      * @param mean The mean on the Gaussian spread of randomly generated initial numbers.
      * @param variance The variance on the Gaussian spread of randomly generated initial numbers.
      */
@@ -77,6 +82,10 @@ public class MFMatrix{
         // returning the object's vector
         return this.matrix.get(objectID);
     }
+
+    /////////////////////////////////
+    // SETTING DATA INTO THE MODEL //
+    /////////////////////////////////
 
     /**
      * Sets an object vector into the matrix at the location of the object ID.

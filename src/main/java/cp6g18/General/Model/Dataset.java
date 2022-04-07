@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * An abstract class that represents an dataset, which could be for training or testing purposes.
+ * A Ratings Dataset.
  * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework

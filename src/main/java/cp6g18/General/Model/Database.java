@@ -5,8 +5,8 @@ import java.util.Random;
 
 import com.almworks.sqlite4java.SQLite;
 import com.almworks.sqlite4java.SQLiteConnection;
-import com.almworks.sqlite4java.SQLiteStatement;
 import com.almworks.sqlite4java.SQLiteException;
+import com.almworks.sqlite4java.SQLiteStatement;
 
 import cp6g18.Tools.Logger;
 
@@ -28,8 +28,11 @@ public class Database{
     //////////////////
 
     /**
-     * Class Constructor. Opens the database with the provided filename. An error is
-     * thrown if no database with this filename exists.
+     * Class Constructor. 
+     * 
+     * Opens the database with the provided filename. 
+     * 
+     * An error if thrown if no database with this filename exists.
      * 
      * @param databaseFilename The name of the database file. 
      * @throws SQLiteException If it is not possible to connect to the database.
@@ -52,8 +55,7 @@ public class Database{
     /////////////////////////////////////////
 
     /**
-     * Opens the database by opening the connection to the underlying 
-     * database file.
+     * OPens the database by opening the connection to the underlying database file.
      * 
      * @param allowCreateDatabase Specifies if the opening can create the database if it does not
      * already exist.
@@ -76,7 +78,7 @@ public class Database{
     }
 
     /**
-	 * Closes the database by disposing of the connection.
+	 * Closes the database by disposing of the underlying database connection.
 	 */
 	public void close() {
 		// DISCONNECTING FROM DATABASE //

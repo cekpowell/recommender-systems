@@ -5,7 +5,9 @@ import java.util.Collection;
 /**
  * The model for a MFRecommender.
  * 
- * Contains two matricies - one for user vectors and one for item vectors.
+ * The model is comprised of two MFMatrix objects:
+ *  - One which stores the user vectors (i.e., the user matrix).
+ *  - One which stores the item vectors (i.e., the item matrix).
  */
 public class MFModel {
     

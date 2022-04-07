@@ -3,8 +3,13 @@ package cp6g18.General.Model;
 import java.util.ArrayList;
 
 /**
- * A dataset used for the purposes of storing the ratings for which a recommender must predict,
- * and the results of these predictions.
+ * A dataset that stores a set of ratings a Recommender is to make predictions for.
+ * 
+ * The ratings are stored as an ArrayList of Rating objects. As a precition must be given to each
+ * rating in the dataset, all of the ratings must be iterated over, and thus there is no advantage
+ * to storing the ratings in a structure such as a HashMap. Additionally, the ordering of the 
+ * ratings must be presevered (as evaluation is done by comparing entry to entry, not rating to
+ * rating), which is the case with an ArrayList.
  * 
  * @module  COMP3208: Social Computing Techniques
  * @project Coursework

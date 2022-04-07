@@ -10,8 +10,12 @@ import cp6g18.General.Model.TrainingDataset;
 /**
  * A training dataset for an MFRecommender. 
  * 
- * Data is stored as an ArrayList and methods are provided to return the data in a random order.
- * Additional collections are used to keep track of the users and items in the system.
+ * The data is stored as an ArrayList (most effecient data structure for the Matrix Factorisation 
+ * algorithm as each iteration requires to go over the entire training dataset in a random order, 
+ * so there is no advantage of using a structure like a HashMap).
+ * 
+ * Additional collections are used to keep track of the IDs of all users and items in the system
+ * for the convenience of the Matrix Factorisation algorithm.
  */
 public class MFTrainingDataset extends TrainingDataset{
 

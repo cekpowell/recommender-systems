@@ -1,6 +1,5 @@
 package cp6g18.General.Controller;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import cp6g18.General.Model.Database;
@@ -8,7 +7,6 @@ import cp6g18.General.Model.Evaluation;
 import cp6g18.General.Model.TestingDataset;
 import cp6g18.General.Model.TestingRating;
 import cp6g18.General.Model.TrainingDataset;
-import cp6g18.Tools.FileHandler;
 import cp6g18.Tools.Logger;
 
 /**
@@ -22,7 +20,7 @@ import cp6g18.Tools.Logger;
 public class Evaluator {
 
     // CONSTANTS //
-    private static final int TRAINING_TESTING_RATIO = 10; // 1 in every x ratings is testing, the rest are training
+    private static final int TRAINING_TESTING_RATIO = 10; // 1 in every x ratings are for testing, the rest are for training
 
     ////////////////
     // EVALUATION //
@@ -31,15 +29,18 @@ public class Evaluator {
     /**
      * Evaluates a recommender of the provided type using the provided database and training table.
      * 
-     * Algorithm:
-     *  - Create a new training and testing datasets using the training table within the database.
-     *  - Train the recommender on the new training data.
-     *  - Test the recommender on the new testing data.
-     *  - Evalaute the performance of the recommender using the ground truths.
+     * A new training-testing dataset pair is created from the provided training dataset and the ground
+     * truths for the new testing set are recorded. The recommdner is trained using the new training 
+     * dataset, and used to make predictions for the new testing set. The performance of the 
+     * recommender is then evaluated by comparing the predictions against the recorded ground
+     * truths.
      * 
-     * @param recommender
-     * @param ratingsDatabase
-     * @return
+     * @param recommender The Recommender being evaluated.
+     * @param trainingDataset The type of TrainingDataset the recommender is to be trained on.
+     * @param database The database that will be used to create the new training and testing datasets.
+     * @param trainingTableName The name of the table within the database that contains the dataset
+     * that will be split into a new training and testing set.
+     * @return An Evaluation object that contains the evaluation metrics for the recommender.
      */
     public static <T extends TrainingDataset> Evaluation evaluateRecommender(Recommender<T> recommender, T trainingDataset, Database database, String trainingTableName) throws Exception{
 

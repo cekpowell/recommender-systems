@@ -1,4 +1,4 @@
-package cp6g18.CFRecommenderSystem.Model;
+package cp6g18.IBCFRecommenderSystem.Model;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +15,7 @@ import java.util.Map.Entry;
  * @project Coursework
  * @author  Charles Powell
  */
-public class CFSimilarityMatrix {
+public class IBCFSimilarityMatrix {
     
     // MEMBER VARIABLES //
     private HashMap<Integer, HashMap<Integer,Float>> similarities; // {object ID -> {object ID -> similarity}
@@ -27,7 +27,7 @@ public class CFSimilarityMatrix {
     /**
      * Class constructor.
      */
-    public CFSimilarityMatrix(){
+    public IBCFSimilarityMatrix(){
         this.similarities = new HashMap<Integer, HashMap<Integer,Float>>();
     }
 
