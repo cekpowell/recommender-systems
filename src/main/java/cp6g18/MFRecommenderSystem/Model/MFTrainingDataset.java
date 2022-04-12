@@ -35,6 +35,7 @@ public class MFTrainingDataset extends TrainingDataset{
      */
     public MFTrainingDataset(){
         // initializing
+        super();
         this.data = new ArrayList<TestingRating>();
         this.users = new HashSet<Integer>();
         this.items = new HashSet<Integer>();
@@ -62,6 +63,9 @@ public class MFTrainingDataset extends TrainingDataset{
         // adding user and item ids to set of all users and items
         this.users.add(userID);
         this.items.add(itemID);
+
+        // updating the total ratings
+        this.updateTotalRatings(userID, itemID, itemRating);
     }
 
     ///////////////////////////////////

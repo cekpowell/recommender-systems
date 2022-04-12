@@ -47,13 +47,18 @@ public class IBCFRecommender extends Recommender<IBCFTrainingDataset>{
     /**
      * Class constructor. Constructs a new IBCFRecommender using the provided parameters.
      * 
-     * @param significanceValue The minimum number of co-rated users that must exist between an item pair when determining its similarity.
-     * @param minSimilarity The minimum similarity that must exist between two items for the item to be considered when calculating predicted ratings.
-     * @param temporalWeightFactor The decay rate for the temporal weight applied to the similarity and predicted ratings.
+     * @param minRating The minimum rating that can be given to an item
+     * @param maxRating The maximum rating that can be given to an item
+     * @param significanceValue The minimum number of co-rated users that must exist between an item 
+     * pair when determining its similarity.
+     * @param minSimilarity The minimum similarity that must exist between two items for the item to 
+     * be considered when calculating predicted ratings.
+     * @param temporalWeightFactor The decay rate for the temporal weight applied to the similarity 
+     * and predicted ratings.
      */
-    public IBCFRecommender(int significanceValue, float minSimilarity, float temporalWeightFactor){
+    public IBCFRecommender(float minRating, float maxRating, int significanceValue, float minSimilarity, float temporalWeightFactor){
         // initializing
-        super();
+        super(minRating, maxRating);
         this.trainingDataset = null;
         this.significanceValue = significanceValue;
         this.minSimilarity = minSimilarity;
@@ -235,8 +240,12 @@ public class IBCFRecommender extends Recommender<IBCFTrainingDataset>{
         similarity = numerator / denominator;
 
         // SIGNIFICANCE WEIGHTING //
-
-        // adjusting similarity based on number of common users - items with less common users have lower similarities (https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf
+        
+        /**
+         * Significance weighting - Adjusting similarity based on number of common users - items with 
+         * less common users should have lower similarities 
+         * (https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf)
+         */
         similarity *= (float) Math.min(commonUsers.size(), this.significanceValue) / this.significanceValue;
 
         //////////////////////
@@ -282,6 +291,7 @@ public class IBCFRecommender extends Recommender<IBCFTrainingDataset>{
      *  - Mean centering applied to the prediction formula to account for user/item biases.
      *      - Using method described here: https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf
      *  - Rounding prediction to nearest whole number (because ratings are only in whole numbers).
+     *  - Ensuting all predictions fall wihtin the bounds of 1 and 5. // TODO
      * 
      * Edge cases:
      *  - Cold Starts:
@@ -308,18 +318,20 @@ public class IBCFRecommender extends Recommender<IBCFTrainingDataset>{
      * @return The predicted rating.
      */
     protected float makePrediction(int userID, int itemID, int timestamp){
+        
         //////////////////////////////
         // CHECKING FOR COLD STARTS //
         //////////////////////////////
 
-        // gathering user and item averages
+        // gathering dataset averages
+        float datasetAverageRating = this.getTrainingDataset().getDatasetAverageRating();
         Float averageUserRating = this.getTrainingDataset().getAverageUserRating(userID);
         Float averageItemRating = this.getTrainingDataset().getAverageItemRating(itemID);
 
         // USER AND ITEM COLD START //
         if(averageUserRating == null && averageItemRating == null){
             // return sensible value - average rating across all items
-            return this.getTrainingDataset().getDatasetAverageRating();
+            return datasetAverageRating;
         }
         // USER COLD START //
         else if(averageUserRating == null){
@@ -337,7 +349,7 @@ public class IBCFRecommender extends Recommender<IBCFTrainingDataset>{
         /////////////////
 
         // variable to store prediction
-        Float prediction = 1f; // base recommendation = 1.0 (the lowest possible rating).
+        Float prediction = this.getMinRating(); // base rating = minimum rating.
 
         // getting similarities to other items.
         HashMap<Integer, Float> similarItems = this.getModel().getSimilaritiesForObject(itemID);

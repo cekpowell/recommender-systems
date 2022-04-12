@@ -26,6 +26,8 @@ public class Task3 {
     private static final String RESULTS_FILE = "out" + File.separator + "Task3/results.csv"; // The name of the file the task 1 results will be written to
 
     // SYSTEM PARAMETERS //
+    private static final float MIN_RATING = 1f; // the minimum rating that can be given to an item 
+    private static final float MAX_RATING = 5f; // the maximum rating that can be given to an item
     private static final int FACTORS = 40; // the number of latent factors in the matricies.
     private static final int MIN_ITERATIONS = 10; // the minimum number of iterations the algorithm will perform.
     private static final int MAX_ITERATIONS = 100; // the maximum number of iterations the algorithm will perform.
@@ -65,7 +67,9 @@ public class Task3 {
             database.loadRatingsDataset(trainingDataset, Task3.TRAINING_TABLE_NAME);
 
             // creating recommender system
-            MFRecommender recommender = new MFRecommender(Task3.FACTORS, 
+            MFRecommender recommender = new MFRecommender(Task3.MIN_RATING,
+                                                          Task3.MAX_RATING,
+                                                          Task3.FACTORS, 
                                                           Task3.MIN_ITERATIONS, 
                                                           Task3.MAX_ITERATIONS, 
                                                           Task3.MIN_CHANGE_IN_MAE, 

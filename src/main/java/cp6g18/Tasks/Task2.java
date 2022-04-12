@@ -26,6 +26,8 @@ public class Task2 {
     private static final String RESULTS_FILE = "out" + File.separator + "Task2/results.csv"; // The name of the file the task 1 results will be written to
 
     // SYSTEM PARAMETERS //
+    private static final float MIN_RATING = 1f; // the minimum rating that can be given to an item 
+    private static final float MAX_RATING = 5f; // the maximum rating that can be given to an item
     private static final int SIGNIFICANCE_VALUE = 50; // The minimum number of co-rated users that must exist between an item pair when determining its similarity.
     private static final float MIN_SIMILARITY = 0.0f; // The minimum similarity that can be used when calculating predicted ratings.
     private static final float TEMPORAL_WEIGHT_FACTOR = 0.001f; // The decay rate for the temporal weight applied to the similarity and predicted ratings.
@@ -60,7 +62,12 @@ public class Task2 {
             database.loadRatingsDataset(trainingDataset, Task2.TRAINING_TABLE_NAME);
 
             // creating recommender system
-            IBCFRecommender recommender = new IBCFRecommender(Task2.SIGNIFICANCE_VALUE, Task2.MIN_SIMILARITY, Task2.TEMPORAL_WEIGHT_FACTOR);
+            IBCFRecommender recommender = new IBCFRecommender(Task2.MIN_RATING, 
+                                                              Task2.MAX_RATING, 
+                                                              Task2.SIGNIFICANCE_VALUE, 
+                                                              Task2.MIN_SIMILARITY, 
+                                                              Task2.TEMPORAL_WEIGHT_FACTOR
+                                                             );
 
             // logging
             Logger.logSubTaskEnd("LOADING TRAINING DATA");

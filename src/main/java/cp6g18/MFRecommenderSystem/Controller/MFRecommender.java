@@ -50,6 +50,8 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     /**
      * Class constructor. 
      * 
+     * @param minRating The minimum rating that can be given to an item
+     * @param maxRating The maximum rating that can be given to an item
      * @param factors The number of factors to be used in the user and item vectors.
      * @param minIterations The minimum number of iterations to be performed by the algorithm (termination factor).
      * @param maxIterations The maximum number of iterations to be performed by the algorithm (termination factor).
@@ -59,9 +61,9 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * @param mean The mean on the Gaussian spread of randomly generated initial numbers.
      * @param variance The variance on the Gaussian spread of randomly generated initial numbers.
      */
-    public MFRecommender(int factors, int minIterations, int maxIterations, float minChangeInMae, float learningRate, float regularizationRate, float mean, float variance){
+    public MFRecommender(float minRating, float maxRating, int factors, int minIterations, int maxIterations, float minChangeInMae, float learningRate, float regularizationRate, float mean, float variance){
         // initializing
-        super();
+        super(minRating, maxRating);
         this.trainingDataset = null;
         this.model = null;
         this.factors = factors;
@@ -87,7 +89,8 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * 
      * Each training iteration is carried out using the trainOneIteration() method.
      * 
-     * The number of iterations performed is dependent on the performAnotherTrainingIteration() method. 
+     * The number of iterations performed is dependent on the shouldPerformAnotherTrainingIteration() 
+     * method. 
      * 
      * @param trainingDataset The MFTrainingDataset dataset the recommender will be trained on.
      */
@@ -115,7 +118,7 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         float changeInMae = Float.MAX_VALUE; // the most recent change in MAE
 
         // iteratively training the model
-        while(this.performAnotherTrainingIteration(iterationCount, changeInMae)){
+        while(this.shouldPerformAnotherTrainingIteration(iterationCount, changeInMae)){
             // performing a single training iteration
             float iterationMAE = this.trainOneIteration();
 
@@ -330,7 +333,7 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * @param changeInMae The change in MAE between the two previous training iterations.
      * @return True if the recommender should perform another training iteration, false if not.
      */
-    private boolean performAnotherTrainingIteration(int numIterations, float changeInMae){
+    private boolean shouldPerformAnotherTrainingIteration(int numIterations, float changeInMae){
         // MINIMUM NUMBER OF ITERATIONS NOT PERFORMED //
         if(numIterations < this.minIterations){
             // returning true
@@ -380,6 +383,8 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      *      values will be high in the same places.
      *      - User-item pairs that have 'similar' (e.g., similarly high) factors will have higher 
      *      dot-products and thus higher predicted ratings.
+     *      - p_u * q_i describes the INTERACTION between user u and item i, and thus predicts how
+     *      user u rates item i.
      * 
      * Base Algorithm:
      *  - Gather the user vector for user u.
@@ -388,6 +393,9 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      *  - Return the result of the dot-product calculation as the predicted rating.
      * 
      * Additions:
+     *  - Rounding prediction to nearest whole number (because ratings are only in whole numbers).
+     *  - Ensuring all predictions are within the bounds of the possible ratings (e.g., less than
+     *  6 and greater than 0).
      *  - // TODO
      * 
      * Edge Cases:
@@ -409,39 +417,44 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * @return The predicted rating for the user-item pair.
      */
     protected float makePrediction(int userID, int itemID, int timestamp){   
-        
+
+        //////////////////////////////
+        // CHECKING FOR COLD STARTS //
+        //////////////////////////////
+
+        // gathering dataset averages
+        float datasetAverageRating = this.getTrainingDataset().getDatasetAverageRating();
+        Float averageUserRating = this.getTrainingDataset().getAverageUserRating(userID);
+        Float averageItemRating = this.getTrainingDataset().getAverageItemRating(itemID);
+
+        // USER AND ITEM COLD START //
+        if(averageUserRating == null && averageItemRating == null){
+            // return sensible value - average rating across all items
+            return datasetAverageRating;
+        }
+        // USER COLD START //
+        else if(averageUserRating == null){
+            // return sensible value - average rating of item
+            return averageItemRating;
+        }
+        // ITEM COLD START //
+        else if(averageItemRating == null){
+            // return sensible value - average rating of user
+            return averageUserRating;
+        }
+
         /////////////////
         // PREPERATION //
         /////////////////
 
         // variable for predicted rating
-        float predictedRating = 0f;
+        float predictedRating = this.getMinRating(); // base rating = minimum rating.
 
-        // gathering vector for user (p_u)
+        // gathering factor vector for user (p_u)
         ArrayList<Float> userVector = this.model.getUserMFMatrix().getObjectVector(userID);
 
-        // gathering vector for item (q_i)
+        // gathering factor vector for item (q_i)
         ArrayList<Float> itemVector = this.model.getItemMFMatrix().getObjectVector(itemID);
-
-        /////////////////
-        // COLD STARTS //
-        /////////////////
-
-        // USER AND ITEM COLD START //
-        if (userVector == null && itemVector == null){
-            // returning sensible prediction - average rating across dataset
-            return predictedRating; // TODO update to return average rating across dataset.
-        }
-        // USER COLD START //
-        else if(userVector == null){
-            // returning sensible prediction - the average rating of the item
-            return predictedRating; // TODO update to return average rating of the item.
-        }
-        // ITEM COLD START //
-        else if(itemVector == null){
-            // returning sensible prediction - the average rating of the user
-            return predictedRating; // TODO update to return average rating of the user.
-        }
 
         /////////////////
         // CALCULATION //
@@ -450,6 +463,12 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         // computing predicted rating (dot product of user and item vectors)
         // p_u * q_i
         predictedRating = MFRecommender.getDotProduct(userVector, itemVector);
+
+        // rouding rating to nearest whole number (because ratings are all whole numbers)
+        predictedRating = Recommender.convertToWholeNumber(predictedRating);
+
+        // ensuring predictions are within bounds of rating (not less than min, not greater than max)
+        predictedRating = this.forceRatingWithinBounds(predictedRating);
 
         ///////////////
         // RETURNING //

@@ -21,6 +21,9 @@ public abstract class Recommender<T extends TrainingDataset>{
 
     // MEMBER VARIABLES //
     private T trainingDataset; // the training dataset used to train the recommender
+    // CONSTANTS //
+    private float minRating; // The minimum rating that can be given to an item
+    private float maxRating; // The maximum rating that can be given to an item
     
     //////////////////
     // INITIALIZING //
@@ -28,10 +31,15 @@ public abstract class Recommender<T extends TrainingDataset>{
 
     /**
      * Class constructor.
+     * 
+     * @param minRating The minimum rating that can be given to an item
+     * @param maxRating The maximum rating that can be given to an item
      */
-    public Recommender(){
+    public Recommender(float minRating, float maxRating){
         // initializing
         this.trainingDataset = null;
+        this.minRating = minRating;
+        this.maxRating = maxRating;
     }
 
     /////////////////////
@@ -92,6 +100,43 @@ public abstract class Recommender<T extends TrainingDataset>{
      */
     protected abstract float makePrediction(int userID, int itemID, int timestamp);
 
+    ////////////////////////////////
+    // CALCULATION HELPER METHODS //
+    ////////////////////////////////
+
+    /**
+     * Converts the given value to a whole number.
+     * 
+     * @param number The value being converted to a whole number.
+     * @return The value rounded to the nearest whole number.
+     */
+    public static float convertToWholeNumber(float value){
+        return (float) Math.round(value);
+    }
+
+    /**
+     * Returns a rating within the ratings bound permitted by this recommender.
+     * 
+     * This rating is within the minRating and maxRating properties of the recommender.
+     * 
+     * @param rating The rating being forced into its bounds.
+     * @return The rating within the bounds of the ratings permitted by this recommender.
+     */
+    public float forceRatingWithinBounds(float rating){
+        // rating too small - returning minimum allowed rating
+        if(rating < this.minRating){
+            return this.minRating;
+        }
+        // rating too big - returning maximum allowed rating
+        else if(rating > this.maxRating){
+            return this.maxRating;
+        }
+        // rating okay - returning rating.
+        else{
+            return rating;
+        }
+    }
+
     /////////////////////////
     // GETTERS AND SETTERS //
     /////////////////////////
@@ -103,5 +148,23 @@ public abstract class Recommender<T extends TrainingDataset>{
      */
     public T getTrainingDataset(){
         return this.trainingDataset;
+    }
+
+    /**
+     * Getter method for the minimum rating that can be given to an item by this recommender.
+     * 
+     * @return The minimum rating that can be given to an item by this recommender.
+     */
+    public float getMinRating(){
+        return this.minRating;
+    }
+
+    /**
+     * Getter method for the maximum rating that can be given to an item by this recommender.
+     * 
+     * @return The maximum rating that can be given to an item by this recommender.
+     */
+    public float getMaxRating(){
+        return this.maxRating;
     }
 }
