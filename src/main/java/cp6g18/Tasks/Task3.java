@@ -28,14 +28,18 @@ public class Task3 {
     // SYSTEM PARAMETERS //
     private static final float MIN_RATING = 1f; // the minimum rating that can be given to an item 
     private static final float MAX_RATING = 5f; // the maximum rating that can be given to an item
-    private static final int FACTORS = 40; // the number of latent factors in the matricies.
-    private static final int MIN_ITERATIONS = 10; // the minimum number of iterations the algorithm will perform.
+    private static final int FACTORS = 3; // the number of latent factors in the matricies.
+    private static final int MIN_ITERATIONS = 50; // the minimum number of iterations the algorithm will perform.
     private static final int MAX_ITERATIONS = 100; // the maximum number of iterations the algorithm will perform.
-    private static final float MIN_CHANGE_IN_MAE = 0.0001f; // the change MAE between two iterations that will cause the recommender to stop training if it is reached.
-    private static final float LEARNING_RATE = 0.1f; // the learning rate of the algorithm
-    private static final float REGULARIZATION_RATE = 0.0f; // the regularization rate of the algorithm
+    private static final float MIN_CHANGE_IN_MAE = -100000000f; // the change MAE between two iterations that will cause the recommender to stop training if it is reached.
+    private static final float LEARNING_RATE = 0.01f; // the learning rate of the algorithm
+    private static final int LEARNING_RATE_ADJUSTMENT_FREQUENCY = 10; // the learning rate will be adjusted every x iterations.
+    private static final float LEARNING_RATE_ADJUSTMENT_FACTOR = 0.1f; // the percentage reduction in the learning rate that will occur every adjustmment.
+    private static final float REGULARIZATION_RATE = 0.05f; // the regularization rate of the algorithm
+    private static final int REGULARIZATION_RATE_ADJUSTMENT_FREQUENCY = 10; // the regularization rate will be adjusted every x iterations.
+    private static final float REGULARIZATION_RATE_ADJUSTMENT_FACTOR = 0.1f; // the percentage reduction in the regularization rate that will occur every adjustmment.
     private static final float MEAN = 0.0f; // the mean of the gaussian distribution used to generate the initial numbers for the matricies
-    private static final float VARIANCE = 1.0f; // the variance of the gaussian distribution used to generate the initial numbers for the matricies.
+    private static final float VARIANCE = 0.01f; // the variance of the gaussian distribution used to generate the initial numbers for the matricies.
 
     //////////////////
     // RUNNING TASK //
@@ -74,7 +78,11 @@ public class Task3 {
                                                           Task3.MAX_ITERATIONS, 
                                                           Task3.MIN_CHANGE_IN_MAE, 
                                                           Task3.LEARNING_RATE, 
+                                                          Task3.LEARNING_RATE_ADJUSTMENT_FREQUENCY,
+                                                          Task3.LEARNING_RATE_ADJUSTMENT_FACTOR,
                                                           Task3.REGULARIZATION_RATE, 
+                                                          Task3.REGULARIZATION_RATE_ADJUSTMENT_FREQUENCY,
+                                                          Task3.REGULARIZATION_RATE_ADJUSTMENT_FACTOR,
                                                           Task3.MEAN, 
                                                           Task3.VARIANCE);
 

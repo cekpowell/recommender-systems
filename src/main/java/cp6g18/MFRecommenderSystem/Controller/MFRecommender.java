@@ -9,7 +9,15 @@ import cp6g18.MFRecommenderSystem.Model.MFTrainingDataset;
 import cp6g18.Tools.Logger;
 
 /**
- * A Matrix Factorisation Recommender.
+ * A Matrix Factorisation Recommender. 
+ * 
+ * All system variables are documented with a description of their purpose.
+ * 
+ * All methods are documented with their purpose and descriptions of their functionality.
+ * 
+ * The key methods:
+ *  - train() - used to train the recommender system. Contains descriptions for the methods it uses.
+ *  - makePrediction() - used to make a predicted rating with the trained recommender system.
  * 
  * Training:
  *  - Two matricies (one for items against factors, and one for users against factors) are trained
@@ -39,7 +47,11 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     private int maxIterations; // the maximum number of iterations to be performed by the algorithm (termination factor).
     private float minChangeInMae; // the change MAE between two iterations that will cause the recommender to stop training if it is reached (termination factor).
     private float learningRate; // the learning rate of the algorithm - controls how much the vectors are adjusted each iteration
+    private int learningRateAdjustmentFrequency; // the learning rate will be adjusted every x iterations.
+    private float learningRateAdjustmentFactor; // the percentage reduction in the learning rate that will occur every adjustmment.
     private float regularizationRate; // the regularization rate of the algorithm - controls the extent of the regularization to avoid overfitting.
+    private int regularizationRateAdjustmentFrequency; // the regularization rate will be adjusted every x iterations.
+    private float regularizationRateAdjustmentFactor; // the percentage reduction in the regularization rate that will occur every adjustmment.
     private float mean; // The mean on the Gaussian spread of randomly generated initial numbers.
     private float variance; // The variance on the Gaussian spread of randomly generated initial numbers.
     
@@ -57,11 +69,28 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * @param maxIterations The maximum number of iterations to be performed by the algorithm (termination factor).
      * @param minChangeInMae the change MAE between two iterations that will cause the recommender to stop training if it is reached (termination factor).
      * @param learningRate The learning rate of the algorithm - controls how much the vectors are adjusted each iteration.
+     * @param learningRateAdjustmentFrequency the learning rate will be adjusted every x iterations.
+     * @param learningRateAdjustmentFactor the percentage reduction in the learning rate that will occur every adjustmment.
      * @param regularizationRate The regularization rate of the algorithm - controls the extent of the regularization to avoid overfitting.
+     * @param regularizationRateAdjustmentFrequency the regularization rate will be adjusted every x iterations.
+     * @param regularizationRateAdjustmentFactor the percentage reduction in the regularization rate that will occur every adjustmment.
      * @param mean The mean on the Gaussian spread of randomly generated initial numbers.
      * @param variance The variance on the Gaussian spread of randomly generated initial numbers.
      */
-    public MFRecommender(float minRating, float maxRating, int factors, int minIterations, int maxIterations, float minChangeInMae, float learningRate, float regularizationRate, float mean, float variance){
+    public MFRecommender(float minRating, 
+                         float maxRating, 
+                         int factors, 
+                         int minIterations, 
+                         int maxIterations, 
+                         float minChangeInMae, 
+                         float learningRate, 
+                         int learningRateAdjustmentFrequency, 
+                         float learningRateAdjustmentFactor, 
+                         float regularizationRate, 
+                         int regularizationRateAdjustmentFrequency,
+                         float regularizationRateAdjustmentFactor,
+                         float mean, 
+                         float variance){
         // initializing
         super(minRating, maxRating);
         this.trainingDataset = null;
@@ -71,7 +100,11 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         this.maxIterations = maxIterations;
         this.minChangeInMae = minChangeInMae;
         this.learningRate = learningRate;
+        this.learningRateAdjustmentFrequency = learningRateAdjustmentFrequency;
+        this.learningRateAdjustmentFactor = learningRateAdjustmentFactor;
         this.regularizationRate = regularizationRate;
+        this.regularizationRateAdjustmentFrequency = regularizationRateAdjustmentFrequency;
+        this.regularizationRateAdjustmentFactor = regularizationRateAdjustmentFactor;
         this.mean = mean;
         this.variance = variance;
     }
@@ -87,10 +120,14 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * 
      * The recommender is trained by performing a number of training iterations.
      * 
-     * Each training iteration is carried out using the trainOneIteration() method.
+     * Each training iteration is carried out using the trainOneIteration() method. Refer to this
+     * method's documentaiton for the precise details of its workflow.
      * 
-     * The number of iterations performed is dependent on the shouldPerformAnotherTrainingIteration() 
-     * method. 
+     * Iterations will continue to be performed until the 'shouldPerformAnotherTrainingIteration()'
+     * method returns false. The 'shouldPerformAnotherTrainingIteration()' uses a number of 
+     * termination factors to determine if another training iteration should be performed based
+     * on the current state of the system. Refer to this method's documentation for the precise
+     * details.
      * 
      * @param trainingDataset The MFTrainingDataset dataset the recommender will be trained on.
      */
@@ -120,7 +157,7 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         // iteratively training the model
         while(this.shouldPerformAnotherTrainingIteration(iterationCount, changeInMae)){
             // performing a single training iteration
-            float iterationMAE = this.trainOneIteration();
+            float iterationMAE = this.trainOneIteration(iterationCount);
 
             // logging the results of the iteration
             Logger.logProcessMessage("Iteration : " + iterationCount + " completed.");
@@ -187,7 +224,19 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      *      - Update user and item matrix vectors for the relevant user and item.
      * 
      * Additions:
-     *  - // TODO
+     *  - The learning rate is adjusted according to a step reduction function.
+     *      - The 'learningRateAdjustmentFrequency' parameter determines how many iterations are performed
+     *      before one reduction takes place.
+     *          - e.g., a frequency of 10 will cause the learning rate to be reduced every 10 iterations.
+     *      - The 'learningRateAdjustmentFactor' parameter determines size of the reduction step.
+     *          - e.g., a factor of 0.1 will cause the learning rate to be reduced by 10% every reduction step.
+     *  - The regularization rate is adjusted according to a step reduction function.
+     *      - The 'regularizationRateAdjustmentFrequency' parameter determines how many iterations are performed
+     *      before one reduction takes place.
+     *          - e.g., a frequency of 10 will cause the regularization rate to be reduced every 10 iterations.
+     *      - The 'regularizationRateAdjustmentFactor' parameter determines size of the reduction step.
+     *          - e.g., a factor of 0.1 will cause the regularization rate to be reduced by 10% every reduction step.
+     *  - // TODO extra stuff
      * 
      * Edge Cases:
      *  - // TODO
@@ -195,9 +244,10 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * Full Algorithm:
      *  - // TODO
      * 
+     * @param iterationCount The number of training iterations that have been performed so far.
      * @return The MAE across this training iteration.
      */
-    private float trainOneIteration(){
+    private float trainOneIteration(int iterationCount){
 
         /////////////////
         // PREPERATION //
@@ -208,6 +258,18 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
 
         // getting shuffled training dataset
         ArrayList<TestingRating> ratings = this.trainingDataset.getShuffledRatings();
+
+        // adjusting learning rate - adjustment made every learningRateAdjustmentFrequency iterations
+        if((iterationCount % this.learningRateAdjustmentFrequency) == 0){
+            // adjusting the learning rate according to the learnign rate factor
+            this.learningRate -= (this.learningRate * this.learningRateAdjustmentFactor);
+        }
+
+        // adjusting regularization rate - adjustment made every regularizationRateAdjustmentFrequency iterations
+        if((iterationCount % this.regularizationRateAdjustmentFrequency) == 0){
+            // adjusting the regularization rate according to the adjustment factor
+            this.regularizationRate -= (this.regularizationRate * this.regularizationRateAdjustmentFactor);
+        }
 
         /////////////////
         // CALCULATING //
