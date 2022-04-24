@@ -1,6 +1,6 @@
 package cp6g18;
 
-import cp6g18.Tasks.*;
+import cp6g18.Tasks.Task3;
 
 
 /**
@@ -22,13 +22,13 @@ public class App
         // TASK 1 //
         ////////////
 
-        Task1.run();
+        //Task1.run();
 
         ////////////
         // TASK 2 //
         ////////////
 
-        Task2.run();
+        //Task2.run();
 
         ////////////
         // TASK 3 //

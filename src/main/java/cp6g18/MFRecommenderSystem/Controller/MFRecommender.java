@@ -18,6 +18,7 @@ import cp6g18.Tools.Logger;
  * The key methods:
  *  - train() - used to train the recommender system. Contains descriptions for the methods it uses.
  *  - makePrediction() - used to make a predicted rating with the trained recommender system.
+ *  - These methods are complex, and thus are broken down into a number of steps.
  * 
  * Training:
  *  - Two matricies (one for items against factors, and one for users against factors) are trained
@@ -61,6 +62,8 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
 
     /**
      * Class constructor. 
+     * 
+     * Constructs a new MFRecommender using the provided parameters.
      * 
      * @param minRating The minimum rating that can be given to an item
      * @param maxRating The maximum rating that can be given to an item
@@ -115,8 +118,7 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
 
     /**
      * Trains the recommender using the provided training dataset according to the Matrix 
-     * Factorisation algorithm presented in the lectures (with some additions) and based on the 
-     * ratings present in the training dataset.
+     * Factorisation algorithm.
      * 
      * The recommender is trained by performing a number of training iterations.
      * 
@@ -127,9 +129,10 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * method returns false. The 'shouldPerformAnotherTrainingIteration()' uses a number of 
      * termination factors to determine if another training iteration should be performed based
      * on the current state of the system. Refer to this method's documentation for the precise
-     * details.
+     * details of it's workflow.
      * 
-     * @param trainingDataset The MFTrainingDataset dataset the recommender will be trained on.
+     * @param trainingDataset The MFTrainingDataset dataset that contains the ratings that will
+     * be used to train the MFRecommender.
      */
     public void train(MFTrainingDataset trainingDataset){
         // informing
@@ -192,28 +195,6 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * 
      * The method returns the Mean Absolute Error (MAE) of this iteration's
      * predictions.
-     * 
-     * Formula:
-     *  - P = user matrix
-     *  - p_u = user vector for user u
-     *  - Q = Item Matrix
-     *  - q_i = item vector for item i
-     *  - For each rating in the training dataset:
-     *      - User = u
-     *      - item = i
-     *      - Learning rate = y
-     *          - Controls how much the vectors are adjusted with each iteration.
-     *      - Regularization rate = h
-     *          - Controls the extent of the regularization to avoid overfitting
-     *      - Predicted rating for user u and item i = r'_ui
-     *          - r'_ui = dot product of p_u and q_i = p_u * u_i
-     *      - Actual rating for user u and item i = r_ui 
-     *          - r_ui is gathered from the training dataset.
-     *      - Error in prediction = e_ui = r_ui - r'_ui
-     *      - Updated item vector:
-     *          - q_i = q_i + y((eui * pu) - (h * qi))
-     *      - Updated user vector:
-     *          - p_u = p_u + y((eui * qi) - (h * pu))
      *   
      * Base Algorithm:
      *  - Shuffle the training dataset to avoid training patterns being biassed to the order of the 
@@ -223,7 +204,52 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      *      - Calculate the error between the prediction and the actual rating.
      *      - Update user and item matrix vectors for the relevant user and item.
      * 
+     * Base Algorithm Formula:
+     * 
+     *  - P = user matrix
+     *  - p_u = user vector for user u
+     *  - Q = Item Matrix
+     *  - q_i = item vector for item i
+     * 
+     *  - For each rating in the training dataset:
+     *      - User = u
+     *      - item = i
+     *      - Learning rate = y
+     *          - Controls how much the vectors are adjusted with each iteration.
+     *      - Regularization rate = h
+     *          - Controls the extent of the regularization to avoid overfitting
+     *      - Predicted rating for user u and item i = r'_ui
+     *          - r'_ui = dot product of p_u and q_i = p_u * u_i
+     *          - Why?
+     *              - p_u describes how user u connects to each of the factors.
+     *              - q_i descrives how item i connects to each of the factors.
+     *              - User-item pairs that are 'similar' will have 'similar' user factors - e.g., the factor
+     *              values will be high in the same places.
+     *              - User-item pairs that have 'similar' (e.g., similarly high) factors will have higher 
+     *              dot-products and thus higher predicted ratings.
+     *              - p_u * q_i describes the INTERACTION between user u and item i, and thus predicts how
+     *              user u rates item i.
+     *      - Actual rating for user u and item i = r_ui 
+     *          - r_ui is gathered from the training dataset.
+     *      - Error in prediction = e_ui = r_ui - r'_ui
+     *      - Updated item vector:
+     *          - q_i = q_i + y((eui * pu) - (h * qi))
+     *      - Updated user vector:
+     *          - p_u = p_u + y((eui * qi) - (h * pu))
+     * 
      * Additions:
+     *  - The predicted rating is adjusted to take account for user and item biases that may lie 
+     *  within the dataset.
+     *      - Some users always rate higher than average, some users always rate lower than average.
+     *      - Some items are always rated higher than average, some items are always rated higher
+     *      than average.
+     *      - By taking account for these biases when calculating the predicted rating for a user-item
+     *      pair, a more accurate prediction can be obtained.
+     *      - Dataset average rating = u
+     *      - User bias b_u = u - user average rating.
+     *      - Item bias b_i = u - item average rating.
+     *      - Therefore:
+     *          - Predicted rating = (user-item interaction) + u + b_u + b_i.
      *  - The learning rate is adjusted according to a step reduction function.
      *      - The 'learningRateAdjustmentFrequency' parameter determines how many iterations are performed
      *      before one reduction takes place.
@@ -236,13 +262,61 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      *          - e.g., a frequency of 10 will cause the regularization rate to be reduced every 10 iterations.
      *      - The 'regularizationRateAdjustmentFactor' parameter determines size of the reduction step.
      *          - e.g., a factor of 0.1 will cause the regularization rate to be reduced by 10% every reduction step.
-     *  - // TODO extra stuff
      * 
      * Edge Cases:
-     *  - // TODO
+     *  - None.
      * 
-     * Full Algorithm:
-     *  - // TODO
+     * Full Algorithm Formula:
+     * 
+     *  - Definitions:
+     *      - P = user matrix
+     *      - p_u = user vector for user u
+     *      - Q = Item Matrix
+     *      - q_i = item vector for item i
+     *      - n = number of iterations performed so far
+     *      - y = learning rate
+     *          - y_freq = learningRateUpdateFrequency
+     *          - y_fac = learningRateUpdateFactor
+     *      - h = regularization rate
+     *          - h_freq = regularization Rate Update Frequency
+     *          - h_fac = regularization Rate Update Factor
+     *      - r'_ui = predicted rating for user u and item i
+     *      - r_ui = actual rating for user u and item i
+     * 
+     *  - STEP 1: Shuffle training dataset
+     * 
+     *  - STEP 2: Update learning rate and regularization rate:
+     *      - If n MODULUS y_freq = 0
+     *          - Reduce y by the y_fac amount.
+     *      - If n MODULUS h_freq = 0:
+     *          - Reduce h by the h_fac amount.
+     * 
+     *  - STEP 3: For each rating in the shuffled training dataset:
+     *      - User = u
+     *      - item = i
+     *      
+     *      - STEP 3.1: Calculate user-item interaction
+     *          - User-Item interaction for user u and item i = dot product of p_u and q_i = p_u * u_i
+     * 
+     *      - STEP 3.2: Calculate rating bias
+     *          - a = dataset average rating
+     *          - user bias = b_u = a - user average rating
+     *          - item bias = b_i = a - item average rating
+     *          - Rating bias = b_ui = a + b_u + b_i
+     * 
+     *      - STEP 3.3: Calculating predicted rating
+     *          - predicted rating = r'_ui = (p_u * u_i) + b_ui
+     * 
+     *      - STEP 3.4: Calculate error in prediction
+     *          - Error in prediction = e_ui = r_ui - r'_ui
+     * 
+     *      - STEP 3.5: Update user vector
+     *          - Updated item vector:
+     *          - q_i = q_i + y((eui * pu) - (h * qi))
+     * 
+     *      - STEP 3.6: Update item vector
+     *          - Updated user vector:
+     *          - p_u = p_u + y((eui * qi) - (h * pu))
      * 
      * @param iterationCount The number of training iterations that have been performed so far.
      * @return The MAE across this training iteration.
@@ -253,11 +327,22 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         // PREPERATION //
         /////////////////
 
+        // gathering dataset average
+        float datasetAverageRating = this.getTrainingDataset().getDatasetAverageRating();
+
         // variable to keep track of absolute error across iteration (for MAE calculation)
         float sumOfAbsoluteError = 0f;
 
+        ////////////////////////////////////////
+        // STEP 1: SHUFFLING TRAINING DATASET //
+        ////////////////////////////////////////
+
         // getting shuffled training dataset
         ArrayList<TestingRating> ratings = this.trainingDataset.getShuffledRatings();
+
+        ////////////////////////////////////////////////////////
+        // STEP 2: UPDATING LEARNING AND REGULARIZATION RATES //
+        ////////////////////////////////////////////////////////
 
         // adjusting learning rate - adjustment made every learningRateAdjustmentFrequency iterations
         if((iterationCount % this.learningRateAdjustmentFrequency) == 0){
@@ -271,27 +356,54 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
             this.regularizationRate -= (this.regularizationRate * this.regularizationRateAdjustmentFactor);
         }
 
-        /////////////////
-        // CALCULATING //
-        /////////////////
+        ////////////////////////////////////////////
+        // STEP 3: UPDATING USER AND ITEM VECTORS //
+        ////////////////////////////////////////////
 
         // iterating over ratings and updating model for each rating
         for(TestingRating rating : ratings){
 
-            ///////////////////////
-            // CALCULATING ERROR //
-            ////////////////////////
+            /////////////////
+            // PREPERATION //
+            /////////////////
 
-            // GETTING PREDICTED RATING BASED ON MODEL //
-
-            // p_u
+            // gathering user vector p_u
             ArrayList<Float> userVector = this.model.getUserMFMatrix().getObjectVector(rating.getUserID());
-            // q_i
+            // gathering item vector q_i
             ArrayList<Float> itemVector = this.model.getItemMFMatrix().getObjectVector(rating.getItemID());
-            /// r'_ui = p_u * q_i
-            float predictedRating = MFRecommender.getDotProduct(userVector, itemVector);
 
-            // CALCULATING ERROR IN PREDICTION //
+            // gathering user and item average ratings
+            float userAverageRating = this.getTrainingDataset().getAverageUserRating(rating.getUserID());
+            float itemAverageRating = this.getTrainingDataset().getAverageItemRating(rating.getItemID());
+
+            /////////////////////////////////////////////////
+            // STEP 3.1: CALCULATING USER-ITEM INTERACTION //
+            /////////////////////////////////////////////////
+
+            /// user-item interaction = p_u * q_i
+            float userItemInteraction = MFRecommender.getDotProduct(userVector, itemVector);
+
+            ///////////////////////////////////////
+            // STEP 3.2: CALCULATING RATING BIAS //
+            ///////////////////////////////////////
+
+            // item bias b_i = dataset average - item average
+            float itemBias = datasetAverageRating - itemAverageRating;
+            // user bias b_u = dataset average - user average
+            float userBias = datasetAverageRating - userAverageRating;
+            // rating bias b_ui = datasetAverage + b_u + b_i
+            float ratingBias = datasetAverageRating + itemBias + userBias;
+
+            ////////////////////////////////////////////
+            // STEP 3.3: CALCULATING PREDICTED RATING //
+            ////////////////////////////////////////////
+
+            // r_ui = userItemInteraction + rating bias
+            float predictedRating = userItemInteraction + ratingBias;
+
+            ///////////////////////////////////////////////
+            // STEP 3.4: CALCULATING ERROR IN PREDICTION //
+            ///////////////////////////////////////////////
 
             // e_ui = r_ui - r'_ui
             float ratingError = rating.getRating() - predictedRating;
@@ -299,9 +411,9 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
             // adding absolute rating error to sum of absolute error (for this iterations MAE)
             sumOfAbsoluteError += Math.abs(ratingError);
 
-            //////////////////////////
-            // UPDATING USER VECTOR //
-            //////////////////////////
+            ////////////////////////////////////
+            // STEP 3.5: UPDATING USER VECTOR //
+            ////////////////////////////////////
 
             /*
              * Error in prediction = e_ui = r_ui - r'_ui
@@ -336,9 +448,9 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
             // updating the user vector in the model
             this.model.getUserMFMatrix().setObjectVector(rating.getUserID(), updatedUserVector);
 
-            //////////////////////////
-            // UPDATING ITEM VECTOR //
-            //////////////////////////
+            ////////////////////////////////////
+            // STEP 3.6: UPDATING ITEM VECTOR //
+            ////////////////////////////////////
 
             /*
              * Error in prediction = e_ui = r_ui - r'_ui
@@ -374,12 +486,12 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
             this.model.getItemMFMatrix().setObjectVector(rating.getItemID(), updatedItemVector);
         }
 
-        ///////////////
-        // RETURNING //
-        ///////////////
+        ///////////////////////////////////////////////
+        // step 4: RETURNING MAE ERROR FOR ITERATION //
+        ///////////////////////////////////////////////
 
         // returning MAE for this iteration
-        return sumOfAbsoluteError / ratings.size();
+        return (sumOfAbsoluteError / ratings.size());
     }
 
     /**
@@ -431,7 +543,13 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * Calculates a predicted rating for the provided user-item pair according to the Matrix 
      * Factorisation Algorithm.
      * 
-     * Formula:
+     * Base Algorithm:
+     *  - Gather the user vector for user u.
+     *  - Gather the item vector for item i.
+     *  - Compute the dot product between the user vector and the item vector.
+     *  - Return the result of the dot-product calculation as the predicted rating.
+     * 
+     * Base algorithm formula:
      *  - Predicting rating for:
      *      - User u
      *      - item i
@@ -448,17 +566,22 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      *      - p_u * q_i describes the INTERACTION between user u and item i, and thus predicts how
      *      user u rates item i.
      * 
-     * Base Algorithm:
-     *  - Gather the user vector for user u.
-     *  - Gather the item vector for item i.
-     *  - Compute the dot product between the user vector and the item vector.
-     *  - Return the result of the dot-product calculation as the predicted rating.
-     * 
      * Additions:
+     *  - The predicted rating is adjusted to take account for user and item biases that may lie 
+     *  within the dataset.
+     *      - Some users always rate higher than average, some users always rate lower than average.
+     *      - Some items are always rated higher than average, some items are always rated higher
+     *      than average.
+     *      - By taking account for these biases when calculating the predicted rating for a user-item
+     *      pair, a more accurate prediction can be obtained.
+     *      - Dataset average rating = u
+     *      - User bias b_u = u - user average rating.
+     *      - Item bias b_i = u - item average rating.
+     *      - Therefore:
+     *          - Predicted rating = (user-item interaction) + u + b_u + b_i.
      *  - Rounding prediction to nearest whole number (because ratings are only in whole numbers).
      *  - Ensuring all predictions are within the bounds of the possible ratings (e.g., less than
      *  6 and greater than 0).
-     *  - // TODO
      * 
      * Edge Cases:
      *  - Cold Starts:
@@ -468,42 +591,53 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      *          - Use the items average prediction as the rating.
      *      - User and Item Cold Start:
      *          - Use the average rating of the dataset.
-     *  - Additional:
-     *      - // TODO
      * 
-     * Full Algorithm:
-     *  - // TODO
+     * Full Algorithm Formula:
+     * 
+     *  - Definitions
+     *      - P = user matrix
+     *      - p_u = user vector for user u
+     *      - Q = Item Matrix
+     *      - q_i = item vector for item i
+     *      - a = average rating for dataset
+     *      - a_u = average rating for user u
+     *      - a_i = average rating for item i
+     *      - lb = lower bound of rating (e.g., 1 in a 1 to 5 rating scale)
+     *      - ub = upper bound or ragting (e.g., 5 in a 1 to 5 rating scale)
+     * 
+     *  - STEP 1: Check for Cold-Starts
+     *      - If user cold-start:
+     *          - Return average rating of the item as the prediction
+     *      - If item cold-start:
+     *          - Return average rating of the user as the prediction.
+     *      - If user and item cold-start:
+     *          - Return average rating for the dataset as the prediction.
+     * 
+     *  - STEP 2: Calculate user-item interaction:
+     *      - User-Item interaction for user u and item i:
+     *          - = dot product of p_u and q_i = p_u * u_i
+     * 
+     *  - STEP 3: Calculate rating bias:
+     *      - user bias = b_u = a - a_u
+     *      - item bias = b_i = a - a_i
+     *      - Rating bias = b_ui = a + b_u + b_i
+     * 
+     *  - STEP 4: Calculate predicted rating:
+     *      - r'_ui = (p_u * u_i) + b_ui
+     * 
+     *  - STEP 5: Round the predicted rating to the nearest whole number.
+     * 
+     *  - STEP 6: Force the predicted rating to be within the lower and upper bounds of the rating 
+     *  scheme.
+     *      - lb <= r'ui <= ub
+     * 
+     *  - STEP 7: Return the predicted rating.
      *              
      * @param userID The ID of the user in the rating.
      * @param itemID The ID of the item in the rating.
      * @return The predicted rating for the user-item pair.
      */
     protected float makePrediction(int userID, int itemID, int timestamp){   
-
-        //////////////////////////////
-        // CHECKING FOR COLD STARTS //
-        //////////////////////////////
-
-        // gathering dataset averages
-        float datasetAverageRating = this.getTrainingDataset().getDatasetAverageRating();
-        Float averageUserRating = this.getTrainingDataset().getAverageUserRating(userID);
-        Float averageItemRating = this.getTrainingDataset().getAverageItemRating(itemID);
-
-        // USER AND ITEM COLD START //
-        if(averageUserRating == null && averageItemRating == null){
-            // return sensible value - average rating across all items
-            return datasetAverageRating;
-        }
-        // USER COLD START //
-        else if(averageUserRating == null){
-            // return sensible value - average rating of item
-            return averageItemRating;
-        }
-        // ITEM COLD START //
-        else if(averageItemRating == null){
-            // return sensible value - average rating of user
-            return averageUserRating;
-        }
 
         /////////////////
         // PREPERATION //
@@ -518,23 +652,73 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         // gathering factor vector for item (q_i)
         ArrayList<Float> itemVector = this.model.getItemMFMatrix().getObjectVector(itemID);
 
-        /////////////////
-        // CALCULATION //
-        /////////////////
+        // gathering dataset averages
+        float datasetAverageRating = this.getTrainingDataset().getDatasetAverageRating();
+        Float userAverageRating = this.getTrainingDataset().getAverageUserRating(userID);
+        Float itemAverageRating = this.getTrainingDataset().getAverageItemRating(itemID);
 
-        // computing predicted rating (dot product of user and item vectors)
-        // p_u * q_i
-        predictedRating = MFRecommender.getDotProduct(userVector, itemVector);
+        //////////////////////////////////////
+        // STEP 1: CHECKING FOR COLD STARTS //
+        //////////////////////////////////////
+
+        // USER AND ITEM COLD START //
+        if(userAverageRating == null && itemAverageRating == null){
+            // return sensible value - average rating across all items
+            return datasetAverageRating;
+        }
+        // USER COLD START //
+        else if(userAverageRating == null){
+            // return sensible value - average rating of item
+            return itemAverageRating;
+        }
+        // ITEM COLD START //
+        else if(itemAverageRating == null){
+            // return sensible value - average rating of user
+            return userAverageRating;
+        }
+
+        //////////////////////////////////////////////
+        // STEP 2:CALCULATING USER ITEM INTERACTION //
+        //////////////////////////////////////////////
+
+        /// user-item interaction = p_u * q_i
+        float userItemInteraction = MFRecommender.getDotProduct(userVector, itemVector);
+
+        /////////////////////////////////////
+        // STEP 3: CALCULATING RATING BIAS //
+        /////////////////////////////////////
+
+        // item bias b_i = dataset average - item average
+        float itemBias = datasetAverageRating - itemAverageRating;
+        // user bias b_u = dataset average - user average
+        float userBias = datasetAverageRating - userAverageRating;
+        // rating bias b_ui = datasetAverage + b_u + b_i
+        float ratingBias = datasetAverageRating + itemBias + userBias;
+
+        //////////////////////////////////////////
+        // STEP 4: CALCULATING PREDICTED RATING //
+        //////////////////////////////////////////
+
+        // r_ui = userItemInteraction + rating bias
+        predictedRating = userItemInteraction + ratingBias;
+
+        ///////////////////////////////////////
+        // STEP 5: ROUNDING PREDICTED RATING //
+        ///////////////////////////////////////
 
         // rouding rating to nearest whole number (because ratings are all whole numbers)
         predictedRating = Recommender.convertToWholeNumber(predictedRating);
 
+        //////////////////////////////////////////
+        // STEP 6: FORCING RATING WITHIN BOUNDS //
+        //////////////////////////////////////////
+
         // ensuring predictions are within bounds of rating (not less than min, not greater than max)
         predictedRating = this.forceRatingWithinBounds(predictedRating);
 
-        ///////////////
-        // RETURNING //
-        ///////////////
+        //////////////////////////////////
+        // STEP 7: RETURNING PREDICTION //
+        //////////////////////////////////
         
         // returning predicted rating
         return predictedRating;
