@@ -45,8 +45,6 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     // RECOMMENDER PARAMETERS //
     private int factors; // the number of factors to be used in the user and item vectors
     private int minIterations; // the minimum number of iterations to be performed by the algorithm (termination factor).
-    private int maxIterations; // the maximum number of iterations to be performed by the algorithm (termination factor).
-    private float minChangeInMae; // the change MAE between two iterations that will cause the recommender to stop training if it is reached (termination factor).
     private float learningRate; // the learning rate of the algorithm - controls how much the vectors are adjusted each iteration
     private int learningRateAdjustmentFrequency; // the learning rate will be adjusted every x iterations.
     private float learningRateAdjustmentFactor; // the percentage reduction in the learning rate that will occur every adjustmment.
@@ -69,8 +67,6 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * @param maxRating The maximum rating that can be given to an item
      * @param factors The number of factors to be used in the user and item vectors.
      * @param minIterations The minimum number of iterations to be performed by the algorithm (termination factor).
-     * @param maxIterations The maximum number of iterations to be performed by the algorithm (termination factor).
-     * @param minChangeInMae the change MAE between two iterations that will cause the recommender to stop training if it is reached (termination factor).
      * @param learningRate The learning rate of the algorithm - controls how much the vectors are adjusted each iteration.
      * @param learningRateAdjustmentFrequency the learning rate will be adjusted every x iterations.
      * @param learningRateAdjustmentFactor the percentage reduction in the learning rate that will occur every adjustmment.
@@ -83,9 +79,7 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
     public MFRecommender(float minRating, 
                          float maxRating, 
                          int factors, 
-                         int minIterations, 
-                         int maxIterations, 
-                         float minChangeInMae, 
+                         int minIterations,
                          float learningRate, 
                          int learningRateAdjustmentFrequency, 
                          float learningRateAdjustmentFactor, 
@@ -100,8 +94,6 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         this.model = null;
         this.factors = factors;
         this.minIterations = minIterations;
-        this.maxIterations = maxIterations;
-        this.minChangeInMae = minChangeInMae;
         this.learningRate = learningRate;
         this.learningRateAdjustmentFrequency = learningRateAdjustmentFrequency;
         this.learningRateAdjustmentFactor = learningRateAdjustmentFactor;
@@ -152,13 +144,11 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
         // CALCULATING //
         /////////////////
 
-        // variables to help with the process
-        int iterationCount = 1; // the number of iterations that have been performed
-        float previousIterationMae = Float.MAX_VALUE; // the MAE of the previous training iteration
-        float changeInMae = Float.MAX_VALUE; // the most recent change in MAE
+        // helper variables
+        int iterationCount = 1; // counter for the number of iterations that have been performed
 
         // iteratively training the model
-        while(this.shouldPerformAnotherTrainingIteration(iterationCount, changeInMae)){
+        while(this.shouldPerformAnotherTrainingIteration(iterationCount)){
             // performing a single training iteration
             float iterationMAE = this.trainOneIteration(iterationCount);
 
@@ -166,10 +156,8 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
             Logger.logProcessMessage("Iteration : " + iterationCount + " completed.");
             Logger.logProcessMessage("\tMAE = " + iterationMAE);
 
-            // updating the helper variables
+            // updating the iteration count
             iterationCount++;
-            changeInMae = previousIterationMae - iterationMAE;
-            previousIterationMae = iterationMAE;
         }
 
         ///////////////
@@ -500,38 +488,19 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * 
      * The recommender system will perform another training iteration if:
      *  - The minimum number of training iterations has not yet been performed.
-     *  - The maximum number of training iterations has not yet been exceeded.
-     *  - The change in MAE of the two previous iterations is above the minimum change in MAE.
      * 
      * @param numIterations The number of training iterations performed already.
-     * @param changeInMae The change in MAE between the two previous training iterations.
      * @return True if the recommender should perform another training iteration, false if not.
      */
-    private boolean shouldPerformAnotherTrainingIteration(int numIterations, float changeInMae){
+    private boolean shouldPerformAnotherTrainingIteration(int numIterations){
         // MINIMUM NUMBER OF ITERATIONS NOT PERFORMED //
         if(numIterations < this.minIterations){
             // returning true
             return true;
         }
-        // MAXIMUM NUMBER OF ITERATIONS PERFORMED //
-        else if(numIterations > this.maxIterations){
-            // logging reason for termination
-            Logger.logProcessMessage("Training terminated: Maximum iterations exceeded!");
-            
-            // returning false
-            return false;
-        }
-        // CHANGE IN MAE BELOW MINIMUM ALLOWED //
-        else if(changeInMae < this.minChangeInMae){
-            // logging reason for termination
-            Logger.logProcessMessage("Training terminated: Change in MAE below minimum!");
-
-            // returning false
-            return false;
-        }
         // CONTINUE //
         else{
-            return true;
+            return false;
         }
     }
 

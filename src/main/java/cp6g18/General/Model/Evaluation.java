@@ -47,4 +47,35 @@ public class Evaluation {
     public String toString(){
         return this.mse + "," + this.rmse + "," + this.mae;
     }
+
+    ////////////////////
+    // GETTER METHODS //
+    ////////////////////
+
+    /**
+     * Returns the MSE for this evaluation.
+     * 
+     * @return The MSE for this evaluation.
+     */
+    public float getMSE(){
+        return this.mse;
+    }
+
+    /**
+     * Returns the RMSE for this evaluation.
+     *
+     * @return The RMSE for this evaluation.
+     */
+    public float getRMSE(){
+        return this.rmse;
+    }
+
+    /**
+     * Returns the MAE for this evaluation.
+     * 
+     * @return The MAE for this evaluation.
+     */
+    public float getMAE(){
+        return this.mae;
+    }
 }

@@ -30,8 +30,6 @@ public class Task3 {
     private static final float MAX_RATING = 5f; // the maximum rating that can be given to an item
     private static final int FACTORS = 3; // the number of latent factors in the matricies.
     private static final int MIN_ITERATIONS = 50; // the minimum number of iterations the algorithm will perform.
-    private static final int MAX_ITERATIONS = 50; // the maximum number of iterations the algorithm will perform.
-    private static final float MIN_CHANGE_IN_MAE = -Float.MAX_VALUE; // the change MAE between two iterations that will cause the recommender to stop training if it is reached.
     private static final float LEARNING_RATE = 0.01f; // the learning rate of the algorithm
     private static final int LEARNING_RATE_ADJUSTMENT_FREQUENCY = 10; // the learning rate will be adjusted every x iterations.
     private static final float LEARNING_RATE_ADJUSTMENT_FACTOR = 0.1f; // the percentage reduction in the learning rate that will occur every adjustmment.
@@ -74,9 +72,7 @@ public class Task3 {
             MFRecommender recommender = new MFRecommender(Task3.MIN_RATING,
                                                           Task3.MAX_RATING,
                                                           Task3.FACTORS, 
-                                                          Task3.MIN_ITERATIONS, 
-                                                          Task3.MAX_ITERATIONS, 
-                                                          Task3.MIN_CHANGE_IN_MAE, 
+                                                          Task3.MIN_ITERATIONS,
                                                           Task3.LEARNING_RATE, 
                                                           Task3.LEARNING_RATE_ADJUSTMENT_FREQUENCY,
                                                           Task3.LEARNING_RATE_ADJUSTMENT_FACTOR,

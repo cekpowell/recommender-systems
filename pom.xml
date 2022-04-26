@@ -113,7 +113,7 @@
             <artifactId>exec-maven-plugin</artifactId>
             <version>1.2.1</version>
             <configuration>
-                <mainClass>cp6g18.App</mainClass>
+                <mainClass>cp6g18.Test</mainClass>
             </configuration>
         </plugin>
 
