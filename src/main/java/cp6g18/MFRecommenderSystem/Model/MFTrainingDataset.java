@@ -2,6 +2,7 @@ package cp6g18.MFRecommenderSystem.Model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import cp6g18.General.Model.TestingRating;
@@ -23,6 +24,8 @@ public class MFTrainingDataset extends TrainingDataset{
     private ArrayList<TestingRating> data; // The object used to store the dataset.
     private HashSet<Integer> users; // The set of all users within the dataset
     private HashSet<Integer> items; // The set of all items within the dataset
+    private HashMap<Integer, ArrayList<TestingRating>> userRatingsMap; // mapiing of user ID -> their ratings
+    private HashMap<Integer, ArrayList<TestingRating>> itemRatingsMap; // mapping of item ID -> their ratings
 
     //////////////////
     // INITIALIZING //
@@ -39,6 +42,8 @@ public class MFTrainingDataset extends TrainingDataset{
         this.data = new ArrayList<TestingRating>();
         this.users = new HashSet<Integer>();
         this.items = new HashSet<Integer>();
+        this.userRatingsMap = new HashMap<Integer, ArrayList<TestingRating>>();
+        this.itemRatingsMap = new HashMap<Integer, ArrayList<TestingRating>>();
     }
 
     ////////////////////////////////
@@ -63,6 +68,22 @@ public class MFTrainingDataset extends TrainingDataset{
         // adding user and item ids to set of all users and items
         this.users.add(userID);
         this.items.add(itemID);
+
+        // adding rating to mapping of user ratings
+        ArrayList<TestingRating> userRatings = this.userRatingsMap.get(userID);
+        if(userRatings == null){
+            userRatings = new ArrayList<TestingRating>();
+            this.userRatingsMap.put(userID, userRatings);
+        }
+        userRatings.add(rating);
+
+        // adding rating to mapping of item ratings
+        ArrayList<TestingRating> itemRatings = this.itemRatingsMap.get(itemID);
+        if(itemRatings == null){
+            itemRatings = new ArrayList<TestingRating>();
+            this.itemRatingsMap.put(itemID, itemRatings);
+        }
+        itemRatings.add(rating);
 
         // updating the total ratings
         this.updateTotalRatings(userID, itemID, itemRating);

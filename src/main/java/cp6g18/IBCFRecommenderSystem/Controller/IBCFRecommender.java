@@ -291,7 +291,7 @@ public class IBCFRecommender extends Recommender<IBCFTrainingDataset>{
      *  - Mean centering applied to the prediction formula to account for user/item biases.
      *      - Using method described here: https://www.diva-portal.org/smash/get/diva2:1352791/FULLTEXT01.pdf
      *  - Rounding prediction to nearest whole number (because ratings are only in whole numbers).
-     *  - Ensuting all predictions fall wihtin the bounds of 1 and 5. // TODO
+     *  - Ensuring all predictions fall wihtin the bounds of 1 and 5. // TODO
      * 
      * Edge cases:
      *  - Cold Starts:
