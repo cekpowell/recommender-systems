@@ -1,6 +1,7 @@
 package cp6g18;
 
 import cp6g18.Tasks.Task3;
+import cp6g18.Tasks.Task4;
 
 
 /**
@@ -40,6 +41,6 @@ public class App
         // TASK 4 //
         ////////////
 
-        //Task4.run();
+        Task4.run();
     }
 }

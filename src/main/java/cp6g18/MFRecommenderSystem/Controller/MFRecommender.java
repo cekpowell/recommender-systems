@@ -9,40 +9,40 @@ import cp6g18.MFRecommenderSystem.Model.MFTrainingDataset;
 import cp6g18.Tools.Logger;
 
 /**
- * A Matrix Factorisation Recommender. 
+ * A Matrix Factorisation Recommender System.
  * 
  * All system variables are documented with a description of their purpose.
  * 
- * All methods are documented with their purpose and descriptions of their functionality.
+ * All methods are documented with a description of theirpurpose and functionality.
  * 
  * The key methods:
- *  - train() - used to train the recommender system. Contains descriptions for the methods it uses.
- *  - makePrediction() - used to make a predicted rating with the trained recommender system.
- *  - These methods are complex, and thus are broken down into a number of steps.
+ *  - train() - used to train the recommender system.
+ *  - makePrediction() - used to predict a rating for a given user-item pair.
+ *  - These methods are complex, and make use of sub-routines. Their workflow
+ *    is broken down into a number of steps, as detailed in their documentation.
  * 
  * Training:
- *  - Two matricies (one for items against factors, and one for users against factors) are trained
- *  using a training dataset of ratings.
- *  - The matricies are trained iteratively, with each iteration updating them so that they provide 
- *  predicted ratings closer to the values in the training dataset.
+ *  - Two matricies (one for item factors, and one for user factors) are defined.
+ *  - The matricies are trained iteratively using a training dataset of ratings. 
+ *  - Each iteration of the training process updates the matricies so that they 
+ *  - provide predicted ratings closer to the values in the training dataset.
  *  - Some additional steps are included to improve the performance of the algorithm (documentation)
- *  given at point of relevant code).
+ *    given at point of relevant code).
  * 
  * Predicting Ratings:
  *  - A predicted rating for user u for item i is calculated by finding the dot product of the user
- *  vector for user u in the user matrix, and the item vector for the item i in the item matrix.
+ *    vector for user u in the user matrix, and the item vector for the item i in the item matrix.
+ *      - An explanation for this logic is given in the makePrediction() method.
  * - Some additional steps are included to improve the performance of the algorithm (documentation)
- *  given at point of relevant code).
+ *   given at point of relevant code).
  */
 public class MFRecommender extends Recommender<MFTrainingDataset>{
-
-    // CONSTANTS //
 
     // MEMBER VARIABLES //
     private MFTrainingDataset trainingDataset; // the training dataset used to train the recommender
     private MFModel model; // the model learnt from the training dataset
 
-    // RECOMMENDER PARAMETERS //
+    // SYSTEM PARAMETERS //
     private int factors; // the number of factors to be used in the user and item vectors
     private int minIterations; // the minimum number of iterations to be performed by the algorithm (termination factor).
     private float learningRate; // the learning rate of the algorithm - controls how much the vectors are adjusted each iteration
@@ -123,11 +123,11 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * on the current state of the system. Refer to this method's documentation for the precise
      * details of it's workflow.
      * 
-     * @param trainingDataset The MFTrainingDataset dataset that contains the ratings that will
+     * @param trainingDataset An MFTrainingDataset dataset that contains the ratings that will
      * be used to train the MFRecommender.
      */
     public void train(MFTrainingDataset trainingDataset){
-        // informing
+        // logging
         Logger.logProcessStart("Training recommender system");
 
         ///////////////
@@ -172,89 +172,124 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * Performs one iteration of the Matrix Factorisation training algorithm, as presented
      * in the lectures (with some additions), and using the ratings present in the training dataset.
      * 
-     * One training iteration will perform one pass over the training dataset (in random order), 
+     * This documentation describes the base algorithm + formula for training the system using
+     * the Matrix Factorisation algorithm, the additions that have been made in this implementation,
+     * and the full algorithm as a result of these additions. The full algorithm is broken down into
+     * a number of steps, and the actual code is labelled with these steps.
+     * 
+     * One training iteration will perform one pass over the training dataset (in a random order), 
      * and for each training rating, will:
-     *  - Make a predicted rating using the current model.
-     *  - Calculate the error in this predicted rating using the known rating.
-     *  - Update the user and item matricies for the current user and item vectors according to the
-     *  update formula (see below).
+     *  - Make a predicted rating for the user-item pair using the current model.
+     *  - Calculate the error between this predicted rating and the known rating.
+     *  - Update the user and item vectors for the current user and item as to reduce
+     *    this error (documentation of the update formula provided below).
      *  - Two parameters control the learning rate (how much each vector changes in each iteration)
-     *  and the regularization rate (the extent of the regularization to avoid overfitting).
+     *    and the regularization rate (the extent of the regularization to avoid overfitting).
      * 
      * The method returns the Mean Absolute Error (MAE) of this iteration's
      * predictions.
+     *  - This is the mean of the absolute error between the predicted and known ratings
+     *    for all of the ratings in the training dataset, during this training iteration.
      *   
      * Base Algorithm:
-     *  - Shuffle the training dataset to avoid training patterns being biassed to the order of the 
-     *  ratings in the dataset.
+     *  - Shuffle the training dataset into a random order.
+     *      - This is done so that each iteration does not go over the ratings in the same
+     *        order, and therefore, each iteration does not get 'trapped'/distorted by the natural
+     *        patterns that may lie in the rating dataset because of its ordering.
+     *      - i.e., the training is able to focus on the ratings themselves, instead of their order.
      *  - Iterate over the shuffled dataset, and for each rating:
      *      - Compute the current models prediction for the user-item pair in this rating.
      *      - Calculate the error between the prediction and the actual rating.
-     *      - Update user and item matrix vectors for the relevant user and item.
+     *      - Update user and item matrix vectors for the relevant user and item according to the
+     *        update formula (see below).
      * 
-     * Base Algorithm Formula:
-     * 
-     *  - P = user matrix
-     *  - p_u = user vector for user u
-     *  - Q = Item Matrix
-     *  - q_i = item vector for item i
-     * 
-     *  - For each rating in the training dataset:
+     * Base Update Formula:
+     *  
+     *  - Considering a rating in the training dataset, r_ui, where:
      *      - User = u
      *      - item = i
+     *      - P = user matrix
+     *      - p_u = user vector for user u
+     *      - Q = item matrix
+     *      - q_i = item vector for item i
+     *      - 
+     * 
+     *  - Parameters:
      *      - Learning rate = y
      *          - Controls how much the vectors are adjusted with each iteration.
      *      - Regularization rate = h
      *          - Controls the extent of the regularization to avoid overfitting
-     *      - Predicted rating for user u and item i = r'_ui
-     *          - r'_ui = dot product of p_u and q_i = p_u * u_i
-     *          - Why?
-     *              - p_u describes how user u connects to each of the factors.
-     *              - q_i descrives how item i connects to each of the factors.
-     *              - User-item pairs that are 'similar' will have 'similar' user factors - e.g., the factor
-     *              values will be high in the same places.
-     *              - User-item pairs that have 'similar' (e.g., similarly high) factors will have higher 
-     *              dot-products and thus higher predicted ratings.
-     *              - p_u * q_i describes the INTERACTION between user u and item i, and thus predicts how
-     *              user u rates item i.
-     *      - Actual rating for user u and item i = r_ui 
-     *          - r_ui is gathered from the training dataset.
-     *      - Error in prediction = e_ui = r_ui - r'_ui
-     *      - Updated item vector:
-     *          - q_i = q_i + y((eui * pu) - (h * qi))
-     *      - Updated user vector:
-     *          - p_u = p_u + y((eui * qi) - (h * pu))
      * 
-     * Additions:
+     *  - Predicted rating for user u and item i = r'_ui
+     *      - r'_ui = dot product of p_u and q_i = p_u * u_i
+     *      - Why?
+     *          - p_u describes how user u connects to each of the factors.
+     *          - q_i descrives how item i connects to each of the factors.
+     *          - User-item pairs that are 'similar' will have 'similar' user factors - e.g., the factor
+     *            values will be high in the same places.
+     *          - User-item pairs that have 'similar' (e.g., similarly high) factors will have higher 
+     *            dot-products and thus higher predicted ratings.
+     *          - p_u * q_i describes the INTERACTION between user u and item i, and thus predicts how
+     *            user u rates item i.
+     * 
+     *  - Error in prediction:
+     *      - e_ui = r_ui - r'_ui
+     * 
+     *  - Updated item vector:
+     *      - q_i = q_i + y((e_ui * p_u) - (h * q_i))
+     *      - Why?
+     *          - q_i is the current user vector.
+     *          - e_ui * p_u descrbes the error p_u has in the prediction of the user-item rating.
+     *          - Adjusting by y(e_ui * p_u) makes q_i give a prediction closer to the true value.
+     *          - Subtracting by (h - q_i) ensures that the model does not adjust too much to the 
+     *            training dataset, and therefore that it does not overfit.
+     * 
+     *  - Updated user vector:
+     *      - p_u = p_u + y((e_ui * q_i) - (h * p_u))
+     *      - Why?
+     *          - p_u is the current user vector.
+     *          - e_ui * q_i descrbes the error p_u has in the prediction of the user-item rating.
+     *          - Adjusting by y(e_ui * q_i) makes p_u give a prediction closer to the true value.
+     *          - Subtracting by (h - p_u) ensures that the model does not adjust too much to the 
+     *            training dataset, and therefore that it does not overfit.
+     * 
+     * Additions to the base algorithm:
      *  - The predicted rating is adjusted to take account for user and item biases that may lie 
-     *  within the dataset.
-     *      - Some users always rate higher than average, some users always rate lower than average.
-     *      - Some items are always rated higher than average, some items are always rated higher
-     *      than average.
-     *      - By taking account for these biases when calculating the predicted rating for a user-item
-     *      pair, a more accurate prediction can be obtained.
-     *      - Dataset average rating = u
-     *      - User bias b_u = u - user average rating.
-     *      - Item bias b_i = u - item average rating.
-     *      - Therefore:
-     *          - Predicted rating = (user-item interaction) + u + b_u + b_i.
+     *    within the dataset.
+     *      - Why?
+     *          - Some users always rate higher than average, some users always rate lower than average.
+     *          - Some items are always rated higher than average, some items are always rated higher
+     *            than average.
+     *          - By taking account for these biases when calculating the predicted rating for a user-item
+     *            pair, a more accurate prediction can be obtained.
+     *          - Dataset average rating = u
+     *          - User bias b_u = u - user average rating.
+     *          - Item bias b_i = u - item average rating.
+     *          - Therefore:
+     *              - Predicted rating = (user-item interaction) + u + b_u + b_i.
      *  - The learning rate is adjusted according to a step reduction function.
      *      - The 'learningRateAdjustmentFrequency' parameter determines how many iterations are performed
-     *      before one reduction takes place.
+     *        before one reduction takes place.
      *          - e.g., a frequency of 10 will cause the learning rate to be reduced every 10 iterations.
      *      - The 'learningRateAdjustmentFactor' parameter determines size of the reduction step.
      *          - e.g., a factor of 0.1 will cause the learning rate to be reduced by 10% every reduction step.
+     *      - Why?
+     *          - Decreasing the learning rate over time allows for the model to make smaller and smaller 
+     *            adjustments with each iteration, and thus more preciseley fit the model as it trains.
      *  - The regularization rate is adjusted according to a step reduction function.
      *      - The 'regularizationRateAdjustmentFrequency' parameter determines how many iterations are performed
-     *      before one reduction takes place.
+     *        before one reduction takes place.
      *          - e.g., a frequency of 10 will cause the regularization rate to be reduced every 10 iterations.
      *      - The 'regularizationRateAdjustmentFactor' parameter determines size of the reduction step.
      *          - e.g., a factor of 0.1 will cause the regularization rate to be reduced by 10% every reduction step.
+     *      - Why?
+     *          - Decreasing the regularization rate over time allows for the model to make smaller and smaller 
+     *            adjustments with each iteration, and thus more preciseley fit the model as it trains.
      * 
      * Edge Cases:
      *  - None.
      * 
-     * Full Algorithm Formula:
+     * Full Algorithm/Formula:
      * 
      *  - Definitions:
      *      - P = user matrix
@@ -512,6 +547,11 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      * Calculates a predicted rating for the provided user-item pair according to the Matrix 
      * Factorisation Algorithm.
      * 
+     * This documentation describes the base algorithm + formula for making predictions using
+     * the Matrix Factorisation algorithm, the additions that have been made in this implementation,
+     * and the full algorithm as a result of these additions. The full algorithm is broken down into
+     * a number of steps, and the actual code is labelled with these steps.
+     * 
      * Base Algorithm:
      *  - Gather the user vector for user u.
      *  - Gather the item vector for item i.
@@ -529,37 +569,63 @@ public class MFRecommender extends Recommender<MFTrainingDataset>{
      *      - p_u describes how user u connects to each of the factors.
      *      - q_i descrives how item i connects to each of the factors.
      *      - User-item pairs that are 'similar' will have 'similar' user factors - e.g., the factor
-     *      values will be high in the same places.
+     *        values will be high in the same places.
      *      - User-item pairs that have 'similar' (e.g., similarly high) factors will have higher 
-     *      dot-products and thus higher predicted ratings.
+     *        dot-products and thus higher predicted ratings.
      *      - p_u * q_i describes the INTERACTION between user u and item i, and thus predicts how
-     *      user u rates item i.
+     *        user u rates item i.
      * 
      * Additions:
      *  - The predicted rating is adjusted to take account for user and item biases that may lie 
      *  within the dataset.
-     *      - Some users always rate higher than average, some users always rate lower than average.
-     *      - Some items are always rated higher than average, some items are always rated higher
-     *      than average.
-     *      - By taking account for these biases when calculating the predicted rating for a user-item
-     *      pair, a more accurate prediction can be obtained.
-     *      - Dataset average rating = u
-     *      - User bias b_u = u - user average rating.
-     *      - Item bias b_i = u - item average rating.
-     *      - Therefore:
-     *          - Predicted rating = (user-item interaction) + u + b_u + b_i.
-     *  - Rounding prediction to nearest whole number (because ratings are only in whole numbers).
+     *      - Why?
+     *          - Some users always rate higher than average, some users always rate lower than average.
+     *          - Some items are always rated higher than average, some items are always rated higher
+     *            than average.
+     *          - By taking account for these biases when calculating the predicted rating for a user-item
+     *            pair, a more accurate prediction can be obtained.
+     *          - Dataset average rating = u
+     *          - User bias b_u = u - user average rating.
+     *          - Item bias b_i = u - item average rating.
+     *          - Therefore:
+     *              - Predicted rating = (user-item interaction) + u + b_u + b_i.
+     *  - Rating predictions are rounded to the nearest whole number.
+     *      - Why?
+     *          - The testing dataset, used to evaluate the performance of the recommender system, considers
+     *            only ratings that are whole in value.
+     *          - Rounding the ratings to the nearest whole value gives an increase in performance.
      *  - Ensuring all predictions are within the bounds of the possible ratings (e.g., less than
-     *  6 and greater than 0).
-     * 
-     * Edge Cases:
-     *  - Cold Starts:
-     *      - Item Cold start - the item has not been seen before, so there are no similar items:
-     *          - Use the user's average rating as the prediction.
-     *      - User Cold Start - The user has not been seen before, so there are no ratings for them:
-     *          - Use the items average prediction as the rating.
-     *      - User and Item Cold Start:
-     *          - Use the average rating of the dataset.
+     *    6 and greater than 0).
+     *      - Why?
+     *          - Technically, it is possible according the algorithm that a predicted rating could be less
+     *            than 1 or greater than 5.
+     *          - The testing dataset, used to evaluate the performance of the recommender system, considers
+     *            only ratings that are between 1 and 5.
+     *          - Thus, by rounding any rating less than 1 to 1, or any rating greater than 5 to 5, we ensure
+     *            that any unecesarry error is not incurred.
+     * - Handling of cold starts:
+     *      - If the item in the rating is not defined in the item matrix (i.e., the item was not in the training
+     *        dataset), we have an item cold start.
+     *          - This is handeled by using the average rating given by the user as the predicted rating.
+     *          - Why?
+     *              - As we have no information on the item, we are unable to determine how the user will interact
+     *                with the item.
+     *              - The most accurate rating we can therefore give to the item is the user's average rating.
+     *      - If the user in the rating is not defined in the user matrix (i.e., the user was not in the training
+     *        dataset), we have a user cold start.
+     *          - This is handeled by using the average rating given to item as the predicted rating.
+     *          - Why?
+     *              - As we have no information on the user, we are unable to determine how the user will interact
+     *                with the item.
+     *              - The most accurate rating we can therefore give is the average rating given to the item.
+     *      - If the user in the rating is nto defined in the user matrix, and the item in the rating is not defined
+     *        in the user matrix (i.e., neither the user or the item were in the training dataset), then we have a
+     *        user and item cold start.
+     *          - This is handeled by using the average rating of the training dataset as the predicted rating.
+     *          - Why?
+     *              - We have no information on the user or the item.
+     *              - The best possible rating that can be given is therefore the average rating of the training 
+     *                dataset.
      * 
      * Full Algorithm Formula:
      * 
