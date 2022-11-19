@@ -103,7 +103,7 @@
               </descriptorRefs>
               <archive>
                 <manifest>
-                  <mainClass>cp6g18.App</mainClass>
+                  <mainClass>cp6g18.Test</mainClass>
                 </manifest>
               </archive>
             </configuration>
