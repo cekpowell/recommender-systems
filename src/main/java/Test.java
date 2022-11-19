@@ -27,53 +27,7 @@ public class Test {
      * @param args
      */
     public static void main(String[] args) throws Exception{
-        Test.testTask4Recommender();
-    }
-
-    ////////////////////
-    // TESTING TASK 4 //
-    ////////////////////
-
-    public static void testTask4Recommender() throws Exception{
-        Database database = new Database("data/Task4/database.db");
-
-        Evaluation evaluation = Evaluator.evaluateRecommender(new MFRecommender(
-                                                                                // min rating
-                                                                                Test.MIN_RATING,
-                                                                                // max rating
-                                                                                Test.MAX_RATING,
-
-                                                                                // factors
-                                                                                20,
-
-                                                                                // min iterations
-                                                                                30,
-
-                                                                                // learning rate
-                                                                                0.008f,
-                                                                                // learning rate adjustment frequency
-                                                                                5,
-                                                                                // learning rate adjustment factor
-                                                                                0.1f,
-
-                                                                                // regularization rate
-                                                                                0.02f,
-                                                                                // regularization rate adjustment frequency
-                                                                                5,
-                                                                                // regularization rate adjustment factor
-                                                                                0.1f,
-
-                                                                                // mean for initial matricies
-                                                                                0f,
-                                                                                // variance for initial matricies
-                                                                                0.01f
-                                                                                ), 
-                                                              new MFTrainingDataset(), 
-                                                              database, 
-                                                              "training"
-                                                              );
-
-        System.out.println(evaluation);
+        Test.testTask2Recommender();
     }
 
     ////////////////////
