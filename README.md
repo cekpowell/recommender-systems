@@ -7,8 +7,6 @@
   * **[Task Description](#task-description)**
   * **[Project Contents](#project-contents)**
 - **[Running the Application](#running-the-application)**
-- **[Usage](#usage)**
-  * **[Performing Image Classification](#performing-image-classification)**
 
 ---
 
