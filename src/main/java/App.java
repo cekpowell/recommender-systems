@@ -1,6 +1,8 @@
 
 
-import Tasks.Task4;
+import Tasks.Task1;
+import Tasks.Task2;
+import Tasks.Task3;
 
 
 /**
@@ -22,24 +24,18 @@ public class App
         // TASK 1 //
         ////////////
 
-        //Task1.run();
+        Task1.run();
 
         ////////////
         // TASK 2 //
         ////////////
 
-        //Task2.run();
+        Task2.run();
 
         ////////////
         // TASK 3 //
         ////////////
 
-        //Task3.run();
-
-        ////////////
-        // TASK 4 //
-        ////////////
-
-        Task4.run();
+        Task3.run();
     }
 }
